@@ -74,14 +74,16 @@ class Map:
         self.map_levels = len(tiles[0][0])
         self.screen = screen
 
-    def draw_map(self, camera, x_j, y_j, avatar_j1):  # manque affichage joueur 2
+    def draw_map(self, camera, x_j1, y_j1, avatar_j1, x_j2, y_j2, avatar_j2):  # manque affichage joueur 2
         """fonction qui affiche la map (tiles)"""
 
         tile_wall = pygame.image.load("images/tilesettestwall.png").convert_alpha()
         tile_floor = pygame.image.load("images/tilesettestfloor.png").convert_alpha()
         avatar1 = pygame.image.load(avatar_j1).convert_alpha()
+        avatar2 = pygame.image.load(avatar_j2).convert_alpha()
 
-        j1_pos = iso_to_cart_tile(x_j, y_j)
+        j1_pos = iso_to_cart_tile(x_j1, y_j1)
+        j2_pos = iso_to_cart_tile(x_j2, y_j2)
         # dessine du fond vers devant
         for x in range(self.map_height):
             for y in range(self.map_width):
@@ -89,9 +91,16 @@ class Map:
                 for z in range(self.map_levels):
                     if x == j1_pos[0] and y == j1_pos[1] and z == 1:
 
-                        x_j, y_j = camera.apply(x_j, y_j)
+                        x_j1, y_j1 = camera.apply(x_j1, y_j1)
                         self.screen.blit(
-                            avatar1, (x_j, y_j - 64)
+                            avatar1, (x_j1, y_j1 - 64)
+                        )  # pour le décalage par rapport à la hauteur du pixel art avatar
+                    #print(j1_pos)
+                    if x == j2_pos[0] and y == j2_pos[1] and z == 1:
+
+                        x_j2, y_j2 = camera.apply(x_j2, y_j2)
+                        self.screen.blit(
+                            avatar2, (x_j2, y_j2 - 64)
                         )  # pour le décalage par rapport à la hauteur du pixel art avatar
                     #print(j1_pos)
 

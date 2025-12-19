@@ -5,6 +5,7 @@ from queue import Queue
 
 import game_logic
 
+
 # Ajout des paramètres de la base de donnée Firebase
 API_KEY = "AIzaSyCYI_3pSmQTPU2YtLcMlPCW0ch8qurqbEs"
 PROJECT_ID = "projet-sup-epita"
@@ -12,6 +13,10 @@ PROJECT_ID = "projet-sup-epita"
 # Déclaration globale datachannel et boucle réseau pour intercommunication des boucles
 channel = None # Chanel à créer
 network_loop = None # Loop réseau
+
+# event globale pour prevenir que le réseau est près (connexion établie)
+network_ready = threading.Event()
+
 
 # Queue globale pour les messages
 incoming_messages = Queue() 
@@ -24,27 +29,40 @@ game_context = None
 local_player = None 
 distant_player = None 
 
-def start_network(is_host,fen_context):
-    global stop_event, game_context, local_player, distant_player
-    # Creation d'un event pour arreter la connexion
-    stop_event = asyncio.Event()
-    # Enregistrement du contexte de la fenetre pygame
+def start_network(is_host, fen_context):
+    global game_context
     game_context = fen_context
 
-    # Configuration de la connection P2P
+    thread = threading.Thread(
+        target=_network_thread,
+        args=(is_host,),
+        daemon=True
+    )
+    thread.start()
+
+def _network_thread(is_host):
+    global local_player, distant_player, stop_event
+
+    stop_event = threading.Event()
+
     config = RTCConfiguration(
         iceServers=[RTCIceServer(urls=["stun:stun.l.google.com:19302"])]
     )
     pc = RTCPeerConnection(config)
 
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
     if is_host:
         local_player = game_context.host_player
         distant_player = game_context.client_player
-        asyncio.run(start_host(pc))
+        loop.run_until_complete(start_host(pc))
     else:
         local_player = game_context.client_player
         distant_player = game_context.host_player
-        asyncio.run(start_client(pc))
+        loop.run_until_complete(start_client(pc))
+
+    loop.close()
 
 async def start_host(pc):
     global channel, network_loop
@@ -54,8 +72,7 @@ async def start_host(pc):
     def on_open():
         # À faire quand on ouvre le datachannel
         print("🔔 DataChannel ouvert (offer).")
-        # Lancement du jeu dans un environnement à part
-        threading.Thread(target=initiate_game, daemon=True).start()
+        network_ready.set()
 
     @channel.on("message")
     def on_message(message):
@@ -81,7 +98,9 @@ async def start_host(pc):
     answer = wait_for_answer(game_code)
     await pc.setRemoteDescription(RTCSessionDescription(sdp=answer["sdp"], type=answer["type"]))
     network_loop = asyncio.get_running_loop()
-    await stop_event.wait()
+    while not stop_event.is_set():
+        await asyncio.sleep(0.01)
+
 
 async def start_client(pc):
     global channel, network_loop
@@ -89,8 +108,7 @@ async def start_client(pc):
     @pc.on("datachannel")
     def on_datachannel(channel):
         print("🔔 DataChannel reçu (answer).")
-        # Lancement du jeu dans un environnement à part
-        threading.Thread(target=initiate_game, daemon=True).start()
+        network_ready.set()
         @channel.on("open")
         def on_open():
             # À faire quand on ouvre le datachannel
@@ -115,7 +133,9 @@ async def start_client(pc):
     print("\n---------------------------------\n")
 
     network_loop = asyncio.get_running_loop()
-    await stop_event.wait()
+    while not stop_event.is_set():
+        await asyncio.sleep(0.01)
+
 
 # ========== Gestion de la création de la partie et de l'envoie des offres / réponses =========
 
