@@ -3,6 +3,8 @@ from aiortc import RTCPeerConnection, RTCSessionDescription, RTCConfiguration, R
 from random import *
 from queue import Queue
 
+import game_logic
+
 # Ajout des paramètres de la base de donnée Firebase
 API_KEY = "AIzaSyCYI_3pSmQTPU2YtLcMlPCW0ch8qurqbEs"
 PROJECT_ID = "projet-sup-epita"
@@ -14,9 +16,21 @@ network_loop = None # Loop réseau
 # Queue globale pour les messages
 incoming_messages = Queue() 
 
-def start_network(is_host):
+# evenement pour arrèter la connexion
+stop_event = None
+
+# Contexte du jeu 
+game_context = None
+local_player = None 
+distant_player = None 
+
+def start_network(is_host,fen_context):
+    global stop_event, game_context, local_player, distant_player
     # Creation d'un event pour arreter la connexion
     stop_event = asyncio.Event()
+    # Enregistrement du contexte de la fenetre pygame
+    game_context = fen_context
+
     # Configuration de la connection P2P
     config = RTCConfiguration(
         iceServers=[RTCIceServer(urls=["stun:stun.l.google.com:19302"])]
@@ -24,25 +38,30 @@ def start_network(is_host):
     pc = RTCPeerConnection(config)
 
     if is_host:
-        asyncio.run(start_host(stop_event,pc))
+        local_player = game_context.host_player
+        distant_player = game_context.client_player
+        asyncio.run(start_host(pc))
     else:
-        asyncio.run(start_client(stop_event,pc))
+        local_player = game_context.client_player
+        distant_player = game_context.host_player
+        asyncio.run(start_client(pc))
 
-async def start_host(end_event, pc):
+async def start_host(pc):
     global channel, network_loop
     channel = pc.createDataChannel("game_chanel")
 
     @channel.on("open")
     def on_open():
         # À faire quand on ouvre le datachannel
-        print("🔔 DataChannel ouvert (offer). Tu peux envoyer des messages.")
-        channel.send(input("Message pour le client : "))
+        print("🔔 DataChannel ouvert (offer).")
+        # Lancement du jeu dans un environnement à part
+        threading.Thread(target=initiate_game, daemon=True).start()
 
     @channel.on("message")
     def on_message(message):
         # À faire quand on reçois un message
         print("← message reçu du client:", message)
-        channel.send(input("Message pour le client : "))
+        incoming_messages.put(message)
 
     offer = await pc.createOffer()
     await pc.setLocalDescription(offer)
@@ -62,23 +81,26 @@ async def start_host(end_event, pc):
     answer = wait_for_answer(game_code)
     await pc.setRemoteDescription(RTCSessionDescription(sdp=answer["sdp"], type=answer["type"]))
     network_loop = asyncio.get_running_loop()
-    await end_event.wait()
+    await stop_event.wait()
 
-async def start_client(end_event,pc):
+async def start_client(pc):
     global channel, network_loop
 
     @pc.on("datachannel")
     def on_datachannel(channel):
         print("🔔 DataChannel reçu (answer).")
+        # Lancement du jeu dans un environnement à part
+        threading.Thread(target=initiate_game, daemon=True).start()
         @channel.on("open")
         def on_open():
             # À faire quand on ouvre le datachannel
-            print("🔗 DataChannel ouvert (answer). Tu peux envoyer des messages.")
+            pass
             
         @channel.on("message")
         def on_message(message):
             print("← message reçu du host:", message)
-            channel.send(input("Message pour le host : "))
+            incoming_messages.put(message)
+            channel.send(json.dumps(local_player.get_pos()))
             
     game_code = input("Code de la game : ")
     game_code,offer = wait_for_offer(game_code)
@@ -93,7 +115,7 @@ async def start_client(end_event,pc):
     print("\n---------------------------------\n")
 
     network_loop = asyncio.get_running_loop()
-    await end_event.wait()
+    await stop_event.wait()
 
 # ========== Gestion de la création de la partie et de l'envoie des offres / réponses =========
 
@@ -177,5 +199,37 @@ def wait_for_offer(code):
             code = input("Code de la game : ")
     return (code, offer)
 
+# Envoie de data via le datachannel
+def send_data(data):
+    global channel,network_loop
+    if (channel == None) or (channel.readyState != "open"):
+        print("Channel pas prêt, impossible d'envoyer :", data)
+    else:
+        network_loop.call_soon_threadsafe(channel.send, data)
 
 
+# ===== Gestion globale du jeu =====
+
+def initiate_game():
+        network_interval = 16   # 1000 ms -> 1 FPS réseau
+        last_network_send = game_logic.now()
+
+        while game_context.running: # Boucle du jeu
+            # Update des coordonnées
+            while not incoming_messages.empty():
+                msg = incoming_messages.get()
+                data = json.loads(msg)
+                distant_player.x = data[0]
+                distant_player.y = data[1]
+
+            game_logic.update_game(game_context,local_player,distant_player)
+
+            # Gestion boucle réseau :
+            now = game_logic.now()
+            
+            if local_player.host and now - last_network_send >= network_interval:
+                send_data(json.dumps(local_player.get_pos()))
+                last_network_send = now
+
+        game_logic.end_game() # Fermeture de pygame
+        stop_event.set() # Fermeture du channel

@@ -93,7 +93,7 @@ class Map:
                         self.screen.blit(
                             avatar1, (x_j, y_j - 64)
                         )  # pour le décalage par rapport à la hauteur du pixel art avatar
-                    print(j1_pos)
+                    #print(j1_pos)
 
                     tile_nb = self.tiles[x][y][z]
                     if tile_nb != 0:
