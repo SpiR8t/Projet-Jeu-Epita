@@ -17,11 +17,10 @@ network_loop = None # Loop réseau
 # event globale pour prevenir que le réseau est près (connexion établie)
 network_ready = threading.Event()
 
-
-# Queue globale pour les messages
+# Queue globale pour la reception des messages
 incoming_messages = Queue() 
 
-# evenement pour arrèter la connexion
+# évenement pour arrèter la connexion qd on ferme le jeu
 stop_event = None
 
 # Contexte du jeu 
@@ -33,6 +32,7 @@ def start_network(is_host, fen_context):
     global game_context
     game_context = fen_context
 
+    #Lancement de la boucle de connection dans un endroit séparé de la boucle principale du jeu 
     thread = threading.Thread(
         target=_network_thread,
         args=(is_host,),
@@ -71,7 +71,7 @@ async def start_host(pc):
     @channel.on("open")
     def on_open():
         # À faire quand on ouvre le datachannel
-        print("🔔 DataChannel ouvert (offer).")
+        print("🔔 DataChannel ouvert.")
         network_ready.set()
 
     @channel.on("message")
@@ -107,12 +107,8 @@ async def start_client(pc):
 
     @pc.on("datachannel")
     def on_datachannel(channel):
-        print("🔔 DataChannel reçu (answer).")
+        print("🔔 DataChannel reçu.")
         network_ready.set()
-        @channel.on("open")
-        def on_open():
-            # À faire quand on ouvre le datachannel
-            pass
             
         @channel.on("message")
         def on_message(message):
@@ -163,7 +159,7 @@ def create_lobby(code,data):
     url = f"https://firestore.googleapis.com/v1/projects/{PROJECT_ID}/databases/(default)/documents/lobbies?documentId={code}&key={API_KEY}"
     res = requests.post(url, json=data)
     if res.status_code == 200:
-        print(f"Lobby créé avec succès !")
+        print(f"Lobby créé.")
     else:
         print("Erreur:", res.text)
 
@@ -205,17 +201,17 @@ def wait_for_answer(code):
 
 def wait_for_offer(code):
     """ Check en continue si l'offre sdp est prsente / si la partie a été créée dans la db """
-    url = f"https://firestore.googleapis.com/v1/projects/{PROJECT_ID}/databases/(default)/documents/lobbies/{code}?key={API_KEY}"
     wait_for_offer = True
     while wait_for_offer:
         # récupération de l'offre
+        url = f"https://firestore.googleapis.com/v1/projects/{PROJECT_ID}/databases/(default)/documents/lobbies/{code}?key={API_KEY}"
         res = requests.get(url)
         if res.status_code == 200:
             doc = res.json()
             offer = json.loads(doc["fields"]["offer"]["stringValue"])
             wait_for_offer = False
         else:
-            print("Mauvais code de partie : vous devez utiliser un code de partie valide ou créer une nouvelle partie.")
+            print("❌ Mauvais code de partie : vous devez utiliser un code de partie valide ou créer une nouvelle partie.")
             code = input("Code de la game : ")
     return (code, offer)
 
@@ -231,6 +227,7 @@ def send_data(data):
 # ===== Gestion globale du jeu =====
 
 def initiate_game():
+        """Cette fonction permet de lancer le jeu en lui même : c'est elle qui contient la boucle principale"""
         network_interval = 16   # 1000 ms -> 1 FPS réseau
         last_network_send = game_logic.now()
 
@@ -246,7 +243,6 @@ def initiate_game():
 
             # Gestion boucle réseau :
             now = game_logic.now()
-            
             if local_player.host and now - last_network_send >= network_interval:
                 send_data(json.dumps(local_player.get_pos()))
                 last_network_send = now

@@ -38,10 +38,5 @@ def main():
 
 
 
-
-# --- Boucle principale ---
-    # simulation du mouvement du joueur
-    # joueurH.deplacer()
-
 if __name__ == "__main__":
     main()

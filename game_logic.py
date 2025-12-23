@@ -38,6 +38,7 @@ def update_game(context,playerL,playerD):
     context.clock.tick(60)
 
 def now():
+    """ Renvoie l'heure du jeu (en tick)"""
     return pygame.time.get_ticks()
 
 def end_game():
