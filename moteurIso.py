@@ -1,5 +1,3 @@
-# il faut rajouter l'affichage du joueur dans la fonction draw_map
-
 import pygame
 
 # --- Paramètres de base ---
@@ -7,23 +5,20 @@ TILE_WIDTH = 64
 TILE_HEIGHT = 32
 
 MAP_HEIGHT = 8
-MAP_WIDTH = 5
+MAP_WIDTH = 8
 MAP_LEVELS = 3
 
 # --- Génération d'une carte simple ---
-tilemap = [
-    [[0 for _ in range(MAP_LEVELS)] for _ in range(MAP_WIDTH)]
-    for _ in range(MAP_HEIGHT)
-]
-tilemap_test = [
+map_tiles = [
     [
-        [1 if k == 0 else 2 if j == 0 or i == 0 else 0 for k in range(3)]
-        for j in range(5)
+        [1 if k == 0 else 2 if j == 0 or i == 0 else 0 for k in range(MAP_LEVELS)]
+        for j in range(MAP_WIDTH)
     ]
-    for i in range(8)
+    for i in range(MAP_HEIGHT)
 ]
 
 
+# --- Fonction de conversion cartésien <-> isométrique
 def cart_to_iso(x, y, z=0):
     screen_x = (x - y) * (TILE_WIDTH // 2) + 400
     screen_y = (x + y) * (TILE_HEIGHT // 2) - z * TILE_HEIGHT
@@ -43,7 +38,9 @@ def iso_to_cart_tile(screen_x, screen_y, z=0):
     return int(cart_x), int(cart_y)
 
 
+
 class Camera:
+    # la classe qui permet de garder l'offset constant de l'affichage du joueur
     def __init__(self, screen_width, screen_height):
         self.offset_x = 0
         self.offset_y = 0
@@ -64,6 +61,24 @@ class Camera:
         return x - self.offset_x, y - self.offset_y
 
 
+def display_ranges(x_j1, y_j1):
+    """
+    Détermine la range de coordonnées de la matrice qui se trouve à l'écran, pour afficher seulement le nécessaire.
+    La partie Z n'est pas renvoyé car elle est toujours affiché de 0 à 2 (pour une hauteur de 3)
+
+    Param: x_j1 et y_j1 sont considérés déjà converti vers les coordonnées de la matrice
+    """
+
+    # il faudra adapter la marge à la taille de l'écran, peut être agrandir la taille de l'affichage pour les écran plus grand ?
+    x_min = max(0, x_j1 - 16)
+    x_max = min(len(map_tiles), x_j1 + 16)
+
+    y_min = max(0, y_j1 - 16)
+    y_max = min(len(map_tiles[0]), y_j1 + 16)
+
+    return ((x_min, x_max), (y_min, y_max))
+
+
 class Map:
     def __init__(self, tiles, tile_width, tile_height, screen):
         self.tiles = tiles
@@ -74,7 +89,9 @@ class Map:
         self.map_levels = len(tiles[0][0])
         self.screen = screen
 
-    def draw_map(self, camera, x_j1, y_j1, avatar_j1, x_j2, y_j2, avatar_j2):  # manque affichage joueur 2
+    def draw_map(
+        self, camera, x_j1, y_j1, avatar_j1, x_j2, y_j2, avatar_j2
+    ):  # manque affichage joueur 2
         """fonction qui affiche la map (tiles)"""
 
         tile_wall = pygame.image.load("images/tilesettestwall.png").convert_alpha()
@@ -84,9 +101,12 @@ class Map:
 
         j1_pos = iso_to_cart_tile(x_j1, y_j1)
         j2_pos = iso_to_cart_tile(x_j2, y_j2)
+
+        ((x_min, x_max), (y_min, y_max)) = display_ranges(j1_pos[0], j1_pos[1])
+
         # dessine du fond vers devant
-        for x in range(self.map_height):
-            for y in range(self.map_width):
+        for x in range(x_min, x_max):
+            for y in range(y_min, y_max):
 
                 for z in range(self.map_levels):
                     if x == j1_pos[0] and y == j1_pos[1] and z == 1:
@@ -95,14 +115,14 @@ class Map:
                         self.screen.blit(
                             avatar1, (x_j1, y_j1 - 64)
                         )  # pour le décalage par rapport à la hauteur du pixel art avatar
-                    #print(j1_pos)
+                    # print(j1_pos)
                     if x == j2_pos[0] and y == j2_pos[1] and z == 1:
 
                         x_j2, y_j2 = camera.apply(x_j2, y_j2)
                         self.screen.blit(
                             avatar2, (x_j2, y_j2 - 64)
                         )  # pour le décalage par rapport à la hauteur du pixel art avatar
-                    #print(j1_pos)
+                    # print(j1_pos)
 
                     tile_nb = self.tiles[x][y][z]
                     if tile_nb != 0:
