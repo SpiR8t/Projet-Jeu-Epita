@@ -14,13 +14,13 @@ PROJECT_ID = "projet-sup-epita"
 channel = None # Chanel à créer
 network_loop = None # Loop réseau
 
-# event globale pour prevenir que le réseau est près (connexion établie)
+# Event globale pour prevenir que le réseau est près (connexion établie)
 network_ready = threading.Event()
 
 # Queue globale pour la reception des messages
 incoming_messages = Queue() 
 
-# évenement pour arrèter la connexion qd on ferme le jeu
+# Evenement pour arrèter la connexion qd on ferme le jeu
 stop_event = None
 
 # Contexte du jeu 
@@ -28,17 +28,25 @@ game_context = None
 local_player = None 
 distant_player = None 
 
-def start_network(is_host, fen_context):
-    global game_context
+def share_context(fen_context):
+    global game_context,local_player,distant_player
     game_context = fen_context
 
-    #Lancement de la boucle de connection dans un endroit séparé de la boucle principale du jeu 
-    thread = threading.Thread(
-        target=_network_thread,
-        args=(is_host,),
-        daemon=True
-    )
-    thread.start()
+    if not game_context.multiplayer:
+        local_player = game_context.host_player
+        distant_player = game_context.client_player
+
+
+
+def start_network(is_host):
+    if game_context.multiplayer:
+        #Lancement de la boucle de connexion dans un endroit séparé de la boucle principale du jeu 
+        thread = threading.Thread(
+            target=_network_thread,
+            args=(is_host,),
+            daemon=True
+        )
+        thread.start()
 
 def _network_thread(is_host):
     global local_player, distant_player, stop_event
@@ -230,22 +238,26 @@ def initiate_game():
         """Cette fonction permet de lancer le jeu en lui même : c'est elle qui contient la boucle principale"""
         network_interval = 16   # 1000 ms -> 1 FPS réseau
         last_network_send = game_logic.now()
+        multi_activated = game_context.multiplayer
 
         while game_context.running: # Boucle du jeu
             # Update des coordonnées
-            while not incoming_messages.empty():
-                msg = incoming_messages.get()
-                data = json.loads(msg)
-                distant_player.x = data[0]
-                distant_player.y = data[1]
+            if multi_activated:
+                while not incoming_messages.empty():
+                    msg = incoming_messages.get()
+                    data = json.loads(msg)
+                    distant_player.x = data[0]
+                    distant_player.y = data[1]
 
             game_logic.update_game(game_context,local_player,distant_player)
 
             # Gestion boucle réseau :
-            now = game_logic.now()
-            if local_player.host and now - last_network_send >= network_interval:
-                send_data(json.dumps(local_player.get_pos()))
-                last_network_send = now
+            if multi_activated:
+                now = game_logic.now()
+                if local_player.host and now - last_network_send >= network_interval:
+                    send_data(json.dumps(local_player.get_pos()))
+                    last_network_send = now
 
         game_logic.end_game() # Fermeture de pygame
-        stop_event.set() # Fermeture du channel
+        if multi_activated:
+            stop_event.set() # Fermeture du channel

@@ -6,7 +6,7 @@ import sys
 from game_context import GameContext
 from player import *
 from moteurIso import *
-from network import start_network, network_ready, initiate_game
+from network import start_network, network_ready, initiate_game, share_context
 
 
 def main():
@@ -16,6 +16,9 @@ def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.SCALED)
     clock = pygame.time.Clock()
 
+    # Activation du multijoueur
+    MULTIPLAYER = True
+
     map1 = Map(map_tiles, TILE_WIDTH, TILE_HEIGHT, screen)
     camera = Camera(screen.get_width(), screen.get_height())
 
@@ -24,18 +27,20 @@ def main():
     playerC = Joueur(400, 150, 2, "images/avatar2.png", False)  # joueur client
     # ----
 
-    context = GameContext(screen, clock, playerH, playerC, WIDTH, HEIGHT, map1, camera)
+    context = GameContext(screen, clock, playerH, playerC, WIDTH, HEIGHT, map1, camera, MULTIPLAYER)
 
     # faire une fonction qui lance le menu
     # menuPrincipale()
 
     # Gestion du multijoueur
     # Faire en sorte que dans le menu on puisse choisir si on host ou si on rejoint une partie
-    play_as_host = (
-        input("En tant que host ? (T/F) ") == "T"
-    )  # Temporaire en attendant le menu
-    start_network(play_as_host, context)
-    network_ready.wait()
+    share_context(context)
+    if MULTIPLAYER:
+        play_as_host = (
+            input("En tant que host ? (T/F) ") == "T"
+        )  # Temporaire en attendant le menu
+        start_network(play_as_host)
+        network_ready.wait()
     initiate_game()
 
 
