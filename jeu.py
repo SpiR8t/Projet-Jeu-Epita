@@ -1,44 +1,42 @@
+"""Ce fichier est le fichier de base qui permet de lancer le jeu : c'est le seule à lancer."""
+
 import pygame
 import sys
 
+from game_context import GameContext
 from player import *
 from moteurIso import *
+from network import start_network, network_ready, initiate_game
 
-pygame.init()
-screen = pygame.display.set_mode((800, 600), pygame.SCALED)
-clock = pygame.time.Clock()
+def main():
+    pygame.init()
+    WIDTH = 800
+    HEIGHT = 600
+    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.SCALED)
+    clock = pygame.time.Clock()
 
-
-map1 = Map(tilemap_test, TILE_WIDTH, TILE_HEIGHT, screen)
-camera1 = Camera(screen.get_width(), screen.get_height())
-
-# Joueur
-joueur1 = Joueur(400, 150, 2, "images/avatar2.png")
-joueur2 = Joueur(400, 300, 2, "images/avatar2.png") # joueur qui est connecté en ligne
-# ----
-
-# faire une fonction qui lance le menu
-# menuPrincipale()
+    map1 = Map(tilemap_test, TILE_WIDTH, TILE_HEIGHT, screen)
+    camera = Camera(screen.get_width(), screen.get_height())
 
 
-# --- Boucle principale ---
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
+    # Joueur
+    playerH = Joueur(400, 150, 2, "images/avatar.png",True) # joueur host 
+    playerC = Joueur(400, 150, 2, "images/avatar2.png",False) # joueur client
+    # ----
 
-    screen.fill((50, 50, 60))
+    context = GameContext(screen, clock,playerH,playerC,WIDTH,HEIGHT,map1,camera)
 
-    # simulation du mouvement du joueur
-    joueur1.deplacer()
+    # faire une fonction qui lance le menu
+    # menuPrincipale()
 
-    # centre la caméro sur le joueur
-    x_joueur, y_joueur = joueur1.get_pos()
-    camera1.follow(x_joueur, y_joueur, 0.05)
-    # afficher la map, avec le décalage imposé par la caméra
-    map1.draw_map(camera1, x_joueur, y_joueur, joueur1.avatar)
+    # Gestion du multijoueur
+    # Faire en sorte que dans le menu on puisse choisir si on host ou si on rejoint une partie
+    play_as_host = (input("En tant que host ? (T/F) ") == "T") # Temporaire en attendant le menu
+    start_network(play_as_host,context)
+    network_ready.wait()
+    initiate_game()
 
-    pygame.display.flip()
-    clock.tick(60)
+
+
+if __name__ == "__main__":
+    main()
