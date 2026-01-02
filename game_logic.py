@@ -16,37 +16,60 @@ def update_game(context, playerL, playerD):
     # Gestion de la pression des touches
     keys = pygame.key.get_pressed()
 
+    # récupération de la position du joueur pour vérifier les collisions durant le déplacement
+    # les collisions sont gérées en regardant la position futur
     x_joueur1, y_joueur1 = playerL.get_pos()
-    x_grid_joueur1, y_grid_joueur1 = iso_to_cart_tile(x_joueur1, y_joueur1)
+    joueur1_leftfoot, joueur1_rightfoot = deduce_foots_from_iso_coords(
+        x_joueur1, y_joueur1
+    )
 
     if keys[pygame.K_DOWN]:
-        x_joueur1, y_joueur1 = playerL.get_pos()
-        x_grid_joueur1, y_grid_joueur1 = iso_to_cart_tile(
-            x_joueur1, y_joueur1 + playerL.vitesse
+        # left foot
+        l_x_grid_joueur1, l_y_grid_joueur1 = iso_to_cart_tile(
+            joueur1_leftfoot[0], joueur1_leftfoot[1] + playerL.vitesse
         )
-        if map_tiles[x_grid_joueur1][y_grid_joueur1][1] == 0:
+        # right foot
+        r_x_grid_joueur1, r_y_grid_joueur1 = iso_to_cart_tile(
+            joueur1_rightfoot[0], joueur1_rightfoot[1] + playerL.vitesse
+        )
+        if (
+            map_tiles[l_x_grid_joueur1][l_y_grid_joueur1][1] == 0
+            and map_tiles[r_x_grid_joueur1][r_y_grid_joueur1][1] == 0
+        ):
             playerL.y += playerL.vitesse
 
     if keys[pygame.K_UP]:
-        x_joueur1, y_joueur1 = playerL.get_pos()
-        x_grid_joueur1, y_grid_joueur1 = iso_to_cart_tile(
-            x_joueur1, y_joueur1 - playerL.vitesse
+        # left foot
+        l_x_grid_joueur1, l_y_grid_joueur1 = iso_to_cart_tile(
+            joueur1_leftfoot[0], joueur1_leftfoot[1] - playerL.vitesse
         )
-        if map_tiles[x_grid_joueur1][y_grid_joueur1][1] == 0:
+        # right foot
+        r_x_grid_joueur1, r_y_grid_joueur1 = iso_to_cart_tile(
+            joueur1_rightfoot[0], joueur1_rightfoot[1] - playerL.vitesse
+        )
+
+        if (
+            map_tiles[l_x_grid_joueur1][l_y_grid_joueur1][1] == 0
+            and map_tiles[r_x_grid_joueur1][r_y_grid_joueur1][1] == 0
+        ):
             playerL.y -= playerL.vitesse
+
     if keys[pygame.K_LEFT]:
-        x_joueur1, y_joueur1 = playerL.get_pos()
-        x_grid_joueur1, y_grid_joueur1 = iso_to_cart_tile(
-            x_joueur1 - playerL.vitesse, y_joueur1 + playerL.vitesse
+        # left foot
+        l_x_grid_joueur1, l_y_grid_joueur1 = iso_to_cart_tile(
+            joueur1_leftfoot[0] - playerL.vitesse, joueur1_leftfoot[1]
         )
-        if map_tiles[x_grid_joueur1][y_grid_joueur1][1] == 0:
+
+        if map_tiles[l_x_grid_joueur1][l_y_grid_joueur1][1] == 0:
             playerL.x -= playerL.vitesse
+
     if keys[pygame.K_RIGHT]:
-        x_joueur1, y_joueur1 = playerL.get_pos()
-        x_grid_joueur1, y_grid_joueur1 = iso_to_cart_tile(
-            x_joueur1 + playerL.vitesse, y_joueur1 + playerL.vitesse
+        # right foot
+        r_x_grid_joueur1, r_y_grid_joueur1 = iso_to_cart_tile(
+            joueur1_rightfoot[0] + playerL.vitesse, joueur1_rightfoot[1]
         )
-        if map_tiles[x_grid_joueur1][y_grid_joueur1][1] == 0:
+
+        if map_tiles[r_x_grid_joueur1][r_y_grid_joueur1][1] == 0:
             playerL.x += playerL.vitesse
 
     # Fond

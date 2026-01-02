@@ -2,7 +2,7 @@ import pygame
 
 
 class Joueur:
-    def __init__(self, x, y, vitesse, avatar_image,is_host):
+    def __init__(self, x, y, vitesse, avatar_image, is_host):
         self.x = x
         self.y = y
         self.vitesse = vitesse

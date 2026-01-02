@@ -49,6 +49,10 @@ def iso_to_cart_tile(screen_x, screen_y, z=0):
     return int(cart_x), int(cart_y)
 
 
+def deduce_foots_from_iso_coords(player_x, player_y):
+    return ((player_x - 32, player_y), (player_x + 1, player_y))
+
+
 class Camera:
     # la classe qui permet de garder l'offset constant de l'affichage du joueur
     def __init__(self, screen_width, screen_height):
