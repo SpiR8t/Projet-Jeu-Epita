@@ -17,7 +17,7 @@ def main():
     clock = pygame.time.Clock()
 
     # Activation du multijoueur
-    MULTIPLAYER = True
+    MULTIPLAYER = False
 
     map1 = Map(map_tiles, TILE_WIDTH, TILE_HEIGHT, screen)
     camera = Camera(screen.get_width(), screen.get_height())
@@ -27,7 +27,9 @@ def main():
     playerC = Joueur(400, 150, 2, "images/avatar2.png", False)  # joueur client
     # ----
 
-    context = GameContext(screen, clock, playerH, playerC, WIDTH, HEIGHT, map1, camera, MULTIPLAYER)
+    context = GameContext(
+        screen, clock, playerH, playerC, WIDTH, HEIGHT, map1, camera, MULTIPLAYER
+    )
 
     # faire une fonction qui lance le menu
     # menuPrincipale()

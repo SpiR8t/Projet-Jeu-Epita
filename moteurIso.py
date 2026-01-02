@@ -4,14 +4,25 @@ import pygame
 TILE_WIDTH = 64
 TILE_HEIGHT = 32
 
-MAP_HEIGHT = 8
-MAP_WIDTH = 8
+MAP_HEIGHT = 10
+MAP_WIDTH = 15
 MAP_LEVELS = 3
 
 # --- Génération d'une carte simple ---
 map_tiles = [
     [
-        [1 if k == 0 else 2 if j == 0 or i == 0 else 0 for k in range(MAP_LEVELS)]
+        [
+            (
+                1
+                if k == 0
+                else (
+                    2
+                    if j == 0 or i == 0 or j == MAP_WIDTH - 1 or i == MAP_HEIGHT - 1
+                    else 0
+                )
+            )
+            for k in range(MAP_LEVELS)
+        ]
         for j in range(MAP_WIDTH)
     ]
     for i in range(MAP_HEIGHT)
@@ -36,7 +47,6 @@ def iso_to_cart_tile(screen_x, screen_y, z=0):
 
     # renvoyer les tuiles arrondies
     return int(cart_x), int(cart_y)
-
 
 
 class Camera:
