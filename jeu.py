@@ -23,8 +23,8 @@ def main():
     camera = Camera(screen.get_width(), screen.get_height())
 
     # Joueur
-    playerH = Joueur(400, 150, 2, "images/avatar.png", True)  # joueur host
-    playerC = Joueur(400, 150, 2, "images/avatar2.png", False)  # joueur client
+    playerH = Joueur(400, 150, 2, "assets/images/game/players/avatar.png", True)  # joueur host
+    playerC = Joueur(400, 150, 2, "assets/images/game/players/avatar2.png", False)  # joueur client
     # ----
 
     context = GameContext(

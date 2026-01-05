@@ -5,13 +5,13 @@ pygame.init()
 
 WIDTH, HEIGHT = 1280, 720
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Echoes of Light")
+pygame.display.set_caption("Echoes of Lights")
 
-background = pygame.image.load("main_image.png")
+background = pygame.image.load("assets/images/menu/menu_bg.png")
 background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
 volume = 0.5
-pygame.mixer.music.load("musiquemenu.mp3")
+pygame.mixer.music.load("assets/audio/musics/menu_music.mp3")
 pygame.mixer.music.set_volume(volume)
 pygame.mixer.music.play(-1)
 
@@ -23,7 +23,7 @@ BLACK = (0, 0, 0)
 BUTTON_BG = (255, 255, 255, 200)
 BUTTON_HOVER = (120, 120, 120, 230)
 
-FONT_TITLE = pygame.font.Font("Darksoul.otf", 72)
+FONT_TITLE = pygame.font.Font("assets/fonts/Darksoul.otf", 72)
 FONT_BUTTON = pygame.font.SysFont("arial", 36)
 
 TEXT = {

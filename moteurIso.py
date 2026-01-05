@@ -108,8 +108,8 @@ class Map:
     ):  # manque affichage joueur 2
         """fonction qui affiche la map (tiles)"""
 
-        tile_wall = pygame.image.load("images/tilesettestwall.png").convert_alpha()
-        tile_floor = pygame.image.load("images/tilesettestfloor.png").convert_alpha()
+        tile_wall = pygame.image.load("assets/images/game/tileset/tilesettestwall.png").convert_alpha()
+        tile_floor = pygame.image.load("assets/images/game/tileset/tilesettestfloor.png").convert_alpha()
         avatar1 = pygame.image.load(avatar_j1).convert_alpha()
         avatar2 = pygame.image.load(avatar_j2).convert_alpha()
 
