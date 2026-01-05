@@ -2,22 +2,23 @@
 
 import pygame
 import sys
+import time
 
 from game_context import GameContext
 from player import *
 from moteurIso import *
-from network import start_network, network_ready, initiate_game, share_context
-
+from network import start_network, network_ready, initiate_game, share_context_multi
+from menu import display_menu
 
 def main():
     pygame.init()
-    WIDTH = 800
-    HEIGHT = 600
+    WIDTH, HEIGHT = 1280, 720
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.SCALED)
+    pygame.display.set_caption("Echoes of Lights")
     clock = pygame.time.Clock()
 
     # Activation du multijoueur
-    MULTIPLAYER = False
+    MULTIPLAYER = True
 
     map1 = Map(map_tiles, TILE_WIDTH, TILE_HEIGHT, screen)
     camera = Camera(screen.get_width(), screen.get_height())
@@ -31,17 +32,18 @@ def main():
         screen, clock, playerH, playerC, WIDTH, HEIGHT, map1, camera, MULTIPLAYER
     )
 
-    # faire une fonction qui lance le menu
-    # menuPrincipale()
+    # Menu
+    display_menu(context)
 
     # Gestion du multijoueur
     # Faire en sorte que dans le menu on puisse choisir si on host ou si on rejoint une partie
-    share_context(context)
+    share_context_multi(context)
     if MULTIPLAYER:
-        play_as_host = (
-            input("En tant que host ? (T/F) ") == "T"
-        )  # Temporaire en attendant le menu
-        start_network(play_as_host)
+        while context.game_code == "":
+            print(context.game_code)
+            time.sleep(0.2)
+        print(context.is_host, context.game_code)
+        start_network(context.is_host)
         network_ready.wait()
     initiate_game()
 

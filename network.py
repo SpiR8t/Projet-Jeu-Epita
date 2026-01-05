@@ -34,7 +34,7 @@ local_player = None
 distant_player = None
 
 
-def share_context(fen_context):
+def share_context_multi(fen_context):
     global game_context, local_player, distant_player
     game_context = fen_context
 
@@ -133,7 +133,9 @@ async def start_client(pc):
             incoming_messages.put(message)
             channel.send(json.dumps(local_player.get_pos()))
 
-    game_code = input("Code de la game : ")
+    while game_context.game_code == "":
+        time.sleep(0.2)
+    game_code = game_context.game_code
     game_code, offer = wait_for_offer(game_code)
 
     await pc.setRemoteDescription(
