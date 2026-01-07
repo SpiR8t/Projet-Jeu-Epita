@@ -45,6 +45,7 @@ def share_context_multi(fen_context):
 
 def start_network(is_host):
     if game_context.multiplayer:
+        print("lancement multi, host ?", is_host)
         # Lancement de la boucle de connexion dans un endroit séparé de la boucle principale du jeu
         thread = threading.Thread(target=_network_thread, args=(is_host,), daemon=True)
         thread.start()
@@ -107,6 +108,7 @@ async def start_host(pc):
     }
 
     create_lobby(game_code, game_data)
+    game_context.game_code = game_code
     print("Code de partie : " + game_code)
     print("\n-----------------------------------\n")
 
@@ -272,7 +274,7 @@ def initiate_game():
     network_interval = 16  # 1000 ms -> 1 FPS réseau
     last_network_send = game_logic.now()
     multi_activated = game_context.multiplayer
-
+    game_context.running = True
     while game_context.running:  # Boucle du jeu
         # Update des coordonnées
         if multi_activated:

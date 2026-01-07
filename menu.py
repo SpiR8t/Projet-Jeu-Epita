@@ -1,6 +1,8 @@
 import pygame
 import sys
 
+from network import start_network, network_ready, share_context_multi
+
 WIDTH, HEIGHT = 1280, 720
 
 background = pygame.image.load("assets/images/menu/menu_bg.png")
@@ -31,6 +33,7 @@ TEXT = {
         "join": "Rejoindre une Partie",
         "options": "Options",
         "quit": "Quitter",
+        "show_code": "Le code de partie va s'afficher, partagez le avec l'autre joueur :",
         "enter_code": "Entrez le code multijoueur :",
         "language": "Langue",
         "change_language": "Changer la langue",
@@ -45,7 +48,8 @@ TEXT = {
         "join": "Join a Game",
         "options": "Options",
         "quit": "Quit",
-        "enter_code": "Enter multiplayer code:",
+        "show_code": "The game code will be displayed, share it to the other player :",
+        "enter_code": "Enter game code:",
         "language": "Language",
         "change_language": "Change language",
         "volume": "Music volume",
@@ -92,12 +96,10 @@ def display_menu(context):
     global language,code_multi,page,volume
     screen = context.screen
     click_cooldown = 0
+    asked_network = False
+    share_context_multi(context)
 
-    page_next = ""
-    while context.game_code == "" or page_next != "":
-        if page_next != "":
-            page = page_next
-            page_next = ""
+    while not network_ready.is_set():
         dt = context.clock.tick(60)
         if click_cooldown > 0:
             click_cooldown -= dt
@@ -132,8 +134,31 @@ def display_menu(context):
                     else:
                         page = btn.action
                         code_multi = ""
+        elif page == "new":
+            title = FONT_TITLE.render(T["title"], True, WHITE)
+            shadow = FONT_TITLE.render(T["title"], True, BLACK)
+            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + 3, 123)))
+            screen.blit(title, title.get_rect(center=(WIDTH // 2, 120)))
 
-        elif page in ("new", "join"):
+            info = FONT_BUTTON.render(T["show_code"], True, LIGHT_GREY)
+            screen.blit(info, info.get_rect(center=(WIDTH // 2, 260)))
+
+            # Affichage du champ de texte
+            input_rect = pygame.Rect(WIDTH // 2 - 220, 300, 440, 65)
+            pygame.draw.rect(screen, BUTTON_BG, input_rect, border_radius=12)
+            pygame.draw.rect(screen, WHITE, input_rect, 2, border_radius=12)
+
+            # Affichage contenu champ de texte
+            txt = FONT_BUTTON.render(context.game_code, True, DARK_GREY)
+            screen.blit(txt, (input_rect.x + 15, input_rect.y + 15))
+
+            # Demande de creation du code de partie
+            if not asked_network:
+                context.is_host = True
+                asked_network = True
+                start_network(context.is_host)
+
+        elif page == "join":
             title = FONT_TITLE.render(T["title"], True, WHITE)
             shadow = FONT_TITLE.render(T["title"], True, BLACK)
             screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + 3, 123)))
@@ -156,10 +181,12 @@ def display_menu(context):
             if continue_btn.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
                 click_cooldown = COOLDOWN_TIME
                 pygame.time.delay(180)
-                page_next = "loading"
+                page = "loading"
                 # envoi du code de partie :
-                context.is_host = False
-                context.game_code = code_multi.upper()
+                if not asked_network:
+                    context.is_host = False
+                    context.game_code = code_multi.upper()
+                    start_network(context.is_host)
 
             back = Button(T["back"], 600, "menu")
             back.draw(screen, mouse_pos)
@@ -223,7 +250,7 @@ def display_menu(context):
                 pygame.quit()
                 sys.exit()
 
-            if event.type == pygame.KEYDOWN and page in ("new", "join"):
+            if event.type == pygame.KEYDOWN and page == "join":
                 if event.key == pygame.K_BACKSPACE:
                     code_multi = code_multi[:-1]
                 elif len(code_multi) < 12 and event.unicode.isprintable():

@@ -7,7 +7,7 @@ import time
 from game_context import GameContext
 from player import *
 from moteurIso import *
-from network import start_network, network_ready, initiate_game, share_context_multi
+from network import initiate_game
 from menu import display_menu
 
 def main():
@@ -37,14 +37,7 @@ def main():
 
     # Gestion du multijoueur
     # Faire en sorte que dans le menu on puisse choisir si on host ou si on rejoint une partie
-    share_context_multi(context)
-    if MULTIPLAYER:
-        while context.game_code == "":
-            print(context.game_code)
-            time.sleep(0.2)
-        print(context.is_host, context.game_code)
-        start_network(context.is_host)
-        network_ready.wait()
+    
     initiate_game()
 
 
