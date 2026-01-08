@@ -6,7 +6,7 @@ import time
 
 from game_context import GameContext
 from player import *
-from moteurIso import *
+from isometric_motor import *
 from network import initiate_game,share_context_multi
 from menu import display_menu
 
