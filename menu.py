@@ -35,6 +35,7 @@ TEXT = {
         "quit": "Quitter",
         "show_code": "Le code de partie va s'afficher, partagez le avec l'autre joueur :",
         "enter_code": "Entrez le code multijoueur :",
+        "wrong_code":"Veuillez entrer un code valide (5 lettre majuscules)",
         "language": "Langue",
         "change_language": "Changer la langue",
         "volume": "Volume musique",
@@ -50,6 +51,7 @@ TEXT = {
         "quit": "Quit",
         "show_code": "The game code will be displayed, share it to the other player :",
         "enter_code": "Enter game code:",
+        "wrong_code":"Please enter a valid code (5 uppercase letters)",
         "language": "Language",
         "change_language": "Change language",
         "volume": "Music volume",
@@ -110,6 +112,11 @@ def display_menu(context):
 
         T = TEXT[language]
 
+        if context.game_code == "wrong_code":
+            page = "join_wrong_code"
+            code_multi = ""
+            context.game_code = ""
+
         if page == "menu":
             title = FONT_TITLE.render(T["title"], True, WHITE)
             shadow = FONT_TITLE.render(T["title"], True, BLACK)
@@ -158,13 +165,16 @@ def display_menu(context):
                 asked_network = True
                 start_network(context.is_host)
 
-        elif page == "join":
+        elif page in ("join","join_wrong_code"):
             title = FONT_TITLE.render(T["title"], True, WHITE)
             shadow = FONT_TITLE.render(T["title"], True, BLACK)
             screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + 3, 123)))
             screen.blit(title, title.get_rect(center=(WIDTH // 2, 120)))
 
-            info = FONT_BUTTON.render(T["enter_code"], True, LIGHT_GREY)
+            if page == "join":
+                info = FONT_BUTTON.render(T["enter_code"], True, LIGHT_GREY)
+            else:
+                info = FONT_BUTTON.render(T["wrong_code"], True, LIGHT_GREY)
             screen.blit(info, info.get_rect(center=(WIDTH // 2, 260)))
 
             # Affichage du champ de texte
@@ -184,9 +194,12 @@ def display_menu(context):
                 page = "loading"
                 # envoi du code de partie :
                 if not asked_network:
+                    asked_network = True
                     context.is_host = False
                     context.game_code = code_multi.upper()
                     start_network(context.is_host)
+                else:
+                    context.game_code = code_multi.upper()
 
             back = Button(T["back"], 600, "menu")
             back.draw(screen, mouse_pos)
@@ -250,7 +263,7 @@ def display_menu(context):
                 pygame.quit()
                 sys.exit()
 
-            if event.type == pygame.KEYDOWN and page == "join":
+            if event.type == pygame.KEYDOWN and page in ("join","join_wrong_code"):
                 if event.key == pygame.K_BACKSPACE:
                     code_multi = code_multi[:-1]
                 elif len(code_multi) < 12 and event.unicode.isprintable():

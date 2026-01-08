@@ -45,7 +45,6 @@ def share_context_multi(fen_context):
 
 def start_network(is_host):
     if game_context.multiplayer:
-        print("lancement multi, host ?", is_host)
         # Lancement de la boucle de connexion dans un endroit séparé de la boucle principale du jeu
         thread = threading.Thread(target=_network_thread, args=(is_host,), daemon=True)
         thread.start()
@@ -83,7 +82,7 @@ async def start_host(pc):
     @channel.on("open")
     def on_open():
         # À faire quand on ouvre le datachannel
-        print("🔔 DataChannel ouvert.")
+        print("DataChannel ouvert.")
         network_ready.set()
 
     @channel.on("message")
@@ -126,7 +125,7 @@ async def start_client(pc):
 
     @pc.on("datachannel")
     def on_datachannel(channel):
-        print("🔔 DataChannel reçu.")
+        print("DataChannel reçu.")
         network_ready.set()
 
         @channel.on("message")
@@ -135,10 +134,7 @@ async def start_client(pc):
             incoming_messages.put(message)
             channel.send(json.dumps(local_player.get_pos()))
 
-    while game_context.game_code == "":
-        time.sleep(0.2)
-    game_code = game_context.game_code
-    game_code, offer = wait_for_offer(game_code)
+    game_code, offer = wait_for_offer(game_context.game_code)
 
     await pc.setRemoteDescription(
         RTCSessionDescription(sdp=offer["sdp"], type=offer["type"])
@@ -210,7 +206,7 @@ def add_answer_to_db(pc, code):
         },
     )
     if res.status_code == 200:
-        print("✅ Réponse envoyée")
+        print("Réponse envoyée")
     else:
         print("Erreur:", res.text)
 
@@ -228,7 +224,7 @@ def wait_for_answer(code):
         if res.status_code == 200:
             doc = res.json()
             if doc["fields"]["answer"] != {"nullValue": None}:
-                print("✅ reponse reçu")
+                print("Réponse reçu.")
                 answer = json.loads(doc["fields"]["answer"]["stringValue"])
                 searching_answer = False
             else:
@@ -242,18 +238,19 @@ def wait_for_offer(code):
     """Check en continue si l'offre sdp est prsente / si la partie a été créée dans la db"""
     wait_for_offer = True
     while wait_for_offer:
-        # récupération de l'offre
-        url = f"https://firestore.googleapis.com/v1/projects/{PROJECT_ID}/databases/(default)/documents/lobbies/{code}?key={API_KEY}"
-        res = requests.get(url)
-        if res.status_code == 200:
-            doc = res.json()
-            offer = json.loads(doc["fields"]["offer"]["stringValue"])
-            wait_for_offer = False
-        else:
-            print(
-                "❌ Mauvais code de partie : vous devez utiliser un code de partie valide ou créer une nouvelle partie."
-            )
-            code = input("Code de la game : ")
+        code = game_context.game_code
+        if code not in ("","wrong_code"):
+            # récupération de l'offre
+            url = f"https://firestore.googleapis.com/v1/projects/{PROJECT_ID}/databases/(default)/documents/lobbies/{code}?key={API_KEY}"
+            res = requests.get(url)
+            if res.status_code == 200:
+                doc = res.json()
+                offer = json.loads(doc["fields"]["offer"]["stringValue"])
+                wait_for_offer = False
+            else:
+                print("Mauvais code de partie, demande d'un nouveau code")
+                game_context.game_code = "wrong_code"
+        time.sleep(0.5)
     return (code, offer)
 
 
