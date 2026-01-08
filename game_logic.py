@@ -1,5 +1,5 @@
 import pygame
-from moteurIso import *
+from isometric_motor import *
 
 
 def update_game(context, playerL, playerD):

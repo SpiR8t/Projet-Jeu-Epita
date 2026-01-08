@@ -1,17 +1,16 @@
 import pygame
 import sys
 
-pygame.init()
+from network import start_network, network_ready, share_context_multi
 
 WIDTH, HEIGHT = 1280, 720
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Echoes of Light")
 
-background = pygame.image.load("main_image.png")
+background = pygame.image.load("assets/images/menu/menu_bg.png")
 background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
 volume = 0.5
-pygame.mixer.music.load("musiquemenu.mp3")
+pygame.mixer.init()
+pygame.mixer.music.load("assets/audio/musics/menu_music.mp3")
 pygame.mixer.music.set_volume(volume)
 pygame.mixer.music.play(-1)
 
@@ -23,17 +22,20 @@ BLACK = (0, 0, 0)
 BUTTON_BG = (255, 255, 255, 200)
 BUTTON_HOVER = (120, 120, 120, 230)
 
-FONT_TITLE = pygame.font.Font("Darksoul.otf", 72)
+pygame.font.init()
+FONT_TITLE = pygame.font.Font("assets/fonts/Darksoul.otf", 72)
 FONT_BUTTON = pygame.font.SysFont("arial", 36)
 
 TEXT = {
     "FR": {
-        "title": "Echoes of Light",
+        "title": "Echoes of Lights",
         "new": "Nouvelle Partie",
-        "load": "Charger Partie",
+        "join": "Rejoindre une Partie",
         "options": "Options",
         "quit": "Quitter",
+        "show_code": "Le code de partie va s'afficher, partagez le avec l'autre joueur :",
         "enter_code": "Entrez le code multijoueur :",
+        "wrong_code":"Veuillez entrer un code valide (5 lettre majuscules)",
         "language": "Langue",
         "change_language": "Changer la langue",
         "volume": "Volume musique",
@@ -42,12 +44,14 @@ TEXT = {
         "loading": "Chargement..."
     },
     "EN": {
-        "title": "Echoes of Light",
+        "title": "Echoes of Lights",
         "new": "New Game",
-        "load": "Load Game",
+        "join": "Join a Game",
         "options": "Options",
         "quit": "Quit",
-        "enter_code": "Enter multiplayer code:",
+        "show_code": "The game code will be displayed, share it to the other player :",
+        "enter_code": "Enter game code:",
+        "wrong_code":"Please enter a valid code (5 uppercase letters)",
         "language": "Language",
         "change_language": "Change language",
         "volume": "Music volume",
@@ -60,7 +64,7 @@ TEXT = {
 BUTTON_WIDTH = 420
 BUTTON_HEIGHT = 80
 
-click_cooldown = 0 
+
 COOLDOWN_TIME = 200  
 
 class Button:
@@ -90,135 +94,179 @@ page = "menu"
 language = "FR"
 code_multi = ""
 
-clock = pygame.time.Clock()
-running = True
+def display_menu(context):
+    global language,code_multi,page,volume
+    screen = context.screen
+    click_cooldown = 0
+    asked_network = False
+    share_context_multi(context)
 
-while running:
-    dt = clock.tick(60)
-    if click_cooldown > 0:
-        click_cooldown -= dt
+    while not network_ready.is_set():
+        dt = context.clock.tick(60)
+        if click_cooldown > 0:
+            click_cooldown -= dt
 
-    screen.blit(background, (0, 0))
-    mouse_pos = pygame.mouse.get_pos()
-    mouse_pressed = pygame.mouse.get_pressed()
+        screen.blit(background, (0, 0))
+        mouse_pos = pygame.mouse.get_pos()
+        mouse_pressed = pygame.mouse.get_pressed()
 
-    T = TEXT[language]
+        T = TEXT[language]
 
-    if page == "menu":
-        title = FONT_TITLE.render(T["title"], True, WHITE)
-        shadow = FONT_TITLE.render(T["title"], True, BLACK)
-        screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + 3, 123)))
-        screen.blit(title, title.get_rect(center=(WIDTH // 2, 120)))
+        if context.game_code == "wrong_code":
+            page = "join_wrong_code"
+            code_multi = ""
+            context.game_code = ""
 
-        buttons = [
-            Button(T["new"], 320, "new"),
-            Button(T["load"], 410, "load"),
-            Button(T["options"], 500, "options"),
-            Button(T["quit"], 590, "quit")
-        ]
+        if page == "menu":
+            title = FONT_TITLE.render(T["title"], True, WHITE)
+            shadow = FONT_TITLE.render(T["title"], True, BLACK)
+            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + 3, 123)))
+            screen.blit(title, title.get_rect(center=(WIDTH // 2, 120)))
 
-        for btn in buttons:
-            btn.draw(screen, mouse_pos)
-            if btn.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
+            buttons = [
+                Button(T["new"], 320, "new"),
+                Button(T["join"], 410, "join"),
+                Button(T["options"], 500, "options"),
+                Button(T["quit"], 590, "quit")
+            ]
+
+            for btn in buttons:
+                btn.draw(screen, mouse_pos)
+                if btn.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
+                    click_cooldown = COOLDOWN_TIME
+                    pygame.time.delay(180)
+                    if btn.action == "quit":
+                        pygame.quit()
+                        sys.exit()
+                    else:
+                        page = btn.action
+                        code_multi = ""
+        elif page == "new":
+            title = FONT_TITLE.render(T["title"], True, WHITE)
+            shadow = FONT_TITLE.render(T["title"], True, BLACK)
+            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + 3, 123)))
+            screen.blit(title, title.get_rect(center=(WIDTH // 2, 120)))
+
+            info = FONT_BUTTON.render(T["show_code"], True, LIGHT_GREY)
+            screen.blit(info, info.get_rect(center=(WIDTH // 2, 260)))
+
+            # Affichage du champ de texte
+            input_rect = pygame.Rect(WIDTH // 2 - 220, 300, 440, 65)
+            pygame.draw.rect(screen, BUTTON_BG, input_rect, border_radius=12)
+            pygame.draw.rect(screen, WHITE, input_rect, 2, border_radius=12)
+
+            # Affichage contenu champ de texte
+            txt = FONT_BUTTON.render(context.game_code, True, DARK_GREY)
+            screen.blit(txt, (input_rect.x + 15, input_rect.y + 15))
+
+            # Demande de creation du code de partie
+            if not asked_network:
+                context.is_host = True
+                asked_network = True
+                start_network(context.is_host)
+
+        elif page in ("join","join_wrong_code"):
+            title = FONT_TITLE.render(T["title"], True, WHITE)
+            shadow = FONT_TITLE.render(T["title"], True, BLACK)
+            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + 3, 123)))
+            screen.blit(title, title.get_rect(center=(WIDTH // 2, 120)))
+
+            if page == "join":
+                info = FONT_BUTTON.render(T["enter_code"], True, LIGHT_GREY)
+            else:
+                info = FONT_BUTTON.render(T["wrong_code"], True, LIGHT_GREY)
+            screen.blit(info, info.get_rect(center=(WIDTH // 2, 260)))
+
+            # Affichage du champ de texte
+            input_rect = pygame.Rect(WIDTH // 2 - 220, 300, 440, 65)
+            pygame.draw.rect(screen, BUTTON_BG, input_rect, border_radius=12)
+            pygame.draw.rect(screen, WHITE, input_rect, 2, border_radius=12)
+
+            # Affichage contenu champ de texte
+            txt = FONT_BUTTON.render(code_multi, True, DARK_GREY)
+            screen.blit(txt, (input_rect.x + 15, input_rect.y + 15))
+
+            continue_btn = Button(T["continue"], 420, "continue")
+            continue_btn.draw(screen, mouse_pos)
+            if continue_btn.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
                 click_cooldown = COOLDOWN_TIME
                 pygame.time.delay(180)
-                if btn.action == "quit":
-                    running = False
+                page = "loading"
+                # envoi du code de partie :
+                if not asked_network:
+                    asked_network = True
+                    context.is_host = False
+                    context.game_code = code_multi.upper()
+                    start_network(context.is_host)
                 else:
-                    page = btn.action
-                    code_multi = ""
+                    context.game_code = code_multi.upper()
 
-    elif page in ("new", "load"):
-        title = FONT_TITLE.render(T["title"], True, WHITE)
-        shadow = FONT_TITLE.render(T["title"], True, BLACK)
-        screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + 3, 123)))
-        screen.blit(title, title.get_rect(center=(WIDTH // 2, 120)))
+            back = Button(T["back"], 600, "menu")
+            back.draw(screen, mouse_pos)
+            if back.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
+                click_cooldown = COOLDOWN_TIME
+                pygame.time.delay(180)
+                page = "menu"
 
-        info = FONT_BUTTON.render(T["enter_code"], True, LIGHT_GREY)
-        screen.blit(info, info.get_rect(center=(WIDTH // 2, 260)))
+        elif page == "loading":
+            title = FONT_TITLE.render(T["loading"], True, WHITE)
+            shadow = FONT_TITLE.render(T["loading"], True, BLACK)
+            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + 3, 123)))
+            screen.blit(title, title.get_rect(center=(WIDTH // 2, 120)))
 
-        input_rect = pygame.Rect(WIDTH // 2 - 220, 300, 440, 65)
-        pygame.draw.rect(screen, BUTTON_BG, input_rect, border_radius=12)
-        pygame.draw.rect(screen, WHITE, input_rect, 2, border_radius=12)
+            back = Button(T["back"], 600, "menu")
+            back.draw(screen, mouse_pos)
+            if back.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
+                click_cooldown = COOLDOWN_TIME
+                pygame.time.delay(180)
+                page = "menu"
+                code_multi = ""
 
-        txt = FONT_BUTTON.render(code_multi, True, DARK_GREY)
-        screen.blit(txt, (input_rect.x + 15, input_rect.y + 15))
+        elif page == "options":
+            title = FONT_TITLE.render(T["options"], True, WHITE)
+            shadow = FONT_TITLE.render(T["options"], True, BLACK)
+            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + 3, 123)))
+            screen.blit(title, title.get_rect(center=(WIDTH // 2, 120)))
 
-        continue_btn = Button(T["continue"], 420, "continue")
-        continue_btn.draw(screen, mouse_pos)
-        if continue_btn.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
-            click_cooldown = COOLDOWN_TIME
-            pygame.time.delay(180)
-            page = "loading"
+            lang_txt = FONT_BUTTON.render(f"{T['language']} : {language}", True, LIGHT_GREY)
+            screen.blit(lang_txt, lang_txt.get_rect(center=(WIDTH // 2, 280)))
 
-        back = Button(T["back"], 600, "menu")
-        back.draw(screen, mouse_pos)
-        if back.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
-            click_cooldown = COOLDOWN_TIME
-            pygame.time.delay(180)
-            page = "menu"
+            lang_btn = Button(T["change_language"], 350, "lang")
+            lang_btn.draw(screen, mouse_pos)
+            if lang_btn.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
+                click_cooldown = COOLDOWN_TIME
+                pygame.time.delay(180)
+                language = "EN" if language == "FR" else "FR"
 
-    elif page == "loading":
-        title = FONT_TITLE.render(T["loading"], True, WHITE)
-        shadow = FONT_TITLE.render(T["loading"], True, BLACK)
-        screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + 3, 123)))
-        screen.blit(title, title.get_rect(center=(WIDTH // 2, 120)))
+            vol_txt = FONT_BUTTON.render(f"{T['volume']} : {int(volume*100)}%", True, LIGHT_GREY)
+            screen.blit(vol_txt, vol_txt.get_rect(center=(WIDTH // 2, 420)))
 
-        back = Button(T["back"], 600, "menu")
-        back.draw(screen, mouse_pos)
-        if back.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
-            click_cooldown = COOLDOWN_TIME
-            pygame.time.delay(180)
-            page = "menu"
-            code_multi = ""
+            bar_x, bar_y, bar_w = 500, 450, 280
+            pygame.draw.rect(screen, WHITE, (bar_x, bar_y, bar_w, 6))
+            pygame.draw.circle(screen, WHITE, (bar_x + int(volume * bar_w), bar_y + 3), 11)
 
-    elif page == "options":
-        title = FONT_TITLE.render(T["options"], True, WHITE)
-        shadow = FONT_TITLE.render(T["options"], True, BLACK)
-        screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + 3, 123)))
-        screen.blit(title, title.get_rect(center=(WIDTH // 2, 120)))
+            if mouse_pressed[0]:
+                mx, my = mouse_pos
+                if bar_x <= mx <= bar_x + bar_w and bar_y - 12 <= my <= bar_y + 12:
+                    volume = max(0, min(1, (mx - bar_x) / bar_w))
+                    pygame.mixer.music.set_volume(volume)
 
-        lang_txt = FONT_BUTTON.render(f"{T['language']} : {language}", True, LIGHT_GREY)
-        screen.blit(lang_txt, lang_txt.get_rect(center=(WIDTH // 2, 280)))
+            back = Button(T["back"], 600, "menu")
+            back.draw(screen, mouse_pos)
+            if back.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
+                click_cooldown = COOLDOWN_TIME
+                pygame.time.delay(180)
+                page = "menu"
 
-        lang_btn = Button(T["change_language"], 350, "lang")
-        lang_btn.draw(screen, mouse_pos)
-        if lang_btn.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
-            click_cooldown = COOLDOWN_TIME
-            pygame.time.delay(180)
-            language = "EN" if language == "FR" else "FR"
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
-        vol_txt = FONT_BUTTON.render(f"{T['volume']} : {int(volume*100)}%", True, LIGHT_GREY)
-        screen.blit(vol_txt, vol_txt.get_rect(center=(WIDTH // 2, 420)))
+            if event.type == pygame.KEYDOWN and page in ("join","join_wrong_code"):
+                if event.key == pygame.K_BACKSPACE:
+                    code_multi = code_multi[:-1]
+                elif len(code_multi) < 12 and event.unicode.isprintable():
+                    code_multi += event.unicode
 
-        bar_x, bar_y, bar_w = 500, 450, 280
-        pygame.draw.rect(screen, WHITE, (bar_x, bar_y, bar_w, 6))
-        pygame.draw.circle(screen, WHITE, (bar_x + int(volume * bar_w), bar_y + 3), 11)
-
-        if mouse_pressed[0]:
-            mx, my = mouse_pos
-            if bar_x <= mx <= bar_x + bar_w and bar_y - 12 <= my <= bar_y + 12:
-                volume = max(0, min(1, (mx - bar_x) / bar_w))
-                pygame.mixer.music.set_volume(volume)
-
-        back = Button(T["back"], 600, "menu")
-        back.draw(screen, mouse_pos)
-        if back.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
-            click_cooldown = COOLDOWN_TIME
-            pygame.time.delay(180)
-            page = "menu"
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
-        if event.type == pygame.KEYDOWN and page in ("new", "load"):
-            if event.key == pygame.K_BACKSPACE:
-                code_multi = code_multi[:-1]
-            elif len(code_multi) < 12 and event.unicode.isprintable():
-                code_multi += event.unicode
-
-    pygame.display.flip()
-
-pygame.quit()
-sys.exit()
+        pygame.display.flip()

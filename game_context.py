@@ -15,7 +15,9 @@ class GameContext:
         self.client_player = playerC
 
         # Jeu
+        self.game_code = ""
+        self.is_host = True
         self.multiplayer = multi
-        self.running = True
+        self.running = False
         self.map = map
         self.camera = cam
