@@ -9,6 +9,7 @@ MAP_WIDTH = 15
 MAP_LEVELS = 3
 
 # --- Génération d'une carte simple ---
+# un rectangle avec des murs aux extrémités pour éviter la sortie des deux personnages
 map_tiles = [
     [
         [
@@ -29,15 +30,25 @@ map_tiles = [
 ]
 
 
-# --- Fonction de conversion cartésien <-> isométrique
+# --- Fonction de conversion cartésien <-> isométrique ---------
 def cart_to_iso(x, y, z=0):
+    """ 
+    Fonction qui passe les coordonnées de cartésien à isométrique pour l'affichage des tuiles
+    
+    Param: x et y sont les coordonnées que l'on souhaite convertir
+    *"""
     screen_x = (x - y) * (TILE_WIDTH // 2) + 400
     screen_y = (x + y) * (TILE_HEIGHT // 2) - z * TILE_HEIGHT
     return screen_x, screen_y
 
 
 def iso_to_cart_tile(screen_x, screen_y, z=0):
-    # enlever l'offset de la caméra
+    """ 
+    Fonction qui passe les coordonnées isométrique (à l'écran) en cartésien pour retrouver la position sur la matrice 3d 
+    
+    Param: screen_x et screen_y qui correspondent aux coordonnées isométrique à l'écran que l'on souhaite convertir
+    """
+    # enlever l'offset du centrage caméro
     iso_x = screen_x - 400
     iso_y = screen_y + z * TILE_HEIGHT
 
@@ -45,16 +56,39 @@ def iso_to_cart_tile(screen_x, screen_y, z=0):
     cart_x = (iso_y / (TILE_HEIGHT / 2) + iso_x / (TILE_WIDTH / 2)) / 2
     cart_y = (iso_y / (TILE_HEIGHT / 2) - iso_x / (TILE_WIDTH / 2)) / 2
 
-    # renvoyer les tuiles arrondies
+    # renvoyer les coordonées arrondies pour les tuiles
     return int(cart_x), int(cart_y)
 
 
 def deduce_foots_from_iso_coords(player_x, player_y):
+    """ 
+    Fonction qui déduit la position des pieds gauches et droits à partir des coordonnées du joueur (déjà en isométrique) 
+
+    Param: player_x et player_y sont les coordonnées représentant la position du joueur gardé dans l'objet Player
+    """
+    
     return ((player_x - 32, player_y), (player_x + 1, player_y))
 
+def display_ranges(x_j1, y_j1):
+    """
+    Détermine la range de coordonnées de la matrice qui se trouve à l'écran, pour afficher seulement le nécessaire.
+    La partie Z n'est pas renvoyé car elle est toujours affiché de 0 à 2 (pour une hauteur de 3)
 
+    Param: x_j1 et y_j1 sont considérés déjà converti vers les coordonnées de la matrice
+    """
+
+    # il faudra adapter la marge à la taille de l'écran
+    x_min = max(0, x_j1 - 16)
+    x_max = min(len(map_tiles), x_j1 + 16)
+
+    y_min = max(0, y_j1 - 16)
+    y_max = min(len(map_tiles[0]), y_j1 + 16)
+
+    return ((x_min, x_max), (y_min, y_max))
+
+# Classes -------------------------------------------------------------
 class Camera:
-    # la classe qui permet de garder l'offset constant de l'affichage du joueur
+    # La classe qui permet de garder l'offset de l'affichage du joueur pour simuler une caméra
     def __init__(self, screen_width, screen_height):
         self.offset_x = 0
         self.offset_y = 0
@@ -65,48 +99,32 @@ class Camera:
         self.offset_x = x - self.width / 2
         self.offset_y = y - self.height / 2
 
+    # Fonction qui calcule l'offset à l'affichage avec un smooth factor qui rend le déplacement plus fluide 
     def follow(self, x, y, smooth_factor=0.1):
         desired_x = x - self.width // 2
         desired_y = y - self.height // 2
         self.offset_x += (desired_x - self.offset_x) * smooth_factor
         self.offset_y += (desired_y - self.offset_y) * smooth_factor
 
+    # Fonction qui renvoie des coordonnées x,y avec l'offset appliqué
     def apply(self, x, y):
         return x - self.offset_x, y - self.offset_y
 
-
-def display_ranges(x_j1, y_j1):
-    """
-    Détermine la range de coordonnées de la matrice qui se trouve à l'écran, pour afficher seulement le nécessaire.
-    La partie Z n'est pas renvoyé car elle est toujours affiché de 0 à 2 (pour une hauteur de 3)
-
-    Param: x_j1 et y_j1 sont considérés déjà converti vers les coordonnées de la matrice
-    """
-
-    # il faudra adapter la marge à la taille de l'écran, peut être agrandir la taille de l'affichage pour les écran plus grand ?
-    x_min = max(0, x_j1 - 16)
-    x_max = min(len(map_tiles), x_j1 + 16)
-
-    y_min = max(0, y_j1 - 16)
-    y_max = min(len(map_tiles[0]), y_j1 + 16)
-
-    return ((x_min, x_max), (y_min, y_max))
-
-
 class Map:
+    # La classe qui permet de rester modulaire pour les map si nécessaire
     def __init__(self, tiles, tile_width, tile_height, screen):
-        self.tiles = tiles
-        self.tile_width = tile_width
+        self.tiles = tiles # la matrice 3d de la map
+        self.tile_width = tile_width 
         self.tile_height = tile_height
         self.map_width = len(tiles[0])
         self.map_height = len(tiles)
         self.map_levels = len(tiles[0][0])
-        self.screen = screen
+        self.screen = screen # l'écran sur lequel on affiche tout
 
     def draw_map(
         self, camera, x_j1, y_j1, avatar_j1, x_j2, y_j2, avatar_j2
-    ):  # manque affichage joueur 2
-        """fonction qui affiche la map (tiles)"""
+    ):
+        """fonction qui affiche la map (tiles) ainsi que les deux joueurs"""
 
         tile_wall = pygame.image.load("assets/images/game/tileset/tilesettestwall.png").convert_alpha()
         tile_floor = pygame.image.load("assets/images/game/tileset/tilesettestfloor.png").convert_alpha()
@@ -121,7 +139,6 @@ class Map:
         # dessine du fond vers devant
         for x in range(x_min, x_max):
             for y in range(y_min, y_max):
-
                 for z in range(self.map_levels):
                     if x == j1_pos[0] and y == j1_pos[1] and z == 1:
 
@@ -129,18 +146,19 @@ class Map:
                         self.screen.blit(
                             avatar1, (x_j1, y_j1 - 64)
                         )  # pour le décalage par rapport à la hauteur du pixel art avatar
-                    # print(j1_pos)
+
                     if x == j2_pos[0] and y == j2_pos[1] and z == 1:
 
                         x_j2, y_j2 = camera.apply(x_j2, y_j2)
                         self.screen.blit(
                             avatar2, (x_j2, y_j2 - 64)
                         )  # pour le décalage par rapport à la hauteur du pixel art avatar
-                    # print(j1_pos)
 
                     tile_nb = self.tiles[x][y][z]
+
+                    # si tile_nb != 0 (n'est pas vide) alors on affiche la tuile correspondante
                     if tile_nb != 0:
-                        # Chaque condition correspond à une tile différente
+                        # Chaque condition correspond à une tuile différente
                         screen_x, screen_y = cart_to_iso(x, y, z)
                         screen_x, screen_y = camera.apply(screen_x, screen_y)
                         if tile_nb == 1:
