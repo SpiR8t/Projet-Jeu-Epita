@@ -10,7 +10,7 @@ background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
 volume = 0.5
 pygame.mixer.init()
-pygame.mixer.music.load("assets/audio/musics/menu_music.mp3")
+pygame.mixer.music.load("assets/audio/musics/musique_val.mp3")
 pygame.mixer.music.set_volume(volume)
 pygame.mixer.music.play(-1)
 
