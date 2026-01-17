@@ -12,13 +12,13 @@ from menu import display_menu
 
 def main():
     pygame.init()
-    WIDTH, HEIGHT = 1280, 720
+    WIDTH, HEIGHT = 1920,1080 #640, 360
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.SCALED)
     pygame.display.set_caption("Echoes of Lights")
     clock = pygame.time.Clock()
 
     # Activation du multijoueur
-    MULTIPLAYER = True
+    MULTIPLAYER = False
 
     map1 = Map(map_tiles, TILE_WIDTH, TILE_HEIGHT, screen)
     camera = Camera(screen.get_width(), screen.get_height())
@@ -29,7 +29,7 @@ def main():
     # ----
 
     context = GameContext(
-        screen, clock, playerH, playerC, WIDTH, HEIGHT, map1, camera, MULTIPLAYER
+        screen, clock, playerH, playerC, map1, camera, MULTIPLAYER
     )
 
     # Menu

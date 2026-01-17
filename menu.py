@@ -3,10 +3,9 @@ import sys
 
 from network import start_network, network_ready, share_context_multi
 
-WIDTH, HEIGHT = 1280, 720
+WIDTH, HEIGHT = 1280,720
 
 background = pygame.image.load("assets/images/menu/menu_bg.png")
-background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
 volume = 0.5
 pygame.mixer.init()
@@ -23,7 +22,6 @@ BUTTON_BG = (255, 255, 255, 200)
 BUTTON_HOVER = (120, 120, 120, 230)
 
 pygame.font.init()
-FONT_TITLE = pygame.font.Font("assets/fonts/Darksoul.otf", 72)
 FONT_BUTTON = pygame.font.SysFont("arial", 36)
 
 TEXT = {
@@ -78,11 +76,11 @@ class Button:
         hovered = self.rect.collidepoint(mouse_pos)
         color = BUTTON_HOVER if hovered else BUTTON_BG
         surface = pygame.Surface((BUTTON_WIDTH, BUTTON_HEIGHT), pygame.SRCALPHA)
-        pygame.draw.rect(surface, color, surface.get_rect(), border_radius=18)
+        pygame.draw.rect(surface, color, surface.get_rect(), border_radius=9*BUTTON_HEIGHT//40)
         win.blit(surface, self.rect)
         shadow = FONT_BUTTON.render(self.text, True, BLACK)
         text = FONT_BUTTON.render(self.text, True, DARK_GREY)
-        shadow_rect = shadow.get_rect(center=(self.rect.centerx + 2, self.rect.centery + 2))
+        shadow_rect = shadow.get_rect(center=(self.rect.centerx + max(1,BUTTON_HEIGHT//40), self.rect.centery + max(1,BUTTON_HEIGHT//40)))
         text_rect = text.get_rect(center=self.rect.center)
         win.blit(shadow, shadow_rect)
         win.blit(text, text_rect)
@@ -95,10 +93,20 @@ language = "FR"
 code_multi = ""
 
 def display_menu(context):
-    global language,code_multi,page,volume
+    global language,code_multi,page,volume,WIDTH,HEIGHT,BUTTON_WIDTH,BUTTON_HEIGHT,background,FONT_BUTTON
     screen = context.screen
+    WIDTH = screen.get_width()
+    HEIGHT = screen.get_height()
+
+    BUTTON_WIDTH = 21 * WIDTH // 64
+    BUTTON_HEIGHT = HEIGHT // 9
+
+    FONT_TITLE = pygame.font.Font("assets/fonts/Darksoul.otf", HEIGHT//10)
+    FONT_BUTTON = pygame.font.SysFont("arial", HEIGHT//20)
+
     click_cooldown = 0
     asked_network = False
+    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
     share_context_multi(context)
 
     while not network_ready.is_set():
@@ -120,14 +128,14 @@ def display_menu(context):
         if page == "menu":
             title = FONT_TITLE.render(T["title"], True, WHITE)
             shadow = FONT_TITLE.render(T["title"], True, BLACK)
-            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + 3, 123)))
-            screen.blit(title, title.get_rect(center=(WIDTH // 2, 120)))
+            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + max(2,HEIGHT//240), HEIGHT//6 + max(2,HEIGHT//240))))
+            screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT//6)))
 
             buttons = [
-                Button(T["new"], 320, "new"),
-                Button(T["join"], 410, "join"),
-                Button(T["options"], 500, "options"),
-                Button(T["quit"], 590, "quit")
+                Button(T["new"], 4*HEIGHT//9, "new"),
+                Button(T["join"], 41*HEIGHT//72, "join"),
+                Button(T["options"], 25*HEIGHT//36, "options"),
+                Button(T["quit"], 59*HEIGHT//72, "quit")
             ]
 
             for btn in buttons:
@@ -144,20 +152,20 @@ def display_menu(context):
         elif page == "new":
             title = FONT_TITLE.render(T["title"], True, WHITE)
             shadow = FONT_TITLE.render(T["title"], True, BLACK)
-            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + 3, 123)))
-            screen.blit(title, title.get_rect(center=(WIDTH // 2, 120)))
+            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + max(2,HEIGHT//240), HEIGHT//6 + max(2,HEIGHT//240))))
+            screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT//6)))
 
             info = FONT_BUTTON.render(T["show_code"], True, LIGHT_GREY)
-            screen.blit(info, info.get_rect(center=(WIDTH // 2, 260)))
+            screen.blit(info, info.get_rect(center=(WIDTH // 2, 13*HEIGHT//36)))
 
             # Affichage du champ de texte
-            input_rect = pygame.Rect(WIDTH // 2 - 220, 300, 440, 65)
-            pygame.draw.rect(screen, BUTTON_BG, input_rect, border_radius=12)
-            pygame.draw.rect(screen, WHITE, input_rect, 2, border_radius=12)
+            input_rect = pygame.Rect(WIDTH // 2 - (11*WIDTH//64), 5*HEIGHT//12, 11*WIDTH//32, 13*HEIGHT//144)
+            pygame.draw.rect(screen, BUTTON_BG, input_rect, border_radius=HEIGHT//60)
+            pygame.draw.rect(screen, WHITE, input_rect, 2, border_radius=HEIGHT//60)
 
             # Affichage contenu champ de texte
             txt = FONT_BUTTON.render(context.game_code, True, DARK_GREY)
-            screen.blit(txt, (input_rect.x + 15, input_rect.y + 15))
+            screen.blit(txt, (input_rect.x + HEIGHT//48, input_rect.y + HEIGHT//48))
 
             # Demande de creation du code de partie
             if not asked_network:
@@ -168,25 +176,25 @@ def display_menu(context):
         elif page in ("join","join_wrong_code"):
             title = FONT_TITLE.render(T["title"], True, WHITE)
             shadow = FONT_TITLE.render(T["title"], True, BLACK)
-            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + 3, 123)))
-            screen.blit(title, title.get_rect(center=(WIDTH // 2, 120)))
+            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + max(2,HEIGHT//240), HEIGHT//6 + max(2,HEIGHT//240))))
+            screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT//6)))
 
             if page == "join":
                 info = FONT_BUTTON.render(T["enter_code"], True, LIGHT_GREY)
             else:
                 info = FONT_BUTTON.render(T["wrong_code"], True, LIGHT_GREY)
-            screen.blit(info, info.get_rect(center=(WIDTH // 2, 260)))
+            screen.blit(info, info.get_rect(center=(WIDTH // 2, 13*HEIGHT//36)))
 
             # Affichage du champ de texte
-            input_rect = pygame.Rect(WIDTH // 2 - 220, 300, 440, 65)
-            pygame.draw.rect(screen, BUTTON_BG, input_rect, border_radius=12)
-            pygame.draw.rect(screen, WHITE, input_rect, 2, border_radius=12)
+            input_rect = pygame.Rect(WIDTH // 2 - (11*WIDTH//64), 5*HEIGHT//12, 11*WIDTH//32, 13*HEIGHT//144)
+            pygame.draw.rect(screen, BUTTON_BG, input_rect, border_radius=HEIGHT//60)
+            pygame.draw.rect(screen, WHITE, input_rect, 2, border_radius=HEIGHT//60)
 
             # Affichage contenu champ de texte
             txt = FONT_BUTTON.render(code_multi, True, DARK_GREY)
-            screen.blit(txt, (input_rect.x + 15, input_rect.y + 15))
+            screen.blit(txt, (input_rect.x + HEIGHT//48, input_rect.y + HEIGHT//48))
 
-            continue_btn = Button(T["continue"], 420, "continue")
+            continue_btn = Button(T["continue"], 7*HEIGHT//12, "continue")
             continue_btn.draw(screen, mouse_pos)
             if continue_btn.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
                 click_cooldown = COOLDOWN_TIME
@@ -201,7 +209,7 @@ def display_menu(context):
                 else:
                     context.game_code = code_multi.upper()
 
-            back = Button(T["back"], 600, "menu")
+            back = Button(T["back"], 5*HEIGHT//6, "menu")
             back.draw(screen, mouse_pos)
             if back.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
                 click_cooldown = COOLDOWN_TIME
@@ -211,10 +219,10 @@ def display_menu(context):
         elif page == "loading":
             title = FONT_TITLE.render(T["loading"], True, WHITE)
             shadow = FONT_TITLE.render(T["loading"], True, BLACK)
-            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + 3, 123)))
-            screen.blit(title, title.get_rect(center=(WIDTH // 2, 120)))
+            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + max(2,HEIGHT//240), HEIGHT//6 + max(2,HEIGHT//240))))
+            screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT//6)))
 
-            back = Button(T["back"], 600, "menu")
+            back = Button(T["back"], 5*HEIGHT//6, "menu")
             back.draw(screen, mouse_pos)
             if back.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
                 click_cooldown = COOLDOWN_TIME
@@ -223,15 +231,15 @@ def display_menu(context):
                 code_multi = ""
 
         elif page == "options":
-            title = FONT_TITLE.render(T["options"], True, WHITE)
-            shadow = FONT_TITLE.render(T["options"], True, BLACK)
-            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + 3, 123)))
-            screen.blit(title, title.get_rect(center=(WIDTH // 2, 120)))
+            title = FONT_TITLE.render(T["title"], True, WHITE)
+            shadow = FONT_TITLE.render(T["title"], True, BLACK)
+            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + max(2,HEIGHT//240), HEIGHT//6 + max(2,HEIGHT//240))))
+            screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT//6)))
 
             lang_txt = FONT_BUTTON.render(f"{T['language']} : {language}", True, LIGHT_GREY)
-            screen.blit(lang_txt, lang_txt.get_rect(center=(WIDTH // 2, 280)))
+            screen.blit(lang_txt, lang_txt.get_rect(center=(WIDTH // 2, 7*HEIGHT//18)))
 
-            lang_btn = Button(T["change_language"], 350, "lang")
+            lang_btn = Button(T["change_language"], 35*HEIGHT//72, "lang")
             lang_btn.draw(screen, mouse_pos)
             if lang_btn.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
                 click_cooldown = COOLDOWN_TIME
@@ -239,19 +247,19 @@ def display_menu(context):
                 language = "EN" if language == "FR" else "FR"
 
             vol_txt = FONT_BUTTON.render(f"{T['volume']} : {int(volume*100)}%", True, LIGHT_GREY)
-            screen.blit(vol_txt, vol_txt.get_rect(center=(WIDTH // 2, 420)))
+            screen.blit(vol_txt, vol_txt.get_rect(center=(WIDTH // 2, 7*HEIGHT//12)))
 
-            bar_x, bar_y, bar_w = 500, 450, 280
-            pygame.draw.rect(screen, WHITE, (bar_x, bar_y, bar_w, 6))
-            pygame.draw.circle(screen, WHITE, (bar_x + int(volume * bar_w), bar_y + 3), 11)
+            bar_x, bar_y, bar_w = 25*WIDTH//64, 5*HEIGHT//8, 7*WIDTH//32
+            pygame.draw.rect(screen, WHITE, (bar_x, bar_y, bar_w, HEIGHT//120))
+            pygame.draw.circle(screen, WHITE, (bar_x + int(volume * bar_w), bar_y + HEIGHT//240), 11*HEIGHT//720)
 
             if mouse_pressed[0]:
                 mx, my = mouse_pos
-                if bar_x <= mx <= bar_x + bar_w and bar_y - 12 <= my <= bar_y + 12:
+                if bar_x <= mx <= bar_x + bar_w and bar_y - HEIGHT//60 <= my <= bar_y + HEIGHT//60:
                     volume = max(0, min(1, (mx - bar_x) / bar_w))
                     pygame.mixer.music.set_volume(volume)
 
-            back = Button(T["back"], 600, "menu")
+            back = Button(T["back"], 5*HEIGHT//6, "menu")
             back.draw(screen, mouse_pos)
             if back.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
                 click_cooldown = COOLDOWN_TIME
