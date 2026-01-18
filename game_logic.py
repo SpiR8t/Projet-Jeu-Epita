@@ -13,6 +13,12 @@ def update_game(context, playerL, playerD):
         if event.type == pygame.QUIT:
             context.running = False
 
+        if not context.fullscreen and event.type == pygame.VIDEORESIZE:
+            context.screen = pygame.display.set_mode(
+                event.size,
+                pygame.RESIZABLE | pygame.SCALED
+            )
+
     # Gestion de la pression des touches
     keys = pygame.key.get_pressed()
 

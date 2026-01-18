@@ -95,21 +95,24 @@ code_multi = ""
 def display_menu(context):
     global language,code_multi,page,volume,WIDTH,HEIGHT,BUTTON_WIDTH,BUTTON_HEIGHT,background,FONT_BUTTON
     screen = context.screen
-    WIDTH = screen.get_width()
-    HEIGHT = screen.get_height()
-
-    BUTTON_WIDTH = 21 * WIDTH // 64
-    BUTTON_HEIGHT = HEIGHT // 9
-
-    FONT_TITLE = pygame.font.Font("assets/fonts/Darksoul.otf", HEIGHT//10)
-    FONT_BUTTON = pygame.font.SysFont("arial", HEIGHT//20)
+    
 
     click_cooldown = 0
     asked_network = False
-    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+    
     share_context_multi(context)
 
     while not network_ready.is_set():
+        background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+        WIDTH = screen.get_width()
+        HEIGHT = screen.get_height()
+
+        BUTTON_WIDTH = 21 * WIDTH // 64
+        BUTTON_HEIGHT = HEIGHT // 9
+
+        FONT_TITLE = pygame.font.Font("assets/fonts/Darksoul.otf", HEIGHT//10)
+        FONT_BUTTON = pygame.font.SysFont("arial", HEIGHT//20)
+
         dt = context.clock.tick(60)
         if click_cooldown > 0:
             click_cooldown -= dt
@@ -276,5 +279,11 @@ def display_menu(context):
                     code_multi = code_multi[:-1]
                 elif len(code_multi) < 12 and event.unicode.isprintable():
                     code_multi += event.unicode
+
+            if event.type == pygame.VIDEORESIZE and not context.fullscreen:
+                context.screen = pygame.display.set_mode(
+                event.size,
+                pygame.RESIZABLE | pygame.SCALED
+                )
 
         pygame.display.flip()
