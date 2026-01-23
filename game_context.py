@@ -7,6 +7,8 @@ class GameContext:
         # Fenetre pygame
         self.screen = screen
         self.clock = clock
+        self.fullscreen = fullscr 
+        self.extended = False #écran étendu
 
         # Joueurs
         self.host_player = playerH
@@ -16,7 +18,6 @@ class GameContext:
         self.game_code = ""
         self.is_host = True
         self.multiplayer = multi
-        self.fullscreen = fullscr
         self.running = False
         self.map = map
         self.camera = cam

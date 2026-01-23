@@ -280,10 +280,13 @@ def display_menu(context):
                 elif len(code_multi) < 12 and event.unicode.isprintable():
                     code_multi += event.unicode
 
-            if event.type == pygame.VIDEORESIZE and not context.fullscreen:
+            if event.type == pygame.WINDOWRESIZED:
                 context.screen = pygame.display.set_mode(
-                event.size,
-                pygame.RESIZABLE | pygame.SCALED
+                    (event.x,event.y),
+                    pygame.RESIZABLE
                 )
+
+            if event.type == pygame.WINDOWRESTORED:
+                context.screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
 
         pygame.display.flip()
