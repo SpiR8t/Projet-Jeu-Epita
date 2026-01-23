@@ -3,12 +3,10 @@ pygame et de les partager avec tous les fichiers qui en ont besoin, sans nécess
 la lib pygame. Il contient en fait toutes les infos qui doivent être partagé entre les fichiers """
 
 class GameContext:
-    def __init__(self, screen, clock, playerH, playerC, W, H,map,cam,multi):
+    def __init__(self, screen, clock, playerH, playerC,map,cam,multi):
         # Fenetre pygame
         self.screen = screen
         self.clock = clock
-        self.width = W
-        self.height = H
 
         # Joueurs
         self.host_player = playerH
