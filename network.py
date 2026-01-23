@@ -16,7 +16,7 @@ API_KEY = "AIzaSyCYI_3pSmQTPU2YtLcMlPCW0ch8qurqbEs"
 PROJECT_ID = "projet-sup-epita"
 
 # Déclaration globale datachannel et boucle réseau pour intercommunication des boucles
-channel = None  # Chanel à créer
+channel = None  # Channel à créer
 network_loop = None  # Loop réseau
 
 # Event globale pour prevenir que le réseau est près (connexion établie)
@@ -25,7 +25,7 @@ network_ready = threading.Event()
 # Queue globale pour la reception des messages
 incoming_messages = Queue()
 
-# Evenement pour arrèter la connexion qd on ferme le jeu
+# Evenement pour arreter la connexion qd on ferme le jeu
 stop_event = None
 
 # Contexte du jeu
@@ -107,7 +107,7 @@ async def start_host(pc):
     }
 
     create_lobby(game_code, game_data)
-    game_context.game_code = game_code
+    game_context.edit_game_code(game_code)
     print("Code de partie : " + game_code)
     print("\n-----------------------------------\n")
 
@@ -249,7 +249,7 @@ def wait_for_offer(code):
                 wait_for_offer = False
             else:
                 print("Mauvais code de partie, demande d'un nouveau code")
-                game_context.game_code = "wrong_code"
+                game_context.edit_game_code("wrong_code")
         time.sleep(0.5)
     return (code, offer)
 

@@ -19,3 +19,12 @@ class GameContext:
         self.running = False
         self.map = map
         self.camera = cam
+
+    def edit_game_code(self,newcode):
+        self.game_code=newcode
+
+    def set_host(self):
+        self.is_host = True
+
+    def set_client(self):
+        self.is_host = False

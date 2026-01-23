@@ -126,7 +126,7 @@ def display_menu(context):
         if context.game_code == "wrong_code":
             page = "join_wrong_code"
             code_multi = ""
-            context.game_code = ""
+            context.edit_game_code("")
 
         if page == "menu":
             title = FONT_TITLE.render(T["title"], True, WHITE)
@@ -172,7 +172,7 @@ def display_menu(context):
 
             # Demande de creation du code de partie
             if not asked_network:
-                context.is_host = True
+                context.set_host()
                 asked_network = True
                 start_network(context.is_host)
 
@@ -206,11 +206,11 @@ def display_menu(context):
                 # envoi du code de partie :
                 if not asked_network:
                     asked_network = True
-                    context.is_host = False
-                    context.game_code = code_multi.upper()
+                    context.set_client()
+                    context.edit_game_code(code_multi.upper())
                     start_network(context.is_host)
                 else:
-                    context.game_code = code_multi.upper()
+                    context.edit_game_code(code_multi.upper())
 
             back = Button(T["back"], 5*HEIGHT//6, "menu")
             back.draw(screen, mouse_pos)
