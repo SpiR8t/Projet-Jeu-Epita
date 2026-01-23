@@ -13,15 +13,6 @@ def update_game(context, playerL, playerD):
         if event.type == pygame.QUIT:
             context.running = False
 
-        if event.type == pygame.WINDOWRESIZED:
-            context.screen = pygame.display.set_mode(
-                (event.x,event.y),
-                pygame.RESIZABLE
-            )
-
-        if event.type == pygame.WINDOWRESTORED:
-            context.screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
-
     # Gestion de la pression des touches
     keys = pygame.key.get_pressed()
 

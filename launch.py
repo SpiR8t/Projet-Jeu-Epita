@@ -16,12 +16,12 @@ def main():
     
     # Paramètres pour le dev :
     FULLSCREEN = False # Fenêtre ou fullscreen
-    MULTIPLAYER = False # Activation du multijoueur
+    MULTIPLAYER = True # Activation du multijoueur
     
     if FULLSCREEN:
-        screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
     else:
-        screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE | pygame.SCALED)
+        screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.SCALED)
     pygame.display.set_caption("Echoes of Lights")
     clock = pygame.time.Clock()
 
@@ -34,7 +34,7 @@ def main():
     # ----
 
     context = GameContext(
-        screen, clock, playerH, playerC, map1, camera, MULTIPLAYER, FULLSCREEN
+        screen, clock, playerH, playerC, map1, camera, MULTIPLAYER
     )
 
     # Menu
