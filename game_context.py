@@ -17,6 +17,7 @@ class GameContext:
         self.is_host = True
         self.multiplayer = multi
         self.running = False
+        self.pause = False
         self.map = map
         self.camera = cam
 
@@ -28,3 +29,6 @@ class GameContext:
 
     def set_client(self):
         self.is_host = False
+
+    def pause_switch(self):
+        self.pause = not self.pause
