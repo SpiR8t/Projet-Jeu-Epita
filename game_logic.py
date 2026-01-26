@@ -1,5 +1,6 @@
 import pygame
 from isometric_motor import *
+from menu import Button
 
 KEY_COOLDOWN = 400
 
@@ -18,6 +19,8 @@ def update_game(context, playerL, playerD):
 
     # Gestion de la pression des touches
     keys = pygame.key.get_pressed()
+    mouse_pos = pygame.mouse.get_pos()
+    mouse_pressed = pygame.mouse.get_pressed()
 
     # récupération de la position du joueur pour vérifier les collisions durant le déplacement
     # les collisions sont gérées en regardant la position futur
@@ -104,6 +107,9 @@ def update_game(context, playerL, playerD):
         playerD.avatar,
     )
 
+    if context.pause:
+        display_menu_pause(context.screen, mouse_pos)
+
     pygame.display.flip()
     context.clock.tick(60)
 
@@ -115,3 +121,8 @@ def now():
 
 def end_game():
     pygame.quit()
+
+def display_menu_pause(screen,mouse_pos):
+    height = screen.get_height()
+    test = Button("test",height//2,"test",screen)
+    test.draw(screen,mouse_pos)
