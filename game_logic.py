@@ -1,6 +1,6 @@
 import pygame
 from isometric_motor import *
-from menu import Button
+from menu_components import Button
 
 KEY_COOLDOWN = 400
 
