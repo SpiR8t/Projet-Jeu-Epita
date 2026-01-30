@@ -16,6 +16,7 @@ class GameContext:
         self.game_code = ""
         self.is_host = True
         self.multiplayer = multi
+        self.language = "FR"
         self.running = False
         self.pause = False
         self.map = map

@@ -17,11 +17,10 @@ pygame.mixer.music.play(-1)
 COOLDOWN_TIME = 200  
 
 page = "menu"
-language = "FR"
 code_multi = ""
 
 def display_menu(context):
-    global language,code_multi,page,volume,WIDTH,HEIGHT,background,FONT_BUTTON
+    global code_multi,page,volume,WIDTH,HEIGHT,background,FONT_BUTTON
     screen = context.screen
     
 
@@ -46,7 +45,7 @@ def display_menu(context):
         mouse_pos = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
 
-        T = TEXT[language]
+        T = TEXT[context.language]
 
         if context.game_code == "wrong_code":
             page = "join_wrong_code"
@@ -164,7 +163,7 @@ def display_menu(context):
             screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + max(2,HEIGHT//240), HEIGHT//6 + max(2,HEIGHT//240))))
             screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT//6)))
 
-            lang_txt = FONT_BUTTON.render(f"{T['language']} : {language}", True, LIGHT_GREY)
+            lang_txt = FONT_BUTTON.render(f"{T['language']} : {context.language}", True, LIGHT_GREY)
             screen.blit(lang_txt, lang_txt.get_rect(center=(WIDTH // 2, 7*HEIGHT//18)))
 
             lang_btn = Button(T["change_language"], 35*HEIGHT//72, "lang",screen)
@@ -172,7 +171,7 @@ def display_menu(context):
             if lang_btn.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
                 click_cooldown = COOLDOWN_TIME
                 pygame.time.delay(180)
-                language = "EN" if language == "FR" else "FR"
+                context.language = "EN" if context.language == "FR" else "FR"
 
             vol_txt = FONT_BUTTON.render(f"{T['volume']} : {int(volume*100)}%", True, LIGHT_GREY)
             screen.blit(vol_txt, vol_txt.get_rect(center=(WIDTH // 2, 7*HEIGHT//12)))
