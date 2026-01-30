@@ -9,7 +9,6 @@ BUTTON_BG = (255, 255, 255, 200)
 BUTTON_HOVER = (120, 120, 120, 230)
 
 pygame.font.init()
-FONT_BUTTON = pygame.font.SysFont("arial", 36)
 
 TEXT = {
     "FR": {
@@ -58,6 +57,7 @@ class Button:
         self.b_height = self.s_height // 9
         self.rect = pygame.Rect(0, 0, self.b_width, self.b_height)
         self.rect.center = (self.s_width // 2, center_y)
+        self.font = pygame.font.SysFont("arial", self.s_height//20)
 
     def draw(self, win, mouse_pos):
         hovered = self.rect.collidepoint(mouse_pos)
@@ -65,8 +65,8 @@ class Button:
         surface = pygame.Surface((self.b_width, self.b_height), pygame.SRCALPHA)
         pygame.draw.rect(surface, color, surface.get_rect(), border_radius=9*self.b_height//40)
         win.blit(surface, self.rect)
-        shadow = FONT_BUTTON.render(self.text, True, BLACK)
-        text = FONT_BUTTON.render(self.text, True, DARK_GREY)
+        shadow = self.font.render(self.text, True, BLACK)
+        text = self.font.render(self.text, True, DARK_GREY)
         shadow_rect = shadow.get_rect(center=(self.rect.centerx + max(1,self.b_height//40), self.rect.centery + max(1,self.b_height//40)))
         text_rect = text.get_rect(center=self.rect.center)
         win.blit(shadow, shadow_rect)
@@ -74,3 +74,10 @@ class Button:
 
     def is_clicked(self, mouse_pos, mouse_pressed):
         return self.rect.collidepoint(mouse_pos) and mouse_pressed[0]
+    
+def display_title(context,h,text):
+    FONT_TITLE = pygame.font.Font("assets/fonts/Darksoul.otf", context.screen.get_height()//10)
+    title = FONT_TITLE.render(TEXT[context.language][text], True, WHITE)
+    shadow = FONT_TITLE.render(TEXT[context.language][text], True, BLACK)
+    context.screen.blit(shadow, shadow.get_rect(center=(context.screen.get_width() // 2 + max(2,context.screen.get_height()//240), h + max(2,context.screen.get_height()//240))))
+    context.screen.blit(title, title.get_rect(center=(context.screen.get_width() // 2, h)))

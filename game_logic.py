@@ -1,8 +1,8 @@
 import pygame
 from isometric_motor import *
-from menu_components import Button, TEXT
+from menu_components import Button, TEXT, display_title
 
-KEY_COOLDOWN = 400
+KEY_COOLDOWN = 300
 
 last_key_pressed = 0
 
@@ -85,7 +85,6 @@ def update_game(context, playerL, playerD):
         if now() - last_key_pressed >= KEY_COOLDOWN:
             context.pause_switch()
             last_key_pressed = now()
-            print("Pause :", context.pause)
 
     # Fond
     context.screen.fill((50, 50, 60))
@@ -125,6 +124,7 @@ def end_game():
 def display_menu_pause(context,mouse_pos):
     mouse_pressed = pygame.mouse.get_pressed()
     height = context.screen.get_height()
+    display_title(context,height//6,"title")
     btn_go_back = Button(TEXT[context.language]["back"],height//2,"go_back_game",context.screen)
     btn_go_back.draw(context.screen,mouse_pos)
     if btn_go_back.is_clicked(mouse_pos, mouse_pressed):

@@ -1,7 +1,7 @@
 import pygame
 import sys
 
-from menu_components import Button, WHITE,BLACK,LIGHT_GREY,BUTTON_BG,DARK_GREY,TEXT
+from menu_components import Button, display_title,WHITE,BLACK,LIGHT_GREY,BUTTON_BG,DARK_GREY,TEXT
 from network import start_network, network_ready, share_context_multi
 
 WIDTH, HEIGHT = 1280,720
@@ -20,7 +20,7 @@ page = "menu"
 code_multi = ""
 
 def display_menu(context):
-    global code_multi,page,volume,WIDTH,HEIGHT,background,FONT_BUTTON
+    global code_multi,page,volume,WIDTH,HEIGHT,background
     screen = context.screen
     
 
@@ -34,7 +34,6 @@ def display_menu(context):
         WIDTH = screen.get_width()
         HEIGHT = screen.get_height()
 
-        FONT_TITLE = pygame.font.Font("assets/fonts/Darksoul.otf", HEIGHT//10)
         FONT_BUTTON = pygame.font.SysFont("arial", HEIGHT//20)
 
         dt = context.clock.tick(60)
@@ -53,10 +52,7 @@ def display_menu(context):
             context.edit_game_code("")
 
         if page == "menu":
-            title = FONT_TITLE.render(T["title"], True, WHITE)
-            shadow = FONT_TITLE.render(T["title"], True, BLACK)
-            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + max(2,HEIGHT//240), HEIGHT//6 + max(2,HEIGHT//240))))
-            screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT//6)))
+            display_title(context,HEIGHT//6,"title")
 
             buttons = [
                 Button(T["new"], 4*HEIGHT//9, "new",screen),
@@ -77,10 +73,7 @@ def display_menu(context):
                         page = btn.action
                         code_multi = ""
         elif page == "new":
-            title = FONT_TITLE.render(T["title"], True, WHITE)
-            shadow = FONT_TITLE.render(T["title"], True, BLACK)
-            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + max(2,HEIGHT//240), HEIGHT//6 + max(2,HEIGHT//240))))
-            screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT//6)))
+            display_title(context,HEIGHT//6,"title")
 
             info = FONT_BUTTON.render(T["show_code"], True, LIGHT_GREY)
             screen.blit(info, info.get_rect(center=(WIDTH // 2, 13*HEIGHT//36)))
@@ -101,10 +94,7 @@ def display_menu(context):
                 start_network(context.is_host)
 
         elif page in ("join","join_wrong_code"):
-            title = FONT_TITLE.render(T["title"], True, WHITE)
-            shadow = FONT_TITLE.render(T["title"], True, BLACK)
-            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + max(2,HEIGHT//240), HEIGHT//6 + max(2,HEIGHT//240))))
-            screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT//6)))
+            display_title(context,HEIGHT//6,"title")
 
             if page == "join":
                 info = FONT_BUTTON.render(T["enter_code"], True, LIGHT_GREY)
@@ -144,10 +134,7 @@ def display_menu(context):
                 page = "menu"
 
         elif page == "loading":
-            title = FONT_TITLE.render(T["loading"], True, WHITE)
-            shadow = FONT_TITLE.render(T["loading"], True, BLACK)
-            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + max(2,HEIGHT//240), HEIGHT//6 + max(2,HEIGHT//240))))
-            screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT//6)))
+            display_title(context,HEIGHT//6,"loading")
 
             back = Button(T["back"], 5*HEIGHT//6, "menu",screen)
             back.draw(screen, mouse_pos)
@@ -158,10 +145,7 @@ def display_menu(context):
                 code_multi = ""
 
         elif page == "options":
-            title = FONT_TITLE.render(T["title"], True, WHITE)
-            shadow = FONT_TITLE.render(T["title"], True, BLACK)
-            screen.blit(shadow, shadow.get_rect(center=(WIDTH // 2 + max(2,HEIGHT//240), HEIGHT//6 + max(2,HEIGHT//240))))
-            screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT//6)))
+            display_title(context,HEIGHT//6,"title")
 
             lang_txt = FONT_BUTTON.render(f"{T['language']} : {context.language}", True, LIGHT_GREY)
             screen.blit(lang_txt, lang_txt.get_rect(center=(WIDTH // 2, 7*HEIGHT//18)))
