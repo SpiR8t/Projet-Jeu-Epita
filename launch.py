@@ -7,17 +7,18 @@ import time
 from game_context import GameContext
 from player import *
 from isometric_motor import *
-from network import initiate_game,share_context_multi
+from network import initiate_game, share_context_multi
 from menu import display_menu
+
 
 def main():
     pygame.init()
-    WIDTH, HEIGHT = 1280,720 #640, 360
-    
+    WIDTH, HEIGHT = 1280, 720  # 640, 360
+
     # Paramètres pour le dev :
-    FULLSCREEN = False # Fenêtre ou fullscreen
-    MULTIPLAYER = True # Activation du multijoueur
-    
+    FULLSCREEN = False  # Fenêtre ou fullscreen
+    MULTIPLAYER = True  # Activation du multijoueur
+
     if FULLSCREEN:
         screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
     else:
@@ -29,20 +30,22 @@ def main():
     camera = Camera(screen.get_width(), screen.get_height())
 
     # Joueur
-    playerH = Joueur(400, 150, 2, "assets/images/game/players/avatar.png", True)  # joueur host
-    playerC = Joueur(400, 150, 2, "assets/images/game/players/avatar2.png", False)  # joueur client
+    playerH = Joueur(
+        -2400, 4800, 2, "assets/images/game/players/avatar.png", True
+    )  # joueur host
+    playerC = Joueur(
+        -2300, 4800, 2, "assets/images/game/players/avatar2.png", False
+    )  # joueur client
     # ----
 
-    context = GameContext(
-        screen, clock, playerH, playerC, map1, camera, MULTIPLAYER
-    )
+    context = GameContext(screen, clock, playerH, playerC, map1, camera, MULTIPLAYER)
 
     # Menu
     if MULTIPLAYER:
         display_menu(context)
     else:
         share_context_multi(context)
-    
+
     initiate_game()
 
 
