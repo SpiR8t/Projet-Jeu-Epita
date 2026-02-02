@@ -33,6 +33,9 @@ def image_to_matrix(path):
     for y in range(height):
         for x in range(width):
             pixel = image.getpixel((x, y))
+            # y_r = height - y - 1
+            # x_r = width - x - 1
+            # pour reverse la map dans les deux directions: remplacer par le x/y _reverse
             if is_wall(pixel):
                 matrix[y][x][1] = 2
                 matrix[y][x][2] = 2
