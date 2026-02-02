@@ -87,7 +87,7 @@ def deduce_foots_from_iso_coords(player_x, player_y):
     return ((player_x - 32, player_y), (player_x + 1, player_y))
 
 
-def display_ranges(x_j1, y_j1):
+def display_ranges(x_j1, y_j1, size):
     """
     Détermine la range de coordonnées de la matrice qui se trouve à l'écran, pour afficher seulement le nécessaire.
     La partie Z n'est pas renvoyé car elle est toujours affiché de 0 à 2 (pour une hauteur de 3)
@@ -96,11 +96,11 @@ def display_ranges(x_j1, y_j1):
     """
 
     # il faudra adapter la marge à la taille de l'écran
-    x_min = max(0, x_j1 - 16)
-    x_max = min(len(map_tiles), x_j1 + 16)
+    x_min = max(0, x_j1 - size // 2)
+    x_max = min(len(map_tiles), x_j1 + size // 2)
 
-    y_min = max(0, y_j1 - 16)
-    y_max = min(len(map_tiles[0]), y_j1 + 16)
+    y_min = max(0, y_j1 - size // 2)
+    y_max = min(len(map_tiles[0]), y_j1 + size // 2)
 
     return ((x_min, x_max), (y_min, y_max))
 
@@ -140,6 +140,9 @@ class Map:
         self.map_height = len(tiles)
         self.map_levels = len(tiles[0][0])
         self.screen = screen  # l'écran sur lequel on affiche tout
+        self.display_width = int(
+            (screen.get_width() / tile_width) * 2.5
+        )  # 2.5 possiblement à modifier pour optimiser la taille
 
     def draw_map(self, camera, x_j1, y_j1, avatar_j1, x_j2, y_j2, avatar_j2):
         """fonction qui affiche la map (tiles) ainsi que les deux joueurs"""
@@ -156,7 +159,9 @@ class Map:
         j1_pos = iso_to_cart_tile(x_j1, y_j1)
         j2_pos = iso_to_cart_tile(x_j2, y_j2)
 
-        ((x_min, x_max), (y_min, y_max)) = display_ranges(j1_pos[0], j1_pos[1])
+        ((x_min, x_max), (y_min, y_max)) = display_ranges(
+            j1_pos[0], j1_pos[1], self.display_width
+        )
 
         # dessine du fond vers devant
         for x in range(x_min, x_max):
