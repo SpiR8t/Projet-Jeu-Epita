@@ -124,6 +124,13 @@ def end_game():
 def display_menu_pause(context,mouse_pos):
     mouse_pressed = pygame.mouse.get_pressed()
     height = context.screen.get_height()
+    width = context.screen.get_width()
+    # Fond noir transparent
+    menu_surface = pygame.Surface((width,height))
+    menu_surface.set_alpha(128)
+    menu_surface.fill((0,0,0))
+    context.screen.blit(menu_surface,(0,0))
+    # Affichage des boutons
     display_title(context,height//6,"title")
     btn_go_back = Button(TEXT[context.language]["back"],height//2,"go_back_game",context.screen)
     btn_go_back.draw(context.screen,mouse_pos)

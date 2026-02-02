@@ -14,7 +14,7 @@ pygame.mixer.music.load("assets/audio/musics/musique_val.mp3")
 pygame.mixer.music.set_volume(volume)
 pygame.mixer.music.play(-1)
 
-COOLDOWN_TIME = 200  
+COOLDOWN_TIME = 300  
 
 page = "menu"
 code_multi = ""
