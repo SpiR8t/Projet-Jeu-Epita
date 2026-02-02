@@ -132,7 +132,11 @@ def display_menu_pause(context,mouse_pos):
     context.screen.blit(menu_surface,(0,0))
     # Affichage des boutons
     display_title(context,height//6,"title")
-    btn_go_back = Button(TEXT[context.language]["back"],height//2,"go_back_game",context.screen)
-    btn_go_back.draw(context.screen,mouse_pos)
-    if btn_go_back.is_clicked(mouse_pos, mouse_pressed):
+    btn_go_back_game = Button(TEXT[context.language]["back"],height//2,"go_back_game",context.screen)
+    btn_go_back_game.draw(context.screen,mouse_pos)
+    if btn_go_back_game.is_clicked(mouse_pos, mouse_pressed):
         context.pause_switch()
+    btn_quit = Button(TEXT[context.language]["quit"],4*height//6,"quit",context.screen)
+    btn_quit.draw(context.screen,mouse_pos)
+    if btn_quit.is_clicked(mouse_pos, mouse_pressed):
+        context.running = False
