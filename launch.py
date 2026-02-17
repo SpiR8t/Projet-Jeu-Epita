@@ -17,7 +17,7 @@ def main():
 
     # Paramètres pour le dev :
     FULLSCREEN = False  # Fenêtre ou fullscreen
-    MULTIPLAYER = True  # Activation du multijoueur
+    MULTIPLAYER = False  # Activation du multijoueur
 
     if FULLSCREEN:
         screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
