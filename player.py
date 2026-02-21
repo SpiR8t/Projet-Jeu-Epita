@@ -3,6 +3,8 @@ import pygame
 
 class Joueur:
     def __init__(self, x, y, vitesse, avatar_image, is_host):
+        self.x_origine = x
+        self.y_origine = y
         self.x = x
         self.y = y
         self.vitesse = vitesse
@@ -19,3 +21,7 @@ class Joueur:
 
     def get_pos(self):
         return (self.x, self.y)
+    
+    def reset(self):
+        self.x = self.x_origine
+        self.y = self.y_origine

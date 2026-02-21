@@ -25,7 +25,8 @@ TEXT = {
         "volume": "Volume musique",
         "back": "Retour",
         "continue": "Continuer",
-        "loading": "Chargement..."
+        "loading": "Chargement...",
+        "main_menu": "Menu principal"
     },
     "EN": {
         "title": "Echoes of Lights",
@@ -41,7 +42,8 @@ TEXT = {
         "volume": "Music volume",
         "back": "Back",
         "continue": "Continue",
-        "loading": "Loading..."
+        "loading": "Loading...",
+        "main_menu": "Main menu"
     }
 }
 

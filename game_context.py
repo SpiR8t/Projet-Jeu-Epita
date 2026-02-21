@@ -22,6 +22,10 @@ class GameContext:
         self.map = map
         self.camera = cam
 
+        self.quitting = False # ferme le jeu
+        self.local_player_leaving = False # quitte la partie
+        self.distant_player_leaving = False # quitte la partie
+
     def edit_game_code(self,newcode):
         self.game_code=newcode
 

@@ -33,7 +33,6 @@ game_context = None
 local_player = None
 distant_player = None
 
-
 def share_context_multi(fen_context):
     global game_context, local_player, distant_player
     game_context = fen_context
@@ -90,6 +89,10 @@ async def start_host(pc):
         # À faire quand on reçois un message
         print("← message reçu du client:", message)
         incoming_messages.put(message)
+        data = json.loads(message)
+        if game_context.running:
+            if data["msg"] == "player_quitting":
+                stop_event.set()
 
     offer = await pc.createOffer()
     await pc.setLocalDescription(offer)
@@ -124,15 +127,35 @@ async def start_client(pc):
     global channel, network_loop
 
     @pc.on("datachannel")
-    def on_datachannel(channel):
+    def on_datachannel(channelp):
         print("DataChannel reçu.")
+        channel = channelp
         network_ready.set()
-
         @channel.on("message")
         def on_message(message):
-            print("← message reçu du host:", message)
+            # print("← message reçu du host:", message)
             incoming_messages.put(message)
-            channel.send(json.dumps(local_player.get_pos()))
+            data = json.loads(message)
+            if game_context.running:
+                if data["msg"] != "player_quitting":
+                    if game_context.local_player_leaving:
+                        # c'est renvoyé à chaque fois même si on a deja envoyé : marche pas
+                        send_data(json.dumps({
+                            "msg": "player_quitting",
+                            "player_coords": (0,0)
+                        }))
+                    else:
+                        channel.send(json.dumps({
+                            "msg":"",
+                            "player_coords":local_player.get_pos()
+                        }))
+                else:
+                    game_context.running = False
+                    game_context.distant_player_leaving = True
+                    time.sleep(1)
+                    # stop_event.set()  # Fermeture du channel
+
+
 
     game_code, offer = wait_for_offer(game_context.game_code)
 
@@ -258,16 +281,15 @@ def wait_for_offer(code):
 def send_data(data):
     global channel, network_loop
     if (channel == None) or (channel.readyState != "open"):
-        print("Channel pas prêt, impossible d'envoyer :", data)
+        print(channel,"Channel pas prêt, impossible d'envoyer :", data)
     else:
         network_loop.call_soon_threadsafe(channel.send, data)
 
 
 # ===== Gestion globale du jeu =====
 
-
 def initiate_game():
-    """Cette fonction permet de lancer le jeu en lui même : c'est elle qui contient la boucle principale"""
+    """Cette fonction permet de lancer la partie en elle-même : c'est elle qui contient la boucle principale"""
     network_interval = 16  # 1000 ms -> 1 FPS réseau
     last_network_send = game_logic.now()
     multi_activated = game_context.multiplayer
@@ -275,21 +297,33 @@ def initiate_game():
     while game_context.running:  # Boucle du jeu
         # Update des coordonnées
         if multi_activated:
-            while not incoming_messages.empty():
+            while not incoming_messages.empty() and game_context.running:
                 msg = incoming_messages.get()
                 data = json.loads(msg)
-                distant_player.x = data[0]
-                distant_player.y = data[1]
+                if data["msg"] == "player_quitting":
+                    game_context.running = False
+                    game_context.distant_player_leaving = True
+                else:
+                    distant_player.x = data["player_coords"][0]
+                    distant_player.y = data["player_coords"][1]
+        print(channel)
+        # Gestion boucle réseau :
+        if multi_activated and game_context.running and local_player.host:
+            now = game_logic.now()
+            if now - last_network_send >= network_interval:
+                send_data(json.dumps({
+                    "msg":"",
+                    "player_coords": local_player.get_pos()
+                }))
+                last_network_send = now
 
         game_logic.update_game(game_context, local_player, distant_player)
 
-        # Gestion boucle réseau :
-        if multi_activated:
-            now = game_logic.now()
-            if local_player.host and now - last_network_send >= network_interval:
-                send_data(json.dumps(local_player.get_pos()))
-                last_network_send = now
-
-    game_logic.end_game()  # Fermeture de pygame
-    if multi_activated:
+    if multi_activated and local_player.host:
+        if not game_context.distant_player_leaving:
+            send_data(json.dumps({
+                "msg": "player_quitting",
+                "player_coords": (0,0)
+            }))
+        time.sleep(1)
         stop_event.set()  # Fermeture du channel
