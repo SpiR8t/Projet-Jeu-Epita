@@ -8,33 +8,53 @@ MAP_HEIGHT = 10
 MAP_WIDTH = 15
 MAP_LEVELS = 3
 
-# --- Génération d'une carte simple ---
-# un rectangle avec des murs aux extrémités pour éviter la sortie des deux personnages
-map_tiles = [
-    [
-        [
-            (
-                1
-                if k == 0
-                else (
-                    2
-                    if j == 0 or i == 0 or j == MAP_WIDTH - 1 or i == MAP_HEIGHT - 1
-                    else 0
-                )
-            )
-            for k in range(MAP_LEVELS)
-        ]
-        for j in range(MAP_WIDTH)
-    ]
-    for i in range(MAP_HEIGHT)
-]
+# --- Génération d'une carte à partir d'un pixel art coloré ---
+from json import load
+from PIL import Image
+
+
+# Création de la matrice 2d à partir de la carte faite en pixel art
+def load_image(path):
+    image = Image.open(path).convert("RGB")
+    return image
+
+
+def is_wall(pixel):
+    r, g, b = pixel
+    return r == 106 and g == 190 and b == 48
+
+
+def image_to_matrix(path):
+    image = load_image(path)
+    width, height = image.size
+
+    matrix = [[[0, 0, 0] for i in range(width)] for j in range(height)]
+
+    for y in range(height):
+        for x in range(width):
+            pixel = image.getpixel((x, y))
+            # y_r = height - y - 1
+            # x_r = width - x - 1
+            # pour reverse la map dans les deux directions: remplacer par le x/y _reverse
+            if is_wall(pixel):
+                matrix[y][x][1] = 2
+                matrix[y][x][2] = 2
+                matrix[y][x][0] = 1
+            else:
+                matrix[y][x][1] = 0
+                matrix[y][x][2] = 0
+                matrix[y][x][0] = 1
+    return matrix
+
+
+map_tiles = image_to_matrix("assets/images/game/map/MapEchoesOfLightBig.png")
 
 
 # --- Fonction de conversion cartésien <-> isométrique ---------
 def cart_to_iso(x, y, z=0):
-    """ 
+    """
     Fonction qui passe les coordonnées de cartésien à isométrique pour l'affichage des tuiles
-    
+
     Param: x et y sont les coordonnées que l'on souhaite convertir
     *"""
     screen_x = (x - y) * (TILE_WIDTH // 2) + 400
@@ -43,9 +63,9 @@ def cart_to_iso(x, y, z=0):
 
 
 def iso_to_cart_tile(screen_x, screen_y, z=0):
-    """ 
-    Fonction qui passe les coordonnées isométrique (à l'écran) en cartésien pour retrouver la position sur la matrice 3d 
-    
+    """
+    Fonction qui passe les coordonnées isométrique (à l'écran) en cartésien pour retrouver la position sur la matrice 3d
+
     Param: screen_x et screen_y qui correspondent aux coordonnées isométrique à l'écran que l'on souhaite convertir
     """
     # enlever l'offset du centrage caméro
@@ -61,15 +81,16 @@ def iso_to_cart_tile(screen_x, screen_y, z=0):
 
 
 def deduce_foots_from_iso_coords(player_x, player_y):
-    """ 
-    Fonction qui déduit la position des pieds gauches et droits à partir des coordonnées du joueur (déjà en isométrique) 
+    """
+    Fonction qui déduit la position des pieds gauches et droits à partir des coordonnées du joueur (déjà en isométrique)
 
     Param: player_x et player_y sont les coordonnées représentant la position du joueur gardé dans l'objet Player
     """
-    
+
     return ((player_x - 32, player_y), (player_x + 1, player_y))
 
-def display_ranges(x_j1, y_j1):
+
+def display_ranges(x_j1, y_j1, size):
     """
     Détermine la range de coordonnées de la matrice qui se trouve à l'écran, pour afficher seulement le nécessaire.
     La partie Z n'est pas renvoyé car elle est toujours affiché de 0 à 2 (pour une hauteur de 3)
@@ -78,13 +99,14 @@ def display_ranges(x_j1, y_j1):
     """
 
     # il faudra adapter la marge à la taille de l'écran
-    x_min = max(0, x_j1 - 16)
-    x_max = min(len(map_tiles), x_j1 + 16)
+    x_min = max(0, x_j1 - size // 2)
+    x_max = min(len(map_tiles), x_j1 + size // 2)
 
-    y_min = max(0, y_j1 - 16)
-    y_max = min(len(map_tiles[0]), y_j1 + 16)
+    y_min = max(0, y_j1 - size // 2)
+    y_max = min(len(map_tiles[0]), y_j1 + size // 2)
 
     return ((x_min, x_max), (y_min, y_max))
+
 
 # Classes -------------------------------------------------------------
 class Camera:
@@ -99,7 +121,7 @@ class Camera:
         self.offset_x = x - self.width / 2
         self.offset_y = y - self.height / 2
 
-    # Fonction qui calcule l'offset à l'affichage avec un smooth factor qui rend le déplacement plus fluide 
+    # Fonction qui calcule l'offset à l'affichage avec un smooth factor qui rend le déplacement plus fluide
     def follow(self, x, y, smooth_factor=0.1):
         desired_x = x - self.width // 2
         desired_y = y - self.height // 2
@@ -110,31 +132,39 @@ class Camera:
     def apply(self, x, y):
         return x - self.offset_x, y - self.offset_y
 
+
 class Map:
     # La classe qui permet de rester modulaire pour les map si nécessaire
     def __init__(self, tiles, tile_width, tile_height, screen):
-        self.tiles = tiles # la matrice 3d de la map
-        self.tile_width = tile_width 
+        self.tiles = tiles  # la matrice 3d de la map
+        self.tile_width = tile_width
         self.tile_height = tile_height
         self.map_width = len(tiles[0])
         self.map_height = len(tiles)
         self.map_levels = len(tiles[0][0])
-        self.screen = screen # l'écran sur lequel on affiche tout
+        self.screen = screen  # l'écran sur lequel on affiche tout
+        self.display_width = int(
+            (screen.get_width() / tile_width) * 2.5
+        )  # 2.5 possiblement à modifier pour optimiser la taille
 
-    def draw_map(
-        self, camera, x_j1, y_j1, avatar_j1, x_j2, y_j2, avatar_j2
-    ):
+    def draw_map(self, camera, x_j1, y_j1, avatar_j1, x_j2, y_j2, avatar_j2):
         """fonction qui affiche la map (tiles) ainsi que les deux joueurs"""
 
-        tile_wall = pygame.image.load("assets/images/game/tileset/tilesettestwall.png").convert_alpha()
-        tile_floor = pygame.image.load("assets/images/game/tileset/tilesettestfloor.png").convert_alpha()
+        tile_wall = pygame.image.load(
+            "assets/images/game/tileset/tilesettestwall.png"
+        ).convert_alpha()
+        tile_floor = pygame.image.load(
+            "assets/images/game/tileset/tilesettestfloor.png"
+        ).convert_alpha()
         avatar1 = pygame.image.load(avatar_j1).convert_alpha()
         avatar2 = pygame.image.load(avatar_j2).convert_alpha()
 
         j1_pos = iso_to_cart_tile(x_j1, y_j1)
         j2_pos = iso_to_cart_tile(x_j2, y_j2)
 
-        ((x_min, x_max), (y_min, y_max)) = display_ranges(j1_pos[0], j1_pos[1])
+        ((x_min, x_max), (y_min, y_max)) = display_ranges(
+            j1_pos[0], j1_pos[1], self.display_width
+        )
 
         # dessine du fond vers devant
         for x in range(x_min, x_max):
