@@ -2,7 +2,6 @@
 
 import pygame
 import sys
-import time
 
 from game_context import GameContext
 from player import *
@@ -43,7 +42,6 @@ def main():
     while not context.quitting:
         # Menu
         if MULTIPLAYER:
-            print("lancement menu")
             display_menu(context)
 
         initiate_game()

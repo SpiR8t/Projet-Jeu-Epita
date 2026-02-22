@@ -48,8 +48,6 @@ def reset_network():
         network_ready.clear()
     pc_global = None
     channel = None
-    # stop_event = None
-    print("reseau :",network_ready.is_set())
 
 def start_network(is_host):
     if game_context.multiplayer:
@@ -81,6 +79,7 @@ def _network_thread(is_host):
         distant_player = game_context.host_player
         loop.run_until_complete(start_client(pc))
 
+    loop.run_until_complete(asyncio.sleep(0))
     loop.close()
 
 
@@ -129,9 +128,10 @@ async def start_host(pc):
         await asyncio.sleep(0.01)
 
     print("Fermeture du DataChannel...")
-    if channel and channel.readyState == "open":
+    if channel and channel.readyState != "closed":
         channel.close()
     await pc.close()
+    await asyncio.sleep(0.1)
 
 
 async def start_client(pc):
@@ -164,6 +164,12 @@ async def start_client(pc):
     network_loop = asyncio.get_running_loop()
     while not stop_event.is_set():
         await asyncio.sleep(0.01)
+
+    print("Fermeture du DataChannel...")
+    if channel and channel.readyState != "closed":
+        channel.close()
+    await pc.close()
+    await asyncio.sleep(0.1)
 
 
 # ========== Gestion de la création de la partie et de l'envoie des offres / réponses =========
