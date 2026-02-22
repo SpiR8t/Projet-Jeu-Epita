@@ -27,7 +27,6 @@ incoming_messages = Queue()
 
 # Evenement pour arreter la connexion qd on ferme le jeu et gestion de quand on quitte la partie
 stop_event = None
-has_sent_quit = False
 pc_global = None
 
 # Contexte du jeu
@@ -43,6 +42,14 @@ def share_context_multi(fen_context):
         local_player = game_context.host_player
         distant_player = game_context.client_player
 
+def reset_network():
+    global network_ready,pc_global,channel,stop_event
+    if network_ready:
+        network_ready.clear()
+    pc_global = None
+    channel = None
+    # stop_event = None
+    print("reseau :",network_ready.is_set())
 
 def start_network(is_host):
     if game_context.multiplayer:
@@ -282,6 +289,7 @@ def initiate_game():
     last_network_send = game_logic.now()
     multi_activated = game_context.multiplayer
     game_context.running = True
+    distant_player_quitting = False
     while game_context.running:  # Boucle du jeu
         # Reception des messages et update des coordonnées
         if multi_activated:
@@ -290,7 +298,7 @@ def initiate_game():
                 data = json.loads(msg)
                 if data["msg"] == "player_quitting":
                     game_context.running = False
-                    game_context.distant_player_leaving = True
+                    distant_player_quitting = True
                     print("L'autre joueur a quitté la partie")
                 else:
                     distant_player.x = data["player_coords"][0]
@@ -299,7 +307,6 @@ def initiate_game():
         if (
             multi_activated
             and game_context.running
-            and not game_context.distant_player_leaving
             and not stop_event.is_set()
         ):
             #print(game_context.running)
@@ -314,11 +321,10 @@ def initiate_game():
         game_logic.update_game(game_context, local_player, distant_player)
 
     if multi_activated:
-        if not has_sent_quit:
+        if not distant_player_quitting:
             send_data(json.dumps({
                 "msg": "player_quitting",
                 "player_coords": (0,0)
             }))
-            has_sent_quit = True
         time.sleep(0.5)
         stop_event.set()

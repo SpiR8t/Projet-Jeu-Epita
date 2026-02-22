@@ -7,8 +7,8 @@ import time
 from game_context import GameContext
 from player import *
 from isometric_motor import *
-from network import initiate_game,share_context_multi
-from menu import display_menu
+from network import initiate_game,share_context_multi,reset_network
+from menu import display_menu, reset_menu
 
 def main():
     pygame.init()
@@ -43,15 +43,24 @@ def main():
     while not context.quitting:
         # Menu
         if MULTIPLAYER:
+            print("lancement menu")
             display_menu(context)
 
-        context.host_player.reset()
-        context.client_player.reset()
-
         initiate_game()
+        reset_game(context)
 
     pygame.quit()
+    sys.exit()
+
+def reset_game(context):
+    """Cette fonction reset tout ce qu'il faut reset pour recommencer une nouvelle partie après en avoir quitté une"""
+    context.host_player.reset()
+    context.client_player.reset()
+    context.reset()
+    reset_network()
+    reset_menu()
 
 
 if __name__ == "__main__":
     main()
+

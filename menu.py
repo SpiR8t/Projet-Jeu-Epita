@@ -14,35 +14,34 @@ pygame.mixer.music.load("assets/audio/musics/musique_val.mp3")
 pygame.mixer.music.set_volume(volume)
 pygame.mixer.music.play(-1)
 
-COOLDOWN_TIME = 300  
-
 page = "menu"
 code_multi = ""
+
+def reset_menu():
+    global page,code_multi,restart
+    page = "menu"
+    code_multi = ""
 
 def display_menu(context):
     global code_multi,page,volume,WIDTH,HEIGHT,background
     screen = context.screen
     
-
-    click_cooldown = 0
+    
     asked_network = False
     
     share_context_multi(context)
 
     while not network_ready.is_set():
+        context.mouse_pressed_last = context.mouse_pressed
+        context.mouse_pressed = pygame.mouse.get_pressed()[0]
         background = pygame.transform.scale(background, (WIDTH, HEIGHT))
         WIDTH = screen.get_width()
         HEIGHT = screen.get_height()
 
         FONT_BUTTON = pygame.font.SysFont("arial", HEIGHT//20)
 
-        dt = context.clock.tick(60)
-        if click_cooldown > 0:
-            click_cooldown -= dt
-
         screen.blit(background, (0, 0))
         mouse_pos = pygame.mouse.get_pos()
-        mouse_pressed = pygame.mouse.get_pressed()
 
         T = TEXT[context.language]
 
@@ -63,9 +62,7 @@ def display_menu(context):
 
             for btn in buttons:
                 btn.draw(screen, mouse_pos)
-                if btn.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
-                    click_cooldown = COOLDOWN_TIME
-                    pygame.time.delay(180)
+                if btn.is_clicked(mouse_pos) and context.mouse_pressed and not context.mouse_pressed_last:
                     if btn.action == "quit":
                         pygame.quit()
                         sys.exit()
@@ -113,9 +110,7 @@ def display_menu(context):
 
             continue_btn = Button(T["continue"], 7*HEIGHT//12, "continue",screen)
             continue_btn.draw(screen, mouse_pos)
-            if continue_btn.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
-                click_cooldown = COOLDOWN_TIME
-                pygame.time.delay(180)
+            if continue_btn.is_clicked(mouse_pos) and context.mouse_pressed and not context.mouse_pressed_last:
                 page = "loading"
                 # envoi du code de partie :
                 if not asked_network:
@@ -128,9 +123,7 @@ def display_menu(context):
 
             back = Button(T["back"], 5*HEIGHT//6, "menu",screen)
             back.draw(screen, mouse_pos)
-            if back.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
-                click_cooldown = COOLDOWN_TIME
-                pygame.time.delay(180)
+            if back.is_clicked(mouse_pos) and context.mouse_pressed and not context.mouse_pressed_last:
                 page = "menu"
 
         elif page == "loading":
@@ -138,9 +131,7 @@ def display_menu(context):
 
             back = Button(T["back"], 5*HEIGHT//6, "menu",screen)
             back.draw(screen, mouse_pos)
-            if back.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
-                click_cooldown = COOLDOWN_TIME
-                pygame.time.delay(180)
+            if back.is_clicked(mouse_pos) and context.mouse_pressed and not context.mouse_pressed_last:
                 page = "menu"
                 code_multi = ""
 
@@ -152,9 +143,7 @@ def display_menu(context):
 
             lang_btn = Button(T["change_language"], 35*HEIGHT//72, "lang",screen)
             lang_btn.draw(screen, mouse_pos)
-            if lang_btn.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
-                click_cooldown = COOLDOWN_TIME
-                pygame.time.delay(180)
+            if lang_btn.is_clicked(mouse_pos) and context.mouse_pressed and not context.mouse_pressed_last:
                 context.language = "EN" if context.language == "FR" else "FR"
 
             vol_txt = FONT_BUTTON.render(f"{T['volume']} : {int(volume*100)}%", True, LIGHT_GREY)
@@ -164,7 +153,7 @@ def display_menu(context):
             pygame.draw.rect(screen, WHITE, (bar_x, bar_y, bar_w, HEIGHT//120))
             pygame.draw.circle(screen, WHITE, (bar_x + int(volume * bar_w), bar_y + HEIGHT//240), 11*HEIGHT//720)
 
-            if mouse_pressed[0]:
+            if context.mouse_pressed:
                 mx, my = mouse_pos
                 if bar_x <= mx <= bar_x + bar_w and bar_y - HEIGHT//60 <= my <= bar_y + HEIGHT//60:
                     volume = max(0, min(1, (mx - bar_x) / bar_w))
@@ -172,9 +161,7 @@ def display_menu(context):
 
             back = Button(T["back"], 5*HEIGHT//6, "menu",screen)
             back.draw(screen, mouse_pos)
-            if back.is_clicked(mouse_pos, mouse_pressed) and click_cooldown <= 0:
-                click_cooldown = COOLDOWN_TIME
-                pygame.time.delay(180)
+            if back.is_clicked(mouse_pos) and context.mouse_pressed and not context.mouse_pressed_last:
                 page = "menu"
 
         for event in pygame.event.get():

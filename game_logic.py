@@ -6,7 +6,6 @@ KEY_COOLDOWN = 300
 CLICK_COOLDOWN = 300
 
 last_key_pressed = 0
-last_click = 0
 
 def update_game(context, playerL, playerD):
     """
@@ -23,7 +22,8 @@ def update_game(context, playerL, playerD):
     # Gestion de la pression des touches
     keys = pygame.key.get_pressed()
     mouse_pos = pygame.mouse.get_pos()
-    mouse_pressed = pygame.mouse.get_pressed()
+    context.mouse_pressed_last = context.mouse_pressed
+    context.mouse_pressed = pygame.mouse.get_pressed()[0]
 
     # récupération de la position du joueur pour vérifier les collisions durant le déplacement
     # les collisions sont gérées en regardant la position futur
@@ -121,8 +121,7 @@ def now():
     return pygame.time.get_ticks()
 
 def display_menu_pause(context,mouse_pos):
-    global last_click
-    mouse_pressed = pygame.mouse.get_pressed()
+    """ Affiche le menu pause pour quitter le jeu ou retourner au menu principale"""
     height = context.screen.get_height()
     width = context.screen.get_width()
     
@@ -136,23 +135,20 @@ def display_menu_pause(context,mouse_pos):
     # Bouton de retour au jeu
     btn_go_back_game = Button(TEXT[context.language]["back"],height//2,"go_back_game",context.screen)
     btn_go_back_game.draw(context.screen,mouse_pos)
-    if btn_go_back_game.is_clicked(mouse_pos, mouse_pressed):
-        if now() - last_click >= CLICK_COOLDOWN:
+    if btn_go_back_game.is_clicked(mouse_pos):
+        if context.mouse_pressed and not context.mouse_pressed_last:
             context.pause_switch()
-            last_click = now()
     # Bouton de retour au menu
     btn_go_menu = Button(TEXT[context.language]["main_menu"],4*height//6,"go_main_menu",context.screen)
     btn_go_menu.draw(context.screen,mouse_pos)
-    if btn_go_menu.is_clicked(mouse_pos,mouse_pressed):
-        if now() - last_click >= CLICK_COOLDOWN:
+    if btn_go_menu.is_clicked(mouse_pos):
+        if context.mouse_pressed and not context.mouse_pressed_last:
             context.running = False
-            context.local_player_leaving = True
-            last_click = now()
+            
     # Bouton pour fermer le jeu
     btn_quit = Button(TEXT[context.language]["quit"],5*height//6,"quit",context.screen)
     btn_quit.draw(context.screen,mouse_pos)
-    if btn_quit.is_clicked(mouse_pos, mouse_pressed):
-        if now() - last_click >= CLICK_COOLDOWN:
+    if btn_quit.is_clicked(mouse_pos):
+        if context.mouse_pressed and not context.mouse_pressed_last:
             context.running = False
             context.quitting = True
-            last_click = now()

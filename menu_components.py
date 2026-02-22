@@ -74,8 +74,8 @@ class Button:
         win.blit(shadow, shadow_rect)
         win.blit(text, text_rect)
 
-    def is_clicked(self, mouse_pos, mouse_pressed):
-        return self.rect.collidepoint(mouse_pos) and mouse_pressed[0]
+    def is_clicked(self, mouse_pos):
+        return self.rect.collidepoint(mouse_pos)
     
 def display_title(context,h,text):
     FONT_TITLE = pygame.font.Font("assets/fonts/Darksoul.otf", context.screen.get_height()//10)
