@@ -1,3 +1,5 @@
+"""Ce fichier contient les différends composants des menus, notamment les boutons."""
+
 import pygame
 
 WHITE = (255, 255, 255)

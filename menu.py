@@ -18,6 +18,7 @@ page = "menu"
 code_multi = ""
 
 def reset_menu():
+    """Reset tout ce qu'il faut reset pour relancer le menu"""
     global page,code_multi,restart
     page = "menu"
     code_multi = ""

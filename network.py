@@ -35,6 +35,7 @@ local_player = None
 distant_player = None
 
 def share_context_multi(fen_context):
+    """Partage avec le fichier dédié au réseau le contexte global du jeu"""
     global game_context, local_player, distant_player
     game_context = fen_context
 
@@ -43,6 +44,7 @@ def share_context_multi(fen_context):
         distant_player = game_context.client_player
 
 def reset_network():
+    """Reset le réseau afin de pouvoir relancer une nouvelle partie"""
     global network_ready,pc_global,channel,stop_event
     if network_ready:
         network_ready.clear()
@@ -57,6 +59,7 @@ def start_network(is_host):
 
 
 def _network_thread(is_host):
+    """Lance le réseau pour le joueur en fonction de son rôle"""
     global local_player, distant_player, stop_event, pc_global
 
     stop_event = threading.Event()
@@ -84,6 +87,7 @@ def _network_thread(is_host):
 
 
 async def start_host(pc):
+    """Démarre le réseau en tant que host et gère la reception des messages"""
     global channel, network_loop
     channel = pc.createDataChannel("game_chanel")
 
@@ -135,6 +139,7 @@ async def start_host(pc):
 
 
 async def start_client(pc):
+    """Démarre le réseau en tant que client et gère la reception des messages"""
     global channel, network_loop
 
     @pc.on("datachannel")
@@ -276,6 +281,7 @@ def wait_for_offer(code):
 
 # Envoie de data via le datachannel
 def send_data(data):
+    """Envoie les données JSON mise en paramètre via le datachannel"""
     global channel, network_loop
     if network_loop and not network_loop.is_closed():
         if (channel == None) or (channel.readyState != "open"):
@@ -324,9 +330,11 @@ def initiate_game():
                 }))
                 last_network_send = now
 
+        # Mise à jour de l'affichage du jeu
         game_logic.update_game(game_context, local_player, distant_player)
 
     if multi_activated:
+        # Annonce à l'autre joueur qu'il quitte si ce n'est pas l'autre qui quitte.
         if not distant_player_quitting:
             send_data(json.dumps({
                 "msg": "player_quitting",

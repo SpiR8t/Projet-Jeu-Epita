@@ -45,7 +45,7 @@ def main():
             display_menu(context)
 
         initiate_game()
-        reset_game(context)
+        reset_game(context) # Reset le jeu pour une nouvelle partie
 
     pygame.quit()
     sys.exit()

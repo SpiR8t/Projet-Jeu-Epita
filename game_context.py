@@ -39,7 +39,7 @@ class GameContext:
         self.pause = not self.pause
 
     def reset(self):
-        "Méthode pour reset tou le contexte pour relancer une partie"
+        "Méthode pour reset tout le contexte pour relancer une partie"
         self.game_code = ""
         self.is_host = True
         self.running = False
