@@ -39,3 +39,6 @@ Voici les différentes librairies que notre code utilise, leur utilité, et comm
 
 - pygame : utilisée pour implémenter tout le fonctionnemment du jeu. Installation :
 ```pip install pygame```
+
+- PIL ou Pillow : utilisée pour importer et charger l'image qui permet de générer la map du jeu. Installation :
+````pip install Pillow```
