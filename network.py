@@ -25,16 +25,17 @@ network_ready = threading.Event()
 # Queue globale pour la reception des messages
 incoming_messages = Queue()
 
-# Evenement pour arreter la connexion qd on ferme le jeu
+# Evenement pour arreter la connexion qd on ferme le jeu et gestion de quand on quitte la partie
 stop_event = None
+pc_global = None
 
 # Contexte du jeu
 game_context = None
 local_player = None
 distant_player = None
 
-
 def share_context_multi(fen_context):
+    """Partage avec le fichier dédié au réseau le contexte global du jeu"""
     global game_context, local_player, distant_player
     game_context = fen_context
 
@@ -42,6 +43,13 @@ def share_context_multi(fen_context):
         local_player = game_context.host_player
         distant_player = game_context.client_player
 
+def reset_network():
+    """Reset le réseau afin de pouvoir relancer une nouvelle partie"""
+    global network_ready,pc_global,channel,stop_event
+    if network_ready:
+        network_ready.clear()
+    pc_global = None
+    channel = None
 
 def start_network(is_host):
     if game_context.multiplayer:
@@ -51,7 +59,8 @@ def start_network(is_host):
 
 
 def _network_thread(is_host):
-    global local_player, distant_player, stop_event
+    """Lance le réseau pour le joueur en fonction de son rôle"""
+    global local_player, distant_player, stop_event, pc_global
 
     stop_event = threading.Event()
 
@@ -59,6 +68,7 @@ def _network_thread(is_host):
         iceServers=[RTCIceServer(urls=["stun:stun.l.google.com:19302"])]
     )
     pc = RTCPeerConnection(config)
+    pc_global = pc
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -72,10 +82,12 @@ def _network_thread(is_host):
         distant_player = game_context.host_player
         loop.run_until_complete(start_client(pc))
 
+    loop.run_until_complete(asyncio.sleep(0))
     loop.close()
 
 
 async def start_host(pc):
+    """Démarre le réseau en tant que host et gère la reception des messages"""
     global channel, network_loop
     channel = pc.createDataChannel("game_chanel")
 
@@ -119,20 +131,27 @@ async def start_host(pc):
     while not stop_event.is_set():
         await asyncio.sleep(0.01)
 
+    print("Fermeture du DataChannel...")
+    if channel and channel.readyState != "closed":
+        channel.close()
+    await pc.close()
+    await asyncio.sleep(0.1)
+
 
 async def start_client(pc):
+    """Démarre le réseau en tant que client et gère la reception des messages"""
     global channel, network_loop
 
     @pc.on("datachannel")
-    def on_datachannel(channel):
+    def on_datachannel(channelp):
+        global channel
         print("DataChannel reçu.")
+        channel = channelp
         network_ready.set()
-
         @channel.on("message")
         def on_message(message):
             print("← message reçu du host:", message)
             incoming_messages.put(message)
-            channel.send(json.dumps(local_player.get_pos()))
 
     game_code, offer = wait_for_offer(game_context.game_code)
 
@@ -150,6 +169,12 @@ async def start_client(pc):
     network_loop = asyncio.get_running_loop()
     while not stop_event.is_set():
         await asyncio.sleep(0.01)
+
+    print("Fermeture du DataChannel...")
+    if channel and channel.readyState != "closed":
+        channel.close()
+    await pc.close()
+    await asyncio.sleep(0.1)
 
 
 # ========== Gestion de la création de la partie et de l'envoie des offres / réponses =========
@@ -256,40 +281,64 @@ def wait_for_offer(code):
 
 # Envoie de data via le datachannel
 def send_data(data):
+    """Envoie les données JSON mise en paramètre via le datachannel"""
     global channel, network_loop
-    if (channel == None) or (channel.readyState != "open"):
-        print("Channel pas prêt, impossible d'envoyer :", data)
+    if network_loop and not network_loop.is_closed():
+        if (channel == None) or (channel.readyState != "open"):
+            print(channel,"Channel pas prêt, impossible d'envoyer :", data)
+        else:
+            network_loop.call_soon_threadsafe(channel.send, data)
     else:
-        network_loop.call_soon_threadsafe(channel.send, data)
+        print(channel,"Channel pas prêt, impossible d'envoyer :", data)
 
 
 # ===== Gestion globale du jeu =====
 
-
 def initiate_game():
-    """Cette fonction permet de lancer le jeu en lui même : c'est elle qui contient la boucle principale"""
+    """Cette fonction permet de lancer la partie en elle-même : c'est elle qui contient la boucle principale"""
+    global has_sent_quit
     network_interval = 16  # 1000 ms -> 1 FPS réseau
     last_network_send = game_logic.now()
     multi_activated = game_context.multiplayer
     game_context.running = True
+    distant_player_quitting = False
     while game_context.running:  # Boucle du jeu
-        # Update des coordonnées
+        # Reception des messages et update des coordonnées
         if multi_activated:
-            while not incoming_messages.empty():
+            while not incoming_messages.empty() and game_context.running:
                 msg = incoming_messages.get()
                 data = json.loads(msg)
-                distant_player.x = data[0]
-                distant_player.y = data[1]
-
-        game_logic.update_game(game_context, local_player, distant_player)
-
+                if data["msg"] == "player_quitting":
+                    game_context.running = False
+                    distant_player_quitting = True
+                    print("L'autre joueur a quitté la partie")
+                else:
+                    distant_player.x = data["player_coords"][0]
+                    distant_player.y = data["player_coords"][1]
         # Gestion boucle réseau :
-        if multi_activated:
+        if (
+            multi_activated
+            and game_context.running
+            and not stop_event.is_set()
+        ):
+            #print(game_context.running)
             now = game_logic.now()
-            if local_player.host and now - last_network_send >= network_interval:
-                send_data(json.dumps(local_player.get_pos()))
+            if now - last_network_send >= network_interval:
+                send_data(json.dumps({
+                    "msg":"",
+                    "player_coords": local_player.get_pos()
+                }))
                 last_network_send = now
 
-    game_logic.end_game()  # Fermeture de pygame
+        # Mise à jour de l'affichage du jeu
+        game_logic.update_game(game_context, local_player, distant_player)
+
     if multi_activated:
-        stop_event.set()  # Fermeture du channel
+        # Annonce à l'autre joueur qu'il quitte si ce n'est pas l'autre qui quitte.
+        if not distant_player_quitting:
+            send_data(json.dumps({
+                "msg": "player_quitting",
+                "player_coords": (0,0)
+            }))
+        time.sleep(0.5)
+        stop_event.set()

@@ -16,9 +16,15 @@ class GameContext:
         self.game_code = ""
         self.is_host = True
         self.multiplayer = multi
+        self.language = "FR"
         self.running = False
+        self.pause = False
         self.map = map
         self.camera = cam
+        self.mouse_pressed = False #cooldown général pour les cliques
+        self.mouse_pressed_last = False
+
+        self.quitting = False # ferme le jeu
 
     def edit_game_code(self,newcode):
         self.game_code=newcode
@@ -28,3 +34,13 @@ class GameContext:
 
     def set_client(self):
         self.is_host = False
+
+    def pause_switch(self):
+        self.pause = not self.pause
+
+    def reset(self):
+        "Méthode pour reset tout le contexte pour relancer une partie"
+        self.game_code = ""
+        self.is_host = True
+        self.running = False
+        self.pause = False
