@@ -44,3 +44,7 @@ class GameContext:
         self.is_host = True
         self.running = False
         self.pause = False
+
+
+    def execute_action(self, action):
+        action.execute(self)

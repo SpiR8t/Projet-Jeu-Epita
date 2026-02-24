@@ -84,6 +84,14 @@ def update_game(context, playerL, playerD):
             if map_tiles[r_x_grid_joueur1][r_y_grid_joueur1][1] == 0:
                 playerL.x += playerL.vitesse
 
+        playerL.update()
+
+        if keys[pygame.K_SPACE]:
+            action = playerL.try_use(0)
+            print(action)
+            if action:
+                context.execute_action(action)
+
     if keys[pygame.K_ESCAPE]: # Activation du menu pause
         if now() - last_key_pressed >= KEY_COOLDOWN:
             context.pause_switch()

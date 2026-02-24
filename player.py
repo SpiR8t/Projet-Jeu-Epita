@@ -10,8 +10,9 @@ class Joueur:
         self.vitesse = vitesse
         self.avatar = avatar_image
         self.host = is_host
+        self.direction = (0,1) # pour les compétences
         
-        self.skills = []
+        self.skills = [] # hardcodé pour l'instant
 
     def get_pos(self):
         return (self.x, self.y)
@@ -20,8 +21,17 @@ class Joueur:
         self.x = self.x_origine
         self.y = self.y_origine
         
-    def attack(self):
-        pass
+    def try_use(self, index):
+        if index < len(self.skills):
+            return self.skills[index].try_use(self)
+        return None
+    
+    def update(self):
+        for skill in self.skills:
+            skill.update()
+
+
+"""Partie sur les skills et les compétences """
 
 
 class Skill:
@@ -37,38 +47,31 @@ class Skill:
     def can_use(self):
         return self.current_cd <= 0
 
-    def use(self, caster):
-        pass
+    def try_use(self, caster):
+        if not self.can_use():
+            return None
+        else:
+            self.current_cd = self.cooldown
+            return self.create_action(caster)
 
-
-class Projectile:
-    def __init__(self, x, y, direction, speed):
-        self.x = x
-        self.y = y
-        self.direction = direction
-        self.speed = speed
-
-    def update(self):
-        self.x += self.direction[0] * self.speed
-        self.y += self.direction[1] * self.speed
+    def create_action(self, caster):
+        raise NotImplementedError("create_action must be overridden")
 
 class SwordAttack(Skill):
     def __init__(self):
         super().__init__(cooldown=30, range=1)
 
-    def use(self, caster):
-        if not self.can_use():
-            return
+    def create_action(self, caster):
+        return MeleeAction(caster, self.range)
 
-        self.current_cd = self.cooldown
+class MeleeAction:
 
-class Flash(Skill):
-    def __init__(self):
-        super().__init__(cooldown=60, range=6)
+    def __init__(self, caster, range):
+        self.caster = caster
+        self.range = range
 
-    def use(self, caster):
-        if not self.can_use():
-            return
+    def execute(self, game):
+        print("Melee action")
 
-        projectile = Projectile(caster.x, caster.y, (1,0), 5)
-        self.current_cd = self.cooldown
+
+
