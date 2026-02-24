@@ -38,51 +38,51 @@ def update_game(context, playerL, playerD):
         if keys[pygame.K_DOWN]:
             # left foot
             l_x_grid_player1, l_y_grid_player1 = iso_to_cart_tile(
-                player1_leftfoot[0], player1_leftfoot[1] + playerL.vitesse
+                player1_leftfoot[0], player1_leftfoot[1] + playerL.speed
             )
             # right foot
             r_x_grid_player1, r_y_grid_player1 = iso_to_cart_tile(
-                player1_rightfoot[0], player1_rightfoot[1] + playerL.vitesse
+                player1_rightfoot[0], player1_rightfoot[1] + playerL.speed
             )
             if (
                 map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
                 and map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0
             ):
-                playerL.y += playerL.vitesse
+                playerL.y += playerL.speed
         
         if keys[pygame.K_UP]:
             # left foot
             l_x_grid_player1, l_y_grid_player1 = iso_to_cart_tile(
-                player1_leftfoot[0], player1_leftfoot[1] - playerL.vitesse
+                player1_leftfoot[0], player1_leftfoot[1] - playerL.speed
             )
             # right foot
             r_x_grid_player1, r_y_grid_player1 = iso_to_cart_tile(
-                player1_rightfoot[0], player1_rightfoot[1] - playerL.vitesse
+                player1_rightfoot[0], player1_rightfoot[1] - playerL.speed
             )
     
             if (
                 map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
                 and map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0
             ):
-                playerL.y -= playerL.vitesse
+                playerL.y -= playerL.speed
     
         if keys[pygame.K_LEFT]:
             # left foot
             l_x_grid_player1, l_y_grid_player1 = iso_to_cart_tile(
-                player1_leftfoot[0] - playerL.vitesse, player1_leftfoot[1]
+                player1_leftfoot[0] - playerL.speed, player1_leftfoot[1]
             )
     
             if map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0:
-                playerL.x -= playerL.vitesse
+                playerL.x -= playerL.speed
     
         if keys[pygame.K_RIGHT]:
             # right foot
             r_x_grid_player1, r_y_grid_player1 = iso_to_cart_tile(
-                player1_rightfoot[0] + playerL.vitesse, player1_rightfoot[1]
+                player1_rightfoot[0] + playerL.speed, player1_rightfoot[1]
             )
     
             if map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0:
-                playerL.x += playerL.vitesse
+                playerL.x += playerL.speed
 
     if keys[pygame.K_ESCAPE]: # Activation du menu pause
         if now() - last_key_pressed >= KEY_COOLDOWN:

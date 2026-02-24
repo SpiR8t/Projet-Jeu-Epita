@@ -16,7 +16,7 @@ def main():
 
     # Paramètres pour le dev :
     FULLSCREEN = False  # Fenêtre ou fullscreen
-    MULTIPLAYER = False  # Activation du multijoueur
+    MULTIPLAYER = True  # Activation du multijoueur
 
     if FULLSCREEN:
         screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
@@ -30,10 +30,10 @@ def main():
 
     # Joueur
     playerH = Player(
-        -2400, 4800, 2, "assets/images/game/players/avatar.png", True
+        -2400, 4800, "assets/images/game/players/avatar.png", True
     )  # joueur host
     playerC = Player(
-        -2300, 4800, 2, "assets/images/game/players/avatar2.png", False
+        -2300, 4800, "assets/images/game/players/avatar2.png", False
     )  # joueur client
     # ----
 
