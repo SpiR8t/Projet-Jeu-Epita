@@ -1,7 +1,6 @@
 import pygame
 
-
-class Joueur:
+class Player:
     def __init__(self, x, y, vitesse, avatar_image, is_host):
         self.x_origine = x
         self.y_origine = y
