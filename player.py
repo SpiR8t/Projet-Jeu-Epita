@@ -10,20 +10,27 @@ class Entity():
         self.max_hp = max_hp
         self.speed = speed
 
+    def get_pos(self):
+        return (self.x, self.y)
+    
+    def take_damage(self,amount):
+        self.hp -= amount
+        if self.hp < 0:
+            self.hp = 0
+    
+
 class Player(Entity):
     def __init__(self, x, y, avatar_image, is_host):
         super().__init__(x, y, 20,2)
         self.avatar = avatar_image
         self.host = is_host
-        
         self.skills = []
 
-    def get_pos(self):
-        return (self.x, self.y)
-    
     def reset(self):
         self.x = self.x_origine
         self.y = self.y_origine
+        self.hp = 20
+        self.max_hp = 20
         
     def attack(self):
         pass
