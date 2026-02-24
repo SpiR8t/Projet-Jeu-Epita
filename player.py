@@ -12,7 +12,7 @@ class Joueur:
         self.host = is_host
         self.direction = (0,1) # pour les compétences
         
-        self.skills = [] # hardcodé pour l'instant
+        self.skills = [SwordAttack()] # hardcodé pour l'instant
 
     def get_pos(self):
         return (self.x, self.y)
@@ -59,7 +59,7 @@ class Skill:
 
 class SwordAttack(Skill):
     def __init__(self):
-        super().__init__(cooldown=30, range=1)
+        super().__init__(cooldown=100, range=1)
 
     def create_action(self, caster):
         return MeleeAction(caster, self.range)

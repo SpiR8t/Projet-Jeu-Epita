@@ -88,7 +88,7 @@ def update_game(context, playerL, playerD):
 
         if keys[pygame.K_SPACE]:
             action = playerL.try_use(0)
-            print(action)
+            
             if action:
                 context.execute_action(action)
 
