@@ -10,7 +10,7 @@ class Joueur:
         self.vitesse = vitesse
         self.avatar = avatar_image
         self.host = is_host
-        self.direction = (0,1) # pour les compétences
+        self.direction = (-1,-1) # pour les compétences
         
         self.skills = [SwordAttack()] # hardcodé pour l'instant
 
@@ -64,6 +64,27 @@ class SwordAttack(Skill):
     def create_action(self, caster):
         return MeleeAction(caster, self.range)
 
+class SimpleSlashAnimation:
+    def __init__(self, x, y, duration=10):
+        self.x = x
+        self.y = y
+        self.duration = duration
+        self.timer = 0
+        self.finished = False
+
+    def update(self):
+        self.timer += 1
+        if self.timer >= self.duration:
+            self.finished = True
+
+    def draw(self, screen, camera):
+        # effet très simple : cercle blanc qui grandit
+        radius = 5 + self.timer * 2
+        
+        screen_x, screen_y = camera.apply(self.x, self.y)
+        
+        pygame.draw.circle(screen, (255, 255, 255), (int(screen_x), int(screen_y)), radius, 2)
+
 class MeleeAction:
 
     def __init__(self, caster, range):
@@ -72,6 +93,13 @@ class MeleeAction:
 
     def execute(self, game):
         print("Melee action")
+
+        # position devant le joueur
+        target_x = self.caster.x + self.caster.direction[0] * 32
+        target_y = self.caster.y + self.caster.direction[1] * 32
+
+        anim = SimpleSlashAnimation(target_x, target_y, duration=10)
+        game.animations.append(anim)
 
 
 

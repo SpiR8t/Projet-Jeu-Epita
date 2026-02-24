@@ -12,6 +12,9 @@ class GameContext:
         self.host_player = playerH
         self.client_player = playerC
 
+        # Animations des compétences
+        self.animations = []
+
         # Jeu
         self.game_code = ""
         self.is_host = True
@@ -45,6 +48,18 @@ class GameContext:
         self.running = False
         self.pause = False
 
+    # animation et compétence / actions (est-ce que c'est pas un peu hors cadre de le mettre dans context ?)
 
     def execute_action(self, action):
         action.execute(self)
+
+    def update_animations(self):
+        for anim in self.animations:
+            anim.update()
+        
+        self.animations = [a for a in self.animations if not a.finished]
+    
+    def draw_animations(self):
+        for anim in self.animations:
+            anim.draw(self.screen, self.camera)
+    
