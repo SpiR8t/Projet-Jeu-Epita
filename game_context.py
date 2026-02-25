@@ -3,7 +3,7 @@ pygame et de les partager avec tous les fichiers qui en ont besoin, sans nécess
 la lib pygame. Il contient en fait toutes les infos qui doivent être partagé entre les fichiers """
 
 class GameContext:
-    def __init__(self, screen, clock, playerH, playerC,map,cam,multi):
+    def __init__(self, screen, clock, playerH, playerC,map,cam):
         # Fenetre pygame
         self.screen = screen
         self.clock = clock
@@ -12,10 +12,13 @@ class GameContext:
         self.host_player = playerH
         self.client_player = playerC
 
+        # Parametres dev
+        self.multiplayer = True
+        self.hud = True
+
         # Jeu
         self.game_code = ""
         self.is_host = True
-        self.multiplayer = multi
         self.language = "FR"
         self.running = False
         self.pause = False
@@ -25,6 +28,11 @@ class GameContext:
         self.mouse_pressed_last = False
 
         self.quitting = False # ferme le jeu
+
+    def set_dev_params(self,multi,hud):
+        """Méthode pour définir les paramètres servant au dev"""
+        self.multiplayer = multi
+        self.hud = hud
 
     def edit_game_code(self,newcode):
         self.game_code=newcode

@@ -15,8 +15,9 @@ def main():
     WIDTH, HEIGHT = 1280, 720  # 640, 360
 
     # Paramètres pour le dev :
-    FULLSCREEN = False  # Fenêtre ou fullscreen
+    FULLSCREEN = False   # Fenêtre ou fullscreen
     MULTIPLAYER = False  # Activation du multijoueur
+    HUD = True           # Activation du HUD
 
     if FULLSCREEN:
         screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
@@ -37,7 +38,8 @@ def main():
     )  # joueur client
     # ----
 
-    context = GameContext(screen, clock, playerH, playerC, map1, camera, MULTIPLAYER)
+    context = GameContext(screen, clock, playerH, playerC, map1, camera)
+    context.set_dev_params(MULTIPLAYER,HUD)
 
     if not MULTIPLAYER:
         share_context_multi(context)

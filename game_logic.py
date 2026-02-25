@@ -118,7 +118,6 @@ def update_game(playerL, playerD):
     x_player1, y_player1 = playerL.get_pos()
     x_player2, y_player2 = playerD.get_pos()
 
-    # print("Coords : x = ",x_player, "y = ", y_player)
     context.camera.follow(x_player1, y_player1, 0.05)
     # afficher la map, avec le décalage imposé par la caméra
     context.map.draw_map(
@@ -131,7 +130,9 @@ def update_game(playerL, playerD):
         playerD.avatar,
     )
 
-    draw_HUD(playerL)
+    # Draw du HUD
+    if context.hud:
+        draw_HUD(playerL)
 
     if context.pause:
         display_menu_pause(mouse_pos)
