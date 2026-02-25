@@ -3,7 +3,6 @@ from isometric_motor import *
 from menu_components import Button, TEXT, display_title
 
 KEY_COOLDOWN = 300
-CLICK_COOLDOWN = 300
 
 last_key_pressed = 0
 
@@ -12,8 +11,6 @@ context = None
 
 # Images HUD :
 full_heart = pygame.image.load("assets/images/game/HUD/full_heart.png")
-half_heart = pygame.image.load("assets/images/game/HUD/half_heart.png")
-empty_heart = pygame.image.load("assets/images/game/HUD/empty_heart.png")
 
 def share_info(gamecontext):
     """Partage les informations globales nécéssaires au fichier game_logic.py"""
@@ -24,8 +21,6 @@ def share_info(gamecontext):
 
     # Scale les images :
     full_heart = pygame.transform.smoothscale(full_heart,(HEIGHT//20,HEIGHT//20))
-    half_heart = pygame.transform.smoothscale(half_heart,(HEIGHT//20,HEIGHT//20))
-    empty_heart = pygame.transform.smoothscale(empty_heart,(HEIGHT//20,HEIGHT//20))
 
 def update_game(playerL, playerD):
     """
@@ -109,6 +104,13 @@ def update_game(playerL, playerD):
             context.pause_switch()
             last_key_pressed = now()
 
+    # ========= Temporaire pour tester degats ==============
+    if keys[pygame.K_k]: # Activation du menu pause
+        if now() - last_key_pressed >= KEY_COOLDOWN-200:
+            playerL.take_damage(1)
+            last_key_pressed = now()
+    # ======================================================
+
     # Fond
     context.screen.fill((50, 50, 60))
 
@@ -176,24 +178,24 @@ def display_menu_pause(mouse_pos):
 def draw_HUD(playerL):
     HUD_surface = pygame.Surface((WIDTH,HEIGHT),pygame.SRCALPHA)
     HUD_surface.fill((0, 0, 0, 0))
-    draw_health(playerL,HUD_surface)
+    draw_health_bar(playerL,HUD_surface)
     context.screen.blit(HUD_surface,(0,0))
 
-def draw_health(playerL,HUD_surface):
-    global full_heart,half_heart,empty_heart
-
-    nb_full_hearts = playerL.hp // 2
-    nb_half_hearts = playerL.hp % 2
-    total_hearts = playerL.max_hp // 2
-    y_pos = HEIGHT//40
-    x_pos = HEIGHT//40
+def draw_health_bar(playerL,HUD_surface):
+    global full_heart
+    HUD_surface.blit(full_heart, (HEIGHT//40, HEIGHT//40))
     
-    for i in range(total_hearts):
-        if i < nb_full_hearts:
-            HUD_surface.blit(full_heart, (x_pos, y_pos))
-        elif i == nb_full_hearts and nb_half_hearts == 1:
-            HUD_surface.blit(half_heart, (x_pos, y_pos))
-        else:
-            HUD_surface.blit(empty_heart, (x_pos, y_pos))
-        x_pos += 5*HEIGHT//80
+    ratio = playerL.hp / playerL.max_hp
+    ratio = max(0, min(1, ratio))
 
+    bar_height = HEIGHT//30
+    bar_width = WIDTH//3
+    x_pos, y_pos = HEIGHT//10, HEIGHT//30
+    bar_color = (100+(100*ratio),0,0)
+
+    # Fond (barre vide)
+    pygame.draw.rect(HUD_surface, (50, 0, 0), (x_pos, y_pos, bar_width, bar_height))
+    # Vie actuelle
+    pygame.draw.rect(HUD_surface, bar_color, (x_pos, y_pos, bar_width * ratio, bar_height))
+    # Bordure
+    pygame.draw.rect(HUD_surface, (0, 0, 0), (x_pos, y_pos, bar_width, bar_height), 2)

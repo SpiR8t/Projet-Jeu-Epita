@@ -316,15 +316,16 @@ def initiate_game():
                 else:
                     distant_player.x = data["player_coords"][0]
                     distant_player.y = data["player_coords"][1]
+
         # Gestion boucle réseau :
         if (
             multi_activated
             and game_context.running
             and not stop_event.is_set()
         ):
-            #print(game_context.running)
             now = game_logic.now()
             if now - last_network_send >= network_interval:
+                # Envoie des messages
                 send_data(json.dumps({
                     "msg":"",
                     "player_coords": local_player.get_pos()

@@ -21,7 +21,7 @@ class Entity():
 
 class Player(Entity):
     def __init__(self, x, y, avatar_image, is_host):
-        super().__init__(x, y, 20,2)
+        super().__init__(x, y, 100,2)
         self.avatar = avatar_image
         self.host = is_host
         self.skills = []
@@ -29,8 +29,8 @@ class Player(Entity):
     def reset(self):
         self.x = self.x_origine
         self.y = self.y_origine
-        self.hp = 20
-        self.max_hp = 20
+        self.hp = 100
+        self.max_hp = 100
         
     def attack(self):
         pass
