@@ -29,10 +29,10 @@ def main():
     camera = Camera(screen.get_width(), screen.get_height())
 
     # Joueur
-    playerH = Joueur(
+    playerH = Player(
         -2400, 4800, 2, "assets/images/game/players/avatar.png", True
     )  # joueur host
-    playerC = Joueur(
+    playerC = Player(
         -2300, 4800, 2, "assets/images/game/players/avatar2.png", False
     )  # joueur client
     # ----
