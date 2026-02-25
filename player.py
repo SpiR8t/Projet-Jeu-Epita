@@ -1,18 +1,24 @@
 import pygame
 import math
 
-class Player:
-    def __init__(self, x, y, vitesse, avatar_image, is_host):
+class Entity():
+    def __init__(self,x,y,max_hp,speed):
         self.x_origine = x
         self.y_origine = y
         self.x = x
         self.y = y
-        self.vitesse = vitesse
-        self.avatar = avatar_image
-        self.host = is_host
+        self.hp = max_hp
+        self.max_hp = max_hp
+        self.speed = speed
         self.direction = (-1,-1) # pour les compétences
         
         self.skills = [SwordAttack()] # hardcodé pour l'instant
+
+class Player(Entity):
+    def __init__(self, x, y, avatar_image, is_host):
+        super().__init__(x, y, 20,2)
+        self.avatar = avatar_image
+        self.host = is_host
 
     def get_pos(self):
         return (self.x, self.y)

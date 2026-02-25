@@ -130,17 +130,17 @@ def detect_player_movement(keys, playerL):
 
         # left foot
         l_x_grid_player1, l_y_grid_player1 = iso_to_cart_tile(
-            player1_leftfoot[0], player1_leftfoot[1] + playerL.vitesse
+            player1_leftfoot[0], player1_leftfoot[1] + playerL.speed
         )
         # right foot
         r_x_grid_player1, r_y_grid_player1 = iso_to_cart_tile(
-            player1_rightfoot[0], player1_rightfoot[1] + playerL.vitesse
+            player1_rightfoot[0], player1_rightfoot[1] + playerL.speed
         )
         if (
             map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
             and map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0
         ):
-            playerL.y += playerL.vitesse
+            playerL.y += playerL.speed
     
     if keys[pygame.K_UP]:
         dy -= 1
@@ -148,18 +148,18 @@ def detect_player_movement(keys, playerL):
 
         # left foot
         l_x_grid_player1, l_y_grid_player1 = iso_to_cart_tile(
-            player1_leftfoot[0], player1_leftfoot[1] - playerL.vitesse
+            player1_leftfoot[0], player1_leftfoot[1] - playerL.speed
         )
         # right foot
         r_x_grid_player1, r_y_grid_player1 = iso_to_cart_tile(
-            player1_rightfoot[0], player1_rightfoot[1] - playerL.vitesse
+            player1_rightfoot[0], player1_rightfoot[1] - playerL.speed
         )
 
         if (
             map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
             and map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0
         ):
-            playerL.y -= playerL.vitesse
+            playerL.y -= playerL.speed
 
     if keys[pygame.K_LEFT]:
         dx -= 1
@@ -167,11 +167,11 @@ def detect_player_movement(keys, playerL):
 
         # left foot
         l_x_grid_player1, l_y_grid_player1 = iso_to_cart_tile(
-            player1_leftfoot[0] - playerL.vitesse, player1_leftfoot[1]
+            player1_leftfoot[0] - playerL.speed, player1_leftfoot[1]
         )
 
         if map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0:
-            playerL.x -= playerL.vitesse
+            playerL.x -= playerL.speed
 
     if keys[pygame.K_RIGHT]:
         dx += 1
@@ -179,10 +179,10 @@ def detect_player_movement(keys, playerL):
 
         # right foot
         r_x_grid_player1, r_y_grid_player1 = iso_to_cart_tile(
-            player1_rightfoot[0] + playerL.vitesse, player1_rightfoot[1]
+            player1_rightfoot[0] + playerL.speed, player1_rightfoot[1]
         )
 
         if map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0:
-            playerL.x += playerL.vitesse
+            playerL.x += playerL.speed
     
     if moved: playerL.direction = (dx,dy)
