@@ -115,7 +115,8 @@ def display_menu_pause(context,mouse_pos):
             context.quitting = True
 
 def detect_player_movement(keys, playerL):
-
+    dx,dy = 0,0
+    moved = False
     # récupération de la position du player pour vérifier les collisions durant le déplacement
     # les collisions sont gérées en regardant la position futur
     x_player1, y_player1 = playerL.get_pos()
@@ -124,6 +125,9 @@ def detect_player_movement(keys, playerL):
     )
 
     if keys[pygame.K_DOWN]:
+        dy += 1
+        moved = True
+
         # left foot
         l_x_grid_player1, l_y_grid_player1 = iso_to_cart_tile(
             player1_leftfoot[0], player1_leftfoot[1] + playerL.vitesse
@@ -139,6 +143,9 @@ def detect_player_movement(keys, playerL):
             playerL.y += playerL.vitesse
     
     if keys[pygame.K_UP]:
+        dy -= 1
+        moved = True
+
         # left foot
         l_x_grid_player1, l_y_grid_player1 = iso_to_cart_tile(
             player1_leftfoot[0], player1_leftfoot[1] - playerL.vitesse
@@ -155,6 +162,9 @@ def detect_player_movement(keys, playerL):
             playerL.y -= playerL.vitesse
 
     if keys[pygame.K_LEFT]:
+        dx -= 1
+        moved = True
+
         # left foot
         l_x_grid_player1, l_y_grid_player1 = iso_to_cart_tile(
             player1_leftfoot[0] - playerL.vitesse, player1_leftfoot[1]
@@ -164,6 +174,9 @@ def detect_player_movement(keys, playerL):
             playerL.x -= playerL.vitesse
 
     if keys[pygame.K_RIGHT]:
+        dx += 1
+        moved = True
+
         # right foot
         r_x_grid_player1, r_y_grid_player1 = iso_to_cart_tile(
             player1_rightfoot[0] + playerL.vitesse, player1_rightfoot[1]
@@ -171,3 +184,5 @@ def detect_player_movement(keys, playerL):
 
         if map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0:
             playerL.x += playerL.vitesse
+    
+    if moved: playerL.direction = (dx,dy)

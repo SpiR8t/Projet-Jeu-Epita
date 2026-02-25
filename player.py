@@ -1,5 +1,5 @@
 import pygame
-
+import math
 
 class Player:
     def __init__(self, x, y, vitesse, avatar_image, is_host):
@@ -65,9 +65,10 @@ class SwordAttack(Skill):
         return MeleeAction(caster, self.range)
 
 class SimpleSlashAnimation:
-    def __init__(self, x, y, duration=10):
+    def __init__(self, x, y, direction, duration=8):
         self.x = x
         self.y = y
+        self.direction = direction
         self.duration = duration
         self.timer = 0
         self.finished = False
@@ -78,12 +79,40 @@ class SimpleSlashAnimation:
             self.finished = True
 
     def draw(self, screen, camera):
-        # effet très simple : cercle blanc qui grandit
-        radius = 5 + self.timer * 2
-        
         screen_x, screen_y = camera.apply(self.x, self.y)
-        
-        pygame.draw.circle(screen, (255, 255, 255), (int(screen_x), int(screen_y)), radius, 2)
+
+        size = 40
+        rect = pygame.Rect(
+            screen_x - size//2,
+            screen_y - size//2,
+            size,
+            size
+        )
+
+        dx, dy = self.direction
+
+        # angles en radians
+        if (dx, dy) == (0, -1):  # haut
+            start_angle = math.radians(200)
+            end_angle = math.radians(340)
+
+        elif (dx, dy) == (0, 1):  # bas
+            start_angle = math.radians(20)
+            end_angle = math.radians(160)
+
+        elif (dx, dy) == (-1, 0):  # gauche
+            start_angle = math.radians(110)
+            end_angle = math.radians(250)
+
+        elif (dx, dy) == (1, 0):  # droite
+            start_angle = math.radians(-70)
+            end_angle = math.radians(70)
+
+        else:
+            start_angle = 0
+            end_angle = math.pi
+
+        pygame.draw.arc(screen, (255, 255, 255), rect, start_angle, end_angle, 4)
 
 class MeleeAction:
 
@@ -94,11 +123,12 @@ class MeleeAction:
     def execute(self, game):
         print("Melee action")
 
-        # position devant le joueur
-        target_x = self.caster.x + self.caster.direction[0] * 32
-        target_y = self.caster.y + self.caster.direction[1] * 32
+        dx,dy = self.caster.direction
 
-        anim = SimpleSlashAnimation(target_x, target_y, duration=10)
+        # position devant le joueur
+        target_x = self.caster.x+16 + dx * 32
+        target_y = self.caster.y-16 + dy * 32
+        anim = SimpleSlashAnimation(target_x, target_y, (dx, dy))
         game.animations.append(anim)
 
 
