@@ -122,18 +122,32 @@ class SimpleSlashAnimation:
 
 class MeleeAction:
 
-    def __init__(self, caster, range):
-        self.caster = caster
+    def __init__(self, caster, range, x=0, y=0, dx=0, dy=0, host=True):
         self.range = range
+        self.name = "Melee"
+        self.host = host
+        if caster == None:
+            self.position = (x, y)
+            self.direction = (dx, dy)
+        else:
+            self.direction = caster.direction
+            self.position = caster.get_pos()
+            
 
     def execute(self, game):
         print("Melee action")
 
-        dx,dy = self.caster.direction
+        # envoie pour l'autre joueur
+        if (self.host):
+            game.action_created = True
+            game.action_name = self.name
+
+
+        dx,dy = self.direction
 
         # position devant le joueur
-        target_x = self.caster.x+16 + dx * 32
-        target_y = self.caster.y-16 + dy * 32
+        target_x = self.position[0]+16 + self.direction[0] * 32
+        target_y = self.position[1]-16 + self.direction[1] * 32
         anim = SimpleSlashAnimation(target_x, target_y, (dx, dy))
         game.animations.append(anim)
 

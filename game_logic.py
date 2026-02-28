@@ -39,7 +39,7 @@ def update_game(context, playerL, playerD):
             action = playerL.try_use(0)
             
             if action:
-                context.execute_action(action)
+                context.add_action(action)
 
     if keys[pygame.K_ESCAPE]: # Activation du menu pause
         if now() - last_key_pressed >= KEY_COOLDOWN:
@@ -71,6 +71,7 @@ def update_game(context, playerL, playerD):
 
     # animations des compétences
     context.update_animations()
+    context.execute_actions()
     context.draw_animations()
 
     pygame.display.flip()

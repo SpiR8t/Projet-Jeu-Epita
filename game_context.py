@@ -14,6 +14,9 @@ class GameContext:
 
         # Animations des compétences
         self.animations = []
+        self.action = []
+        self.action_created = False
+        self.action_name = ""
 
         # Jeu
         self.game_code = ""
@@ -50,8 +53,13 @@ class GameContext:
 
     # animation et compétence / actions (est-ce que c'est pas un peu hors cadre de le mettre dans context ?)
 
-    def execute_action(self, action):
-        action.execute(self)
+    def add_action(self, action):
+        self.action.append(action)
+
+    def execute_actions(self):
+        for action in self.action:
+            action.execute(self)
+        self.action = []
 
     def update_animations(self):
         for anim in self.animations:

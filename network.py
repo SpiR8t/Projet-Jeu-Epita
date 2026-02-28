@@ -8,6 +8,7 @@ from aiortc import (
 from random import *
 from queue import Queue
 
+from player import *
 import game_logic
 
 
@@ -100,7 +101,7 @@ async def start_host(pc):
     @channel.on("message")
     def on_message(message):
         # À faire quand on reçois un message
-        print("← message reçu du client:", message)
+        # print("← message reçu du client:", message)
         incoming_messages.put(message)
 
     offer = await pc.createOffer()
@@ -150,7 +151,7 @@ async def start_client(pc):
         network_ready.set()
         @channel.on("message")
         def on_message(message):
-            print("← message reçu du host:", message)
+            # print("← message reçu du host:", message)
             incoming_messages.put(message)
 
     game_code, offer = wait_for_offer(game_context.game_code)
@@ -313,21 +314,41 @@ def initiate_game():
                     distant_player_quitting = True
                     print("L'autre joueur a quitté la partie")
                 else:
+
+                    if data["msg"] == "action_created":
+                        # ajouter l'action à la file d'action du context
+                        action_name = data["action"]
+                        if action_name == "Melee":
+                            game_context.add_action(MeleeAction(None, 32, data["player_coords"][0], data["player_coords"][1], data["player_direction"][0], data["player_direction"][1], host=False))
+
                     distant_player.x = data["player_coords"][0]
                     distant_player.y = data["player_coords"][1]
+
+                
         # Gestion boucle réseau :
         if (
             multi_activated
             and game_context.running
             and not stop_event.is_set()
         ):
-            #print(game_context.running)
+            # print(game_context.running)
             now = game_logic.now()
             if now - last_network_send >= network_interval:
-                send_data(json.dumps({
-                    "msg":"",
-                    "player_coords": local_player.get_pos()
-                }))
+                if game_context.action_created:
+                    send_data(json.dumps({
+                        "msg":"action_created",
+                        "player_coords": local_player.get_pos(),
+                        "player_direction": local_player.direction,
+                        "action": game_context.action_name,
+                    }))
+                    game_context.action_created = False
+                    game_context.action_name = ""
+                else:
+                    send_data(json.dumps({
+                        "msg":"",
+                        "player_coords": local_player.get_pos(),
+                        "player_direction": local_player.direction
+                    }))
                 last_network_send = now
 
         # Mise à jour de l'affichage du jeu
