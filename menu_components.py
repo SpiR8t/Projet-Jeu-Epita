@@ -28,7 +28,8 @@ TEXT = {
         "back": "Retour",
         "continue": "Continuer",
         "loading": "Chargement...",
-        "main_menu": "Menu principal"
+        "main_menu": "Menu principal",
+        "death": "Vous êtes mort..."
     },
     "EN": {
         "title": "Echoes of Lights",
@@ -45,7 +46,8 @@ TEXT = {
         "back": "Back",
         "continue": "Continue",
         "loading": "Loading...",
-        "main_menu": "Main menu"
+        "main_menu": "Main menu",
+        "death": "You died..."
     }
 }
 
@@ -79,9 +81,9 @@ class Button:
     def is_clicked(self, mouse_pos):
         return self.rect.collidepoint(mouse_pos)
     
-def display_title(context,h,text):
+def display_title(context,h,text,color):
     FONT_TITLE = pygame.font.Font("assets/fonts/Darksoul.otf", context.screen.get_height()//10)
-    title = FONT_TITLE.render(TEXT[context.language][text], True, WHITE)
+    title = FONT_TITLE.render(TEXT[context.language][text], True, color)
     shadow = FONT_TITLE.render(TEXT[context.language][text], True, BLACK)
     context.screen.blit(shadow, shadow.get_rect(center=(context.screen.get_width() // 2 + max(2,context.screen.get_height()//240), h + max(2,context.screen.get_height()//240))))
     context.screen.blit(title, title.get_rect(center=(context.screen.get_width() // 2, h)))

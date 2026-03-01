@@ -2,8 +2,8 @@ import pygame
 
 class Entity():
     def __init__(self,x,y,max_hp,speed):
-        self.x_origine = x
-        self.y_origine = y
+        self.x_spawn = x
+        self.y_spawn = y
         self.x = x
         self.y = y
         self.hp = max_hp
@@ -17,6 +17,12 @@ class Entity():
         self.hp -= amount
         if self.hp < 0:
             self.hp = 0
+
+    def respawn(self):
+        self.x = self.x_spawn
+        self.y = self.y_spawn
+        self.hp = self.max_hp
+
     
 
 class Player(Entity):
@@ -25,12 +31,6 @@ class Player(Entity):
         self.avatar = avatar_image
         self.host = is_host
         self.skills = []
-
-    def reset(self):
-        self.x = self.x_origine
-        self.y = self.y_origine
-        self.hp = 100
-        self.max_hp = 100
         
     def attack(self):
         pass

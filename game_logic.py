@@ -114,7 +114,7 @@ def update_game(playerL, playerD):
     # Fond
     context.screen.fill((50, 50, 60))
 
-    # centre la caméro sur le player
+    # centre la caméra sur le player
     x_player1, y_player1 = playerL.get_pos()
     x_player2, y_player2 = playerD.get_pos()
 
@@ -137,6 +137,9 @@ def update_game(playerL, playerD):
     if context.pause:
         display_menu_pause(mouse_pos)
 
+
+    check_player_life_state(playerL)
+
     pygame.display.flip()
     context.clock.tick(60)
 
@@ -154,7 +157,7 @@ def display_menu_pause(mouse_pos):
     menu_surface.fill((0,0,0))
     context.screen.blit(menu_surface,(0,0))
     # Affichage des boutons
-    display_title(context,HEIGHT//6,"title")
+    display_title(context,HEIGHT//6,"title",(255,255,255))
     # Bouton de retour au jeu
     btn_go_back_game = Button(TEXT[context.language]["back"],HEIGHT//2,"go_back_game",context.screen)
     btn_go_back_game.draw(context.screen,mouse_pos)
@@ -200,3 +203,7 @@ def draw_health_bar(playerL,HUD_surface):
     pygame.draw.rect(HUD_surface, bar_color, (x_pos, y_pos, bar_width * ratio, bar_height))
     # Bordure
     pygame.draw.rect(HUD_surface, (0, 0, 0), (x_pos, y_pos, bar_width, bar_height), 2)
+
+def check_player_life_state(playerL):
+    if playerL.hp == 0:
+        playerL.respawn()
