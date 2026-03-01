@@ -1,24 +1,36 @@
 import pygame
 
-
-class Joueur:
-    def __init__(self, x, y, vitesse, avatar_image, is_host):
-        self.x_origine = x
-        self.y_origine = y
+class Entity():
+    def __init__(self,x,y,max_hp,speed):
+        self.x_spawn = x
+        self.y_spawn = y
         self.x = x
         self.y = y
-        self.vitesse = vitesse
-        self.avatar = avatar_image
-        self.host = is_host
-        
-        self.skills = []
+        self.hp = max_hp
+        self.max_hp = max_hp
+        self.speed = speed
 
     def get_pos(self):
         return (self.x, self.y)
     
-    def reset(self):
-        self.x = self.x_origine
-        self.y = self.y_origine
+    def take_damage(self,amount):
+        self.hp -= amount
+        if self.hp < 0:
+            self.hp = 0
+
+    def respawn(self):
+        self.x = self.x_spawn
+        self.y = self.y_spawn
+        self.hp = self.max_hp
+
+    
+
+class Player(Entity):
+    def __init__(self, x, y, avatar_image, is_host):
+        super().__init__(x, y, 100,2)
+        self.avatar = avatar_image
+        self.host = is_host
+        self.skills = []
         
     def attack(self):
         pass

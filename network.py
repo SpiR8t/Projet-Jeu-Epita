@@ -298,6 +298,7 @@ def initiate_game():
     """Cette fonction permet de lancer la partie en elle-même : c'est elle qui contient la boucle principale"""
     global has_sent_quit
     network_interval = 16  # 1000 ms -> 1 FPS réseau
+    game_logic.share_info(game_context)
     last_network_send = game_logic.now()
     multi_activated = game_context.multiplayer
     game_context.running = True
@@ -315,15 +316,16 @@ def initiate_game():
                 else:
                     distant_player.x = data["player_coords"][0]
                     distant_player.y = data["player_coords"][1]
+
         # Gestion boucle réseau :
         if (
             multi_activated
             and game_context.running
             and not stop_event.is_set()
         ):
-            #print(game_context.running)
             now = game_logic.now()
             if now - last_network_send >= network_interval:
+                # Envoie des messages
                 send_data(json.dumps({
                     "msg":"",
                     "player_coords": local_player.get_pos()
@@ -331,7 +333,7 @@ def initiate_game():
                 last_network_send = now
 
         # Mise à jour de l'affichage du jeu
-        game_logic.update_game(game_context, local_player, distant_player)
+        game_logic.update_game(local_player, distant_player)
 
     if multi_activated:
         # Annonce à l'autre joueur qu'il quitte si ce n'est pas l'autre qui quitte.
