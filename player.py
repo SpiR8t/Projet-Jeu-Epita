@@ -120,34 +120,63 @@ class SimpleSlashAnimation:
 
         pygame.draw.arc(screen, (255, 255, 255), rect, start_angle, end_angle, 4)
 
-class MeleeAction:
+class Action:
+    def __init__(self, caster, range, name, x=0, y=0, dx=0, dy=0, host=True):
+        """
+        Classe mère pour toutes les actions.
 
-    def __init__(self, caster, range, x=0, y=0, dx=0, dy=0, host=True):
+        :param caster: Entité qui lance l'action (None si reçu du réseau)
+        :param range: Portée de l'action
+        :param name: Nom de l'action
+        :param x, y: Position si action recréée via réseau
+        :param dx, dy: Direction si action recréée via réseau
+        :param host: True si action créée localement
+        """
+
         self.range = range
-        self.name = "Melee"
+        self.name = name
         self.host = host
-        if caster == None:
-            self.position = (x, y)
-            self.direction = (dx, dy)
-        else:
+
+        # Cas 1 : action créée localement
+        if caster is not None:
             self.direction = caster.direction
             self.position = caster.get_pos()
-            
+        # Cas 2 : action reçue via réseau
+        else:
+            self.position = (x, y)
+            self.direction = (dx, dy)
+
+    def send_to_network(self, game):
+        """
+        Gère l'envoi réseau si nécessaire.
+        """
+        if self.host:
+            game.action_created = True
+            game.action_name = self.name
+
+    def execute(self, game):
+        """
+        À redéfinir dans les classes enfants.
+        """
+        raise NotImplementedError("execute() doit être implémentée.")
+
+class MeleeAction(Action):
+
+    def __init__(self, caster, range, x=0, y=0, dx=0, dy=0, host=True):
+        super().__init__(caster, range, "Melee", x, y, dx, dy, host)
 
     def execute(self, game):
         print("Melee action")
 
-        # envoie pour l'autre joueur
-        if (self.host):
-            game.action_created = True
-            game.action_name = self.name
+        # gestion réseau commune
+        self.send_to_network(game)
 
-
-        dx,dy = self.direction
+        dx, dy = self.direction
 
         # position devant le joueur
-        target_x = self.position[0]+16 + self.direction[0] * 32
-        target_y = self.position[1]-16 + self.direction[1] * 32
+        target_x = self.position[0] + 16 + dx * 32
+        target_y = self.position[1] - 16 + dy * 32
+
         anim = SimpleSlashAnimation(target_x, target_y, (dx, dy))
         game.animations.append(anim)
 
