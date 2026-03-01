@@ -2,7 +2,7 @@ import pygame
 import sys
 
 from menu_components import Button, display_title,WHITE,BLACK,LIGHT_GREY,BUTTON_BG,DARK_GREY,TEXT
-from network import start_network, network_ready, share_context_multi
+from network import start_network, network_ready, share_context_multi,reset_network
 
 WIDTH, HEIGHT = 1280,720
 
@@ -70,6 +70,7 @@ def display_menu(context):
                     else:
                         page = btn.action
                         code_multi = ""
+
         elif page == "new":
             display_title(context,HEIGHT//6,"title",WHITE)
 
@@ -90,6 +91,15 @@ def display_menu(context):
                 context.set_host()
                 asked_network = True
                 start_network(context.is_host)
+            
+            # Bouton retour
+            back = Button(T["back"], 5*HEIGHT//6, "menu",screen)
+            back.draw(screen, mouse_pos)
+            if back.is_clicked(mouse_pos) and context.mouse_pressed and not context.mouse_pressed_last:
+                asked_network = False
+                context.edit_game_code("")
+                reset_network()
+                page = "menu"
 
         elif page in ("join","join_wrong_code"):
             display_title(context,HEIGHT//6,"title",WHITE)
