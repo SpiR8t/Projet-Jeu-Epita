@@ -15,8 +15,9 @@ def main():
     WIDTH, HEIGHT = 1280, 720  # 640, 360
 
     # Paramètres pour le dev :
-    FULLSCREEN = False  # Fenêtre ou fullscreen
+    FULLSCREEN = False   # Fenêtre ou fullscreen
     MULTIPLAYER = True  # Activation du multijoueur
+    HUD = True           # Activation du HUD
 
     if FULLSCREEN:
         screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
@@ -29,15 +30,12 @@ def main():
     camera = Camera(screen.get_width(), screen.get_height())
 
     # Joueur
-    playerH = Player(
-        -2400, 4800, "assets/images/game/players/avatar.png", True
-    )  # joueur host
-    playerC = Player(
-        -2300, 4800, "assets/images/game/players/avatar2.png", False
-    )  # joueur client
-    # ----
+    playerH = Player(-2400, 4800, "assets/images/game/players/avatar.png", True)  # joueur host
+    playerC = Player(-2300, 4800, "assets/images/game/players/avatar2.png", False)  # joueur client
 
-    context = GameContext(screen, clock, playerH, playerC, map1, camera, MULTIPLAYER)
+
+    context = GameContext(screen, clock, playerH, playerC, map1, camera)
+    context.set_dev_params(MULTIPLAYER,HUD)
 
     if not MULTIPLAYER:
         share_context_multi(context)
@@ -48,6 +46,7 @@ def main():
             display_menu(context)
 
         initiate_game()
+        # Joueur
         reset_game(context) # Reset le jeu pour une nouvelle partie
 
     pygame.quit()
@@ -55,8 +54,9 @@ def main():
 
 def reset_game(context):
     """Cette fonction reset tout ce qu'il faut reset pour recommencer une nouvelle partie après en avoir quitté une"""
-    context.host_player.reset()
-    context.client_player.reset()
+    context.host_player = Player(-2400, 4800, "assets/images/game/players/avatar.png", True)  # joueur host
+    context.client_player = Player(-2300, 4800, "assets/images/game/players/avatar2.png", False)  # joueur client
+
     context.reset()
     reset_network()
     reset_menu()

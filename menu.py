@@ -2,7 +2,7 @@ import pygame
 import sys
 
 from menu_components import Button, display_title,WHITE,BLACK,LIGHT_GREY,BUTTON_BG,DARK_GREY,TEXT
-from network import start_network, network_ready, share_context_multi
+from network import start_network, network_ready, share_context_multi,reset_network
 
 WIDTH, HEIGHT = 1280,720
 
@@ -52,7 +52,7 @@ def display_menu(context):
             context.edit_game_code("")
 
         if page == "menu":
-            display_title(context,HEIGHT//6,"title")
+            display_title(context,HEIGHT//6,"title",WHITE)
 
             buttons = [
                 Button(T["new"], 4*HEIGHT//9, "new",screen),
@@ -70,8 +70,9 @@ def display_menu(context):
                     else:
                         page = btn.action
                         code_multi = ""
+
         elif page == "new":
-            display_title(context,HEIGHT//6,"title")
+            display_title(context,HEIGHT//6,"title",WHITE)
 
             info = FONT_BUTTON.render(T["show_code"], True, LIGHT_GREY)
             screen.blit(info, info.get_rect(center=(WIDTH // 2, 13*HEIGHT//36)))
@@ -90,9 +91,18 @@ def display_menu(context):
                 context.set_host()
                 asked_network = True
                 start_network(context.is_host)
+            
+            # Bouton retour
+            back = Button(T["back"], 5*HEIGHT//6, "menu",screen)
+            back.draw(screen, mouse_pos)
+            if back.is_clicked(mouse_pos) and context.mouse_pressed and not context.mouse_pressed_last:
+                asked_network = False
+                context.edit_game_code("")
+                reset_network()
+                page = "menu"
 
         elif page in ("join","join_wrong_code"):
-            display_title(context,HEIGHT//6,"title")
+            display_title(context,HEIGHT//6,"title",WHITE)
 
             if page == "join":
                 info = FONT_BUTTON.render(T["enter_code"], True, LIGHT_GREY)
@@ -128,7 +138,7 @@ def display_menu(context):
                 page = "menu"
 
         elif page == "loading":
-            display_title(context,HEIGHT//6,"loading")
+            display_title(context,HEIGHT//6,"loading",WHITE)
 
             back = Button(T["back"], 5*HEIGHT//6, "menu",screen)
             back.draw(screen, mouse_pos)
@@ -137,7 +147,7 @@ def display_menu(context):
                 code_multi = ""
 
         elif page == "options":
-            display_title(context,HEIGHT//6,"title")
+            display_title(context,HEIGHT//6,"title",WHITE)
 
             lang_txt = FONT_BUTTON.render(f"{T['language']} : {context.language}", True, LIGHT_GREY)
             screen.blit(lang_txt, lang_txt.get_rect(center=(WIDTH // 2, 7*HEIGHT//18)))

@@ -49,6 +49,8 @@ def reset_network():
     global network_ready,pc_global,channel,stop_event
     if network_ready:
         network_ready.clear()
+    if not stop_event.is_set():
+        stop_event.set()
     pc_global = None
     channel = None
 
@@ -124,10 +126,11 @@ async def start_host(pc):
     print("Code de partie : " + game_code)
     print("\n-----------------------------------\n")
 
-    answer = wait_for_answer(game_code)
-    await pc.setRemoteDescription(
-        RTCSessionDescription(sdp=answer["sdp"], type=answer["type"])
-    )
+    answer = wait_for_answer()
+    if answer != None:
+        await pc.setRemoteDescription(
+            RTCSessionDescription(sdp=answer["sdp"], type=answer["type"])
+        )
     network_loop = asyncio.get_running_loop()
     while not stop_event.is_set():
         await asyncio.sleep(0.01)
@@ -240,23 +243,28 @@ def add_answer_to_db(pc, code):
 # ===== Récupération des offres et réponses sdp
 
 
-def wait_for_answer(code):
+def wait_for_answer():
     """Check en continue si la réponse a été rempli dans la db"""
     print("En attente de la réponse de l'autre joueur")
+    code = game_context.game_code
     searching_answer = True
     url = f"https://firestore.googleapis.com/v1/projects/{PROJECT_ID}/databases/(default)/documents/lobbies/{code}?key={API_KEY}"
     while searching_answer:
-        res = requests.get(url)
-        if res.status_code == 200:
-            doc = res.json()
-            if doc["fields"]["answer"] != {"nullValue": None}:
-                print("Réponse reçu.")
-                answer = json.loads(doc["fields"]["answer"]["stringValue"])
-                searching_answer = False
-            else:
-                time.sleep(5)
+        if game_context.game_code == "":
+            searching_answer = False
+            answer = None
         else:
-            print("Erreur:", res.text)
+            res = requests.get(url)
+            if res.status_code == 200:
+                doc = res.json()
+                if doc["fields"]["answer"] != {"nullValue": None}:
+                    print("Réponse reçu.")
+                    answer = json.loads(doc["fields"]["answer"]["stringValue"])
+                    searching_answer = False
+                else:
+                    time.sleep(5)
+            else:
+                print("Erreur:", res.text)
     return answer
 
 
@@ -299,6 +307,7 @@ def initiate_game():
     """Cette fonction permet de lancer la partie en elle-même : c'est elle qui contient la boucle principale"""
     global has_sent_quit
     network_interval = 16  # 1000 ms -> 1 FPS réseau
+    game_logic.share_info(game_context)
     last_network_send = game_logic.now()
     multi_activated = game_context.multiplayer
     game_context.running = True
@@ -332,28 +341,17 @@ def initiate_game():
             and game_context.running
             and not stop_event.is_set()
         ):
-            # print(game_context.running)
             now = game_logic.now()
             if now - last_network_send >= network_interval:
-                if game_context.action_created: # c'est ici qu'on peut rajouter des variables 
-                    send_data(json.dumps({      # à transferer pour la gestion des actions
-                        "msg":"action_created",
-                        "player_coords": local_player.get_pos(),
-                        "player_direction": local_player.direction,
-                        "action": game_context.action_name_to_send,
-                    }))
-                    game_context.action_created = False
-                    game_context.action_name = ""
-                else:
-                    send_data(json.dumps({
-                        "msg":"",
-                        "player_coords": local_player.get_pos(),
-                        "player_direction": local_player.direction
-                    }))
+                # Envoie des messages
+                send_data(json.dumps({
+                    "msg":"",
+                    "player_coords": local_player.get_pos()
+                }))
                 last_network_send = now
 
         # Mise à jour de l'affichage du jeu
-        game_logic.update_game(game_context, local_player, distant_player)
+        game_logic.update_game(local_player, distant_player)
 
     if multi_activated:
         # Annonce à l'autre joueur qu'il quitte si ce n'est pas l'autre qui quitte.

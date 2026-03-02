@@ -3,11 +3,26 @@ from isometric_motor import *
 from menu_components import Button, TEXT, display_title
 
 KEY_COOLDOWN = 300
-CLICK_COOLDOWN = 300
 
 last_key_pressed = 0
 
-def update_game(context, playerL, playerD):
+HEIGHT, WIDTH = 0,0
+context = None
+
+# Images HUD :
+full_heart = pygame.image.load("assets/images/game/HUD/full_heart.png")
+
+def share_info(gamecontext):
+    """Partage les informations globales nécéssaires au fichier game_logic.py"""
+    global context,HEIGHT,WIDTH,full_heart,half_heart,empty_heart
+    context = gamecontext
+    HEIGHT = context.screen.get_height()
+    WIDTH = context.screen.get_width()
+
+    # Scale les images :
+    full_heart = pygame.transform.smoothscale(full_heart,(HEIGHT//20,HEIGHT//20))
+
+def update_game(playerL, playerD):
     """
     Cette fonction correspond à ce qu'il se passe dans la boucle principale du jeu.
     playerL -> player local, playerD  -> player distant
@@ -46,6 +61,13 @@ def update_game(context, playerL, playerD):
             context.pause_switch()
             last_key_pressed = now()
 
+    # ========= Temporaire pour tester degats ==============
+    if keys[pygame.K_k]: # Activation du menu pause
+        if now() - last_key_pressed >= KEY_COOLDOWN-200:
+            playerL.take_damage(1)
+            last_key_pressed = now()
+    # ======================================================
+
     # Fond
     context.screen.fill((50, 50, 60))
 
@@ -66,8 +88,15 @@ def update_game(context, playerL, playerD):
         playerD.avatar,
     )
 
+    # Draw du HUD
+    if context.hud:
+        draw_HUD(playerL)
+
     if context.pause:
-        display_menu_pause(context, mouse_pos)
+        display_menu_pause(mouse_pos)
+
+
+    check_player_life_state(playerL)
 
     # animations des compétences
     context.execute_actions()
@@ -82,33 +111,31 @@ def now():
     """Renvoie l'heure du jeu (en tick)"""
     return pygame.time.get_ticks()
 
-def display_menu_pause(context,mouse_pos):
+def display_menu_pause(mouse_pos):
     """ Affiche le menu pause pour quitter le jeu ou retourner au menu principale"""
-    height = context.screen.get_height()
-    width = context.screen.get_width()
     
     # Fond noir transparent
-    menu_surface = pygame.Surface((width,height))
+    menu_surface = pygame.Surface((WIDTH,HEIGHT))
     menu_surface.set_alpha(128)
     menu_surface.fill((0,0,0))
     context.screen.blit(menu_surface,(0,0))
     # Affichage des boutons
-    display_title(context,height//6,"title")
+    display_title(context,HEIGHT//6,"title",(255,255,255))
     # Bouton de retour au jeu
-    btn_go_back_game = Button(TEXT[context.language]["back"],height//2,"go_back_game",context.screen)
+    btn_go_back_game = Button(TEXT[context.language]["back"],HEIGHT//2,"go_back_game",context.screen)
     btn_go_back_game.draw(context.screen,mouse_pos)
     if btn_go_back_game.is_clicked(mouse_pos):
         if context.mouse_pressed and not context.mouse_pressed_last:
             context.pause_switch()
     # Bouton de retour au menu
-    btn_go_menu = Button(TEXT[context.language]["main_menu"],4*height//6,"go_main_menu",context.screen)
+    btn_go_menu = Button(TEXT[context.language]["main_menu"],4*HEIGHT//6,"go_main_menu",context.screen)
     btn_go_menu.draw(context.screen,mouse_pos)
     if btn_go_menu.is_clicked(mouse_pos):
         if context.mouse_pressed and not context.mouse_pressed_last:
             context.running = False
             
     # Bouton pour fermer le jeu
-    btn_quit = Button(TEXT[context.language]["quit"],5*height//6,"quit",context.screen)
+    btn_quit = Button(TEXT[context.language]["quit"],5*HEIGHT//6,"quit",context.screen)
     btn_quit.draw(context.screen,mouse_pos)
     if btn_quit.is_clicked(mouse_pos):
         if context.mouse_pressed and not context.mouse_pressed_last:
@@ -187,3 +214,31 @@ def detect_player_movement(keys, playerL):
             playerL.x += playerL.speed
     
     if moved: playerL.direction = (dx,dy)
+def draw_HUD(playerL):
+    HUD_surface = pygame.Surface((WIDTH,HEIGHT),pygame.SRCALPHA)
+    HUD_surface.fill((0, 0, 0, 0))
+    draw_health_bar(playerL,HUD_surface)
+    context.screen.blit(HUD_surface,(0,0))
+
+def draw_health_bar(playerL,HUD_surface):
+    global full_heart
+    HUD_surface.blit(full_heart, (HEIGHT//40, HEIGHT//40))
+    
+    ratio = playerL.hp / playerL.max_hp
+    ratio = max(0, min(1, ratio))
+
+    bar_height = HEIGHT//30
+    bar_width = WIDTH//3
+    x_pos, y_pos = HEIGHT//10, HEIGHT//30
+    bar_color = (100+(100*ratio),0,0)
+
+    # Fond (barre vide)
+    pygame.draw.rect(HUD_surface, (50, 0, 0), (x_pos, y_pos, bar_width, bar_height))
+    # Vie actuelle
+    pygame.draw.rect(HUD_surface, bar_color, (x_pos, y_pos, bar_width * ratio, bar_height))
+    # Bordure
+    pygame.draw.rect(HUD_surface, (0, 0, 0), (x_pos, y_pos, bar_width, bar_height), 2)
+
+def check_player_life_state(playerL):
+    if playerL.hp == 0:
+        playerL.respawn()
