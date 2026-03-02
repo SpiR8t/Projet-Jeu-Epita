@@ -16,7 +16,7 @@ class GameContext:
         self.animations = []
         self.action = []
         self.action_created = False
-        self.action_name = ""
+        self.action_name_to_send = []
 
         # Jeu
         self.game_code = ""

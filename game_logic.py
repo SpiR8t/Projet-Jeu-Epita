@@ -70,8 +70,8 @@ def update_game(context, playerL, playerD):
         display_menu_pause(context, mouse_pos)
 
     # animations des compétences
-    context.update_animations()
     context.execute_actions()
+    context.update_animations()
     context.draw_animations()
 
     pygame.display.flip()

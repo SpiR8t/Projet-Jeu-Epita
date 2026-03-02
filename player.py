@@ -152,7 +152,7 @@ class Action:
         """
         if self.host:
             game.action_created = True
-            game.action_name = self.name
+            game.action_name_to_send.append(self.name)
 
     def execute(self, game):
         """

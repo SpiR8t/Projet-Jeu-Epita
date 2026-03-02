@@ -317,8 +317,9 @@ def initiate_game():
 
                     if data["msg"] == "action_created":
                         # ajouter l'action à la file d'action du context
-                        action_name = data["action"]
-                        if action_name == "Melee":
+
+                        action_names = data["action"]
+                        if "Melee" in action_names: # on check pour chacun des noms d'action
                             game_context.add_action(MeleeAction(None, 32, data["player_coords"][0], data["player_coords"][1], data["player_direction"][0], data["player_direction"][1], host=False))
 
                     distant_player.x = data["player_coords"][0]
@@ -334,12 +335,12 @@ def initiate_game():
             # print(game_context.running)
             now = game_logic.now()
             if now - last_network_send >= network_interval:
-                if game_context.action_created:
-                    send_data(json.dumps({
+                if game_context.action_created: # c'est ici qu'on peut rajouter des variables 
+                    send_data(json.dumps({      # à transferer pour la gestion des actions
                         "msg":"action_created",
                         "player_coords": local_player.get_pos(),
                         "player_direction": local_player.direction,
-                        "action": game_context.action_name,
+                        "action": game_context.action_name_to_send,
                     }))
                     game_context.action_created = False
                     game_context.action_name = ""
