@@ -11,7 +11,7 @@ class GameStateRegistry:
 
     def __init__(self):
 
-        self.levers = []                # Liste de listes de leviers (énigmes)
+        self.levers = {}               # Dictionnaire de listes de leviers (énigmes)
 
         self.enemies = []                # Tous les ennemis actifs
 
@@ -25,16 +25,25 @@ class GameStateRegistry:
     # ==========================
 
     def add_lever(self, lever):
-        self.levers.append(lever)
+        """
+        Ajoute un levier dans le dictionnaire des leviers,
+        classé par group_id.
+        """
 
-    def create_puzzle(self, lever_list):
-        """Ajoute une nouvelle énigme (liste de leviers)."""
-        self.puzzles.append(lever_list)
+        group_id = lever.group
 
-    def is_puzzle_solved(self, puzzle_index):
-        """Vérifie si tous les leviers d'une énigme sont activés."""
-        puzzle = self.puzzles[puzzle_index]
-        return all(lever.state for lever in puzzle)
+        if group_id not in self.levers:
+            self.levers[group_id] = []
+
+        lever.id = len(self.levers[group_id]) # rajoute l'id dans l'instance (None avant)
+        self.levers[group_id].append(lever)
+
+
+    def is_group_active(self, group_id): #vérifier si un groupe est actif
+        if group_id not in self.levers:
+            return False
+        
+        return all(lever.state for lever in self.levers[group_id])
 
 
     # ==========================
@@ -46,3 +55,12 @@ class GameStateRegistry:
 
     def get_flag(self, key):
         return self.global_flags.get(key, False)
+    
+    def json_save():
+        pass
+        # pour sauvegarder plus tard on pourra se servir du registre avec un gros json
+
+
+# création du registre pour l'importer partout
+gameRegistry = GameStateRegistry()
+print(gameRegistry.levers)

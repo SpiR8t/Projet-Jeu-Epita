@@ -2,12 +2,13 @@
 # affiché notamment pour les énigmes
 
 class Lever:
-    def __init__(self, lever_id, group=None, initial_state=False):
+    def __init__(self, x, y, group, lever_id=None, initial_state=False):
         self.id = lever_id                  # Identifiant unique
         self.group = group                  # Groupe logique (optionnel)
         self.state = initial_state          # True = activé, False = désactivé
         self.links = []                     # Leviers liés
         self.locked = False                 # Empêche interaction si True
+        self.position = (x,y)
 
     # -------------------------
     # Gestion des liens

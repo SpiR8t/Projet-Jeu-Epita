@@ -1,5 +1,7 @@
 import pygame
-
+from gameStateRegistry import gameRegistry
+from interact import Lever
+print(gameRegistry.levers)
 # --- Paramètres de base ---
 TILE_WIDTH = 64
 TILE_HEIGHT = 32
@@ -25,7 +27,7 @@ def is_wall(pixel):
     return r == 106 and g == 190 and b == 48
 def is_lever(pixel): # je pense faire un vérif sur seulement r et g, et me servir du b pour index
     r,g,b = pixel
-    return r == 187 and g == 135 and b == 46
+    return r == 187 and g == 135
 
 
 
@@ -45,10 +47,11 @@ def image_to_matrix(path):
                 matrix[y][x][1] = 2
                 matrix[y][x][2] = 2
                 matrix[y][x][0] = 1
-            elif is_lever(pixel):
+            elif is_lever(pixel): # levier dans l'état de bas
                 matrix[y][x][1] = 0
                 matrix[y][x][2] = 10
                 matrix[y][x][0] = 1
+                gameRegistry.add_lever(Lever(y,x,pixel[2])) # la couleur blue sert d'id
             else:
                 matrix[y][x][1] = 0
                 matrix[y][x][2] = 0

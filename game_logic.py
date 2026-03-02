@@ -1,7 +1,7 @@
 import pygame
 from isometric_motor import *
 from menu_components import Button, TEXT, display_title
-
+from gameStateRegistry import gameRegistry
 KEY_COOLDOWN = 300
 
 last_key_pressed = 0
@@ -14,7 +14,7 @@ full_heart = pygame.image.load("assets/images/game/HUD/full_heart.png")
 
 def share_info(gamecontext):
     """Partage les informations globales nécéssaires au fichier game_logic.py"""
-    global context,HEIGHT,WIDTH,full_heart,half_heart,empty_heart
+    global context, HEIGHT,WIDTH,full_heart,half_heart,empty_heart
     context = gamecontext
     HEIGHT = context.screen.get_height()
     WIDTH = context.screen.get_width()
@@ -65,6 +65,12 @@ def update_game(playerL, playerD):
     if keys[pygame.K_k]: # Activation du menu pause
         if now() - last_key_pressed >= KEY_COOLDOWN-200:
             playerL.take_damage(1)
+            last_key_pressed = now()
+
+    # ========= Temporaire pour débug ======================
+    if keys[pygame.K_g]: # Activation du menu pause
+        if now() - last_key_pressed >= KEY_COOLDOWN-200:
+            print(gameRegistry.levers)
             last_key_pressed = now()
     # ======================================================
 
