@@ -52,8 +52,8 @@ def update_game(playerL, playerD):
         # Skill
         if keys[pygame.K_SPACE]: # Sword attack
             action = playerL.try_use(0)
-            
             if action:
+                
                 context.add_action(action)
 
     if keys[pygame.K_ESCAPE]: # Activation du menu pause

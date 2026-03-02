@@ -31,7 +31,7 @@ class Player(Entity):
         super().__init__(x, y, 100,2)
         self.avatar = avatar_image
         self.host = is_host
-        self.skills = []
+        self.skills = [SwordAttack()]
         
     def try_use(self, index):
         if index < len(self.skills):
@@ -64,6 +64,7 @@ class Skill:
             return None
         else:
             self.current_cd = self.cooldown
+            print('can use')
             return self.create_action(caster)
 
     def create_action(self, caster):
@@ -156,6 +157,7 @@ class Action:
         """
         Gère l'envoi réseau si nécessaire.
         """
+        print("send")
         if self.host:
             game.action_created = True
             game.action_name_to_send.append(self.name)

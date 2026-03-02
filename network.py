@@ -344,10 +344,20 @@ def initiate_game():
             now = game_logic.now()
             if now - last_network_send >= network_interval:
                 # Envoie des messages
-                send_data(json.dumps({
-                    "msg":"",
-                    "player_coords": local_player.get_pos()
-                }))
+                if game_context.action_created: # c'est ici qu'on peut rajouter des variables 
+                    send_data(json.dumps({      # à transferer pour la gestion des actions
+                        "msg":"action_created",
+                        "player_coords": local_player.get_pos(),
+                        "player_direction": local_player.direction,
+                        "action": game_context.action_name_to_send,
+                    }))
+                    game_context.action_created = False
+                    game_context.action_name_to_send = []
+                else:
+                    send_data(json.dumps({
+                        "msg":"",
+                        "player_coords": local_player.get_pos()
+                    }))
                 last_network_send = now
 
         # Mise à jour de l'affichage du jeu
