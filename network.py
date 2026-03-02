@@ -8,6 +8,7 @@ from aiortc import (
 from random import *
 from queue import Queue
 
+from player import *
 import game_logic
 
 
@@ -102,7 +103,7 @@ async def start_host(pc):
     @channel.on("message")
     def on_message(message):
         # À faire quand on reçois un message
-        print("← message reçu du client:", message)
+        # print("← message reçu du client:", message)
         incoming_messages.put(message)
 
     offer = await pc.createOffer()
@@ -153,7 +154,7 @@ async def start_client(pc):
         network_ready.set()
         @channel.on("message")
         def on_message(message):
-            print("← message reçu du host:", message)
+            # print("← message reçu du host:", message)
             incoming_messages.put(message)
 
     game_code, offer = wait_for_offer(game_context.game_code)
@@ -322,9 +323,18 @@ def initiate_game():
                     distant_player_quitting = True
                     print("L'autre joueur a quitté la partie")
                 else:
+
+                    if data["msg"] == "action_created":
+                        # ajouter l'action à la file d'action du context
+
+                        action_names = data["action"]
+                        if "Melee" in action_names: # on check pour chacun des noms d'action
+                            game_context.add_action(MeleeAction(None, 32, data["player_coords"][0], data["player_coords"][1], data["player_direction"][0], data["player_direction"][1], host=False))
+
                     distant_player.x = data["player_coords"][0]
                     distant_player.y = data["player_coords"][1]
 
+                
         # Gestion boucle réseau :
         if (
             multi_activated

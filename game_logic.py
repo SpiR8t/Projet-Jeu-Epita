@@ -40,64 +40,21 @@ def update_game(playerL, playerD):
     context.mouse_pressed_last = context.mouse_pressed
     context.mouse_pressed = pygame.mouse.get_pressed()[0]
 
-    # récupération de la position du player pour vérifier les collisions durant le déplacement
-    # les collisions sont gérées en regardant la position futur
-    x_player1, y_player1 = playerL.get_pos()
-    player1_leftfoot, player1_rightfoot = deduce_foots_from_iso_coords(
-        x_player1, y_player1
-    )
 
     # ===== Controls =====
     
     if not context.pause:
-        if keys[pygame.K_DOWN]:
-            # left foot
-            l_x_grid_player1, l_y_grid_player1 = iso_to_cart_tile(
-                player1_leftfoot[0], player1_leftfoot[1] + playerL.speed
-            )
-            # right foot
-            r_x_grid_player1, r_y_grid_player1 = iso_to_cart_tile(
-                player1_rightfoot[0], player1_rightfoot[1] + playerL.speed
-            )
-            if (
-                map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
-                and map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0
-            ):
-                playerL.y += playerL.speed
         
-        if keys[pygame.K_UP]:
-            # left foot
-            l_x_grid_player1, l_y_grid_player1 = iso_to_cart_tile(
-                player1_leftfoot[0], player1_leftfoot[1] - playerL.speed
-            )
-            # right foot
-            r_x_grid_player1, r_y_grid_player1 = iso_to_cart_tile(
-                player1_rightfoot[0], player1_rightfoot[1] - playerL.speed
-            )
-    
-            if (
-                map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
-                and map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0
-            ):
-                playerL.y -= playerL.speed
-    
-        if keys[pygame.K_LEFT]:
-            # left foot
-            l_x_grid_player1, l_y_grid_player1 = iso_to_cart_tile(
-                player1_leftfoot[0] - playerL.speed, player1_leftfoot[1]
-            )
-    
-            if map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0:
-                playerL.x -= playerL.speed
-    
-        if keys[pygame.K_RIGHT]:
-            # right foot
-            r_x_grid_player1, r_y_grid_player1 = iso_to_cart_tile(
-                player1_rightfoot[0] + playerL.speed, player1_rightfoot[1]
-            )
-    
-            if map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0:
-                playerL.x += playerL.speed
+        # Movements
+        detect_player_movement(keys, playerL)
+        playerL.update()
+
+        # Skill
+        if keys[pygame.K_SPACE]: # Sword attack
+            action = playerL.try_use(0)
+            
+            if action:
+                context.add_action(action)
 
     if keys[pygame.K_ESCAPE]: # Activation du menu pause
         if now() - last_key_pressed >= KEY_COOLDOWN:
@@ -114,10 +71,11 @@ def update_game(playerL, playerD):
     # Fond
     context.screen.fill((50, 50, 60))
 
-    # centre la caméra sur le player
+    # centre la caméro sur le player
     x_player1, y_player1 = playerL.get_pos()
     x_player2, y_player2 = playerD.get_pos()
 
+    # print("Coords : x = ",x_player, "y = ", y_player)
     context.camera.follow(x_player1, y_player1, 0.05)
     # afficher la map, avec le décalage imposé par la caméra
     context.map.draw_map(
@@ -139,6 +97,11 @@ def update_game(playerL, playerD):
 
 
     check_player_life_state(playerL)
+
+    # animations des compétences
+    context.execute_actions()
+    context.update_animations()
+    context.draw_animations()
 
     pygame.display.flip()
     context.clock.tick(60)
@@ -179,6 +142,78 @@ def display_menu_pause(mouse_pos):
             context.running = False
             context.quitting = True
 
+def detect_player_movement(keys, playerL):
+    dx,dy = 0,0
+    moved = False
+    # récupération de la position du player pour vérifier les collisions durant le déplacement
+    # les collisions sont gérées en regardant la position futur
+    x_player1, y_player1 = playerL.get_pos()
+    player1_leftfoot, player1_rightfoot = deduce_foots_from_iso_coords(
+        x_player1, y_player1
+    )
+
+    if keys[pygame.K_DOWN]:
+        dy += 1
+        moved = True
+
+        # left foot
+        l_x_grid_player1, l_y_grid_player1 = iso_to_cart_tile(
+            player1_leftfoot[0], player1_leftfoot[1] + playerL.speed
+        )
+        # right foot
+        r_x_grid_player1, r_y_grid_player1 = iso_to_cart_tile(
+            player1_rightfoot[0], player1_rightfoot[1] + playerL.speed
+        )
+        if (
+            map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
+            and map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0
+        ):
+            playerL.y += playerL.speed
+    
+    if keys[pygame.K_UP]:
+        dy -= 1
+        moved = True
+
+        # left foot
+        l_x_grid_player1, l_y_grid_player1 = iso_to_cart_tile(
+            player1_leftfoot[0], player1_leftfoot[1] - playerL.speed
+        )
+        # right foot
+        r_x_grid_player1, r_y_grid_player1 = iso_to_cart_tile(
+            player1_rightfoot[0], player1_rightfoot[1] - playerL.speed
+        )
+
+        if (
+            map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
+            and map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0
+        ):
+            playerL.y -= playerL.speed
+
+    if keys[pygame.K_LEFT]:
+        dx -= 1
+        moved = True
+
+        # left foot
+        l_x_grid_player1, l_y_grid_player1 = iso_to_cart_tile(
+            player1_leftfoot[0] - playerL.speed, player1_leftfoot[1]
+        )
+
+        if map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0:
+            playerL.x -= playerL.speed
+
+    if keys[pygame.K_RIGHT]:
+        dx += 1
+        moved = True
+
+        # right foot
+        r_x_grid_player1, r_y_grid_player1 = iso_to_cart_tile(
+            player1_rightfoot[0] + playerL.speed, player1_rightfoot[1]
+        )
+
+        if map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0:
+            playerL.x += playerL.speed
+    
+    if moved: playerL.direction = (dx,dy)
 def draw_HUD(playerL):
     HUD_surface = pygame.Surface((WIDTH,HEIGHT),pygame.SRCALPHA)
     HUD_surface.fill((0, 0, 0, 0))
