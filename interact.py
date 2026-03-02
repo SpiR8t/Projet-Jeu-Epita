@@ -72,3 +72,10 @@ class Lever:
 
     def __repr__(self):
         return f"<Lever id={self.id} state={self.state} group={self.group}>"
+    
+
+class Door:
+    def __init__(self, inital_state,orientation):
+        self.state = inital_state        # True = ouverte, False = Fermée
+        self.orientation = orientation   # "NE" -> Nord-Est (en haut à droite), "NW" -> Nord-Ouest...
+        self.position = ()
