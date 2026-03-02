@@ -22,6 +22,9 @@ def load_image(path):
 def is_wall(pixel):
     r, g, b = pixel
     return r == 106 and g == 190 and b == 48
+def is_lever(pixel):
+    r,g,b = pixel
+    return r == 187 and g == 135 and b == 46
 
 
 def image_to_matrix(path):
@@ -39,6 +42,11 @@ def image_to_matrix(path):
             if is_wall(pixel):
                 matrix[y][x][1] = 2
                 matrix[y][x][2] = 2
+                matrix[y][x][0] = 1
+            elif is_lever(pixel):
+                print("is lever")
+                matrix[y][x][1] = 0
+                matrix[y][x][2] = 10
                 matrix[y][x][0] = 1
             else:
                 matrix[y][x][1] = 0
@@ -156,6 +164,13 @@ class Map:
         tile_floor = pygame.image.load(
             "assets/images/game/tileset/tilesettestfloor.png"
         ).convert_alpha()
+        levier_low = pygame.image.load(
+            "assets/images/enigmes/levier_low.png"
+        ).convert_alpha()
+        levier_high = pygame.image.load(
+            "assets/images/enigmes/levier_high.png"
+        ).convert_alpha()
+        
         avatar1 = pygame.image.load(avatar_j1).convert_alpha()
         avatar2 = pygame.image.load(avatar_j2).convert_alpha()
 
@@ -187,11 +202,18 @@ class Map:
                     tile_nb = self.tiles[x][y][z]
 
                     # si tile_nb != 0 (n'est pas vide) alors on affiche la tuile correspondante
+
                     if tile_nb != 0:
                         # Chaque condition correspond à une tuile différente
+                        # ===== C'est ici pour rajouter l'affichage d'un élément
+                        # ===== il faut simplement faire un condition à l'image des autres
+                        # ===== avec le bon numero et ajouter l'image au début de la méthode
                         screen_x, screen_y = cart_to_iso(x, y, z)
                         screen_x, screen_y = camera.apply(screen_x, screen_y)
                         if tile_nb == 1:
                             self.screen.blit(tile_floor, (screen_x, screen_y))
                         elif tile_nb == 2:
                             self.screen.blit(tile_wall, (screen_x, screen_y))
+                        elif tile_nb == 10:
+                            print("affiche")
+                            self.screen.blit(levier_high, (screen_x, screen_y))
