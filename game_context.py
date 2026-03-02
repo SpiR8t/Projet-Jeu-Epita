@@ -58,7 +58,7 @@ class GameContext:
         self.running = False
         self.pause = False
 
-    # animation et compétence / actions (est-ce que c'est pas un peu hors cadre de le mettre dans context ?)
+    # animation et compétence / actions
 
     def add_action(self, action):
         self.action.append(action)

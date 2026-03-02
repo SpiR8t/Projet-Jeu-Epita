@@ -19,12 +19,14 @@ def load_image(path):
     return image
 
 
+# ===== Ici on a les condition qui vérifient la couleur des pixel pour placer le éléments
 def is_wall(pixel):
     r, g, b = pixel
     return r == 106 and g == 190 and b == 48
-def is_lever(pixel):
+def is_lever(pixel): # je pense faire un vérif sur seulement r et g, et me servir du b pour index
     r,g,b = pixel
     return r == 187 and g == 135 and b == 46
+
 
 
 def image_to_matrix(path):
@@ -44,7 +46,6 @@ def image_to_matrix(path):
                 matrix[y][x][2] = 2
                 matrix[y][x][0] = 1
             elif is_lever(pixel):
-                print("is lever")
                 matrix[y][x][1] = 0
                 matrix[y][x][2] = 10
                 matrix[y][x][0] = 1
@@ -165,10 +166,10 @@ class Map:
             "assets/images/game/tileset/tilesettestfloor.png"
         ).convert_alpha()
         levier_low = pygame.image.load(
-            "assets/images/enigmes/levier_low.png"
+            "assets/images/game/enigmes/levier_low.png"
         ).convert_alpha()
         levier_high = pygame.image.load(
-            "assets/images/enigmes/levier_high.png"
+            "assets/images/game/enigmes/levier_high.png"
         ).convert_alpha()
         
         avatar1 = pygame.image.load(avatar_j1).convert_alpha()
@@ -215,5 +216,4 @@ class Map:
                         elif tile_nb == 2:
                             self.screen.blit(tile_wall, (screen_x, screen_y))
                         elif tile_nb == 10:
-                            print("affiche")
                             self.screen.blit(levier_high, (screen_x, screen_y))
