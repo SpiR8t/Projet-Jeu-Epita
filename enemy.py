@@ -8,6 +8,7 @@ Cette classe regroupe toutes les fonctions et méthodes liées à un ennemi.
 —> De cette manière on peut créer une classe par ennemi et leur associer des caractéristiques propres facilement.
 '''
 class Enemy(Entity):
+    #les coordonnées x et y correspondent à la position du coin supérieur gauche de l'ennemi (important pour les hitbox)
     def __init__(self, x, y, max_hp, speed, damage, attack_cooldown, detection_range, attack_range, AI_state="IDLE", level=1):
         super().__init__(x, y, max_hp, speed)
         self.damage = damage
@@ -16,6 +17,8 @@ class Enemy(Entity):
         self.attack_range = attack_range #portée de l'attaque (à cette distance l'ennemi s'arrête et attaque le joueur)
         self.AI_state = AI_state #à l'apparition l'IA est en mode "inactif"
         self.level = level
+
+        self.facing = "N" # directions possibles : N S E O NE NO SE SO
 
 
     def attack(self, player): # chaque ennemi aura sa fonction attack()
@@ -39,7 +42,10 @@ class Enemy(Entity):
         self.y += vy
 
         #déplacement de la hitbox
-        self.hitbox.move_ip(vx, vy)
+        self.hitbox.x, self.hitbox.y = int(self.x), int(self.y)
+
+        #mise à jour de la direction
+        
 
 
 
@@ -58,9 +64,9 @@ class Enemy(Entity):
 
         #action de l'ennemi en fonction de son état
         if self.AI_state == "ATTACK":
-            print("fonction qui attaque le joueur") #self.attack(player) : à dev !!
+            self.attack(player)
         elif self.AI_state == "CHASE":
-            print("fonction qui déplace l'ennemi vers le joueur") #self.chase(player) : à dev !!
+            self.chase(player) #self.chase(player) : à dev !!
 
 
 
@@ -87,7 +93,7 @@ class Slasher(Enemy):
             AI_state = "IDLE",
             level = level
         )
-        self.hitbox = pygame.Rect(x-20, y-20, 40, 40)
+        self.hitbox = pygame.Rect(x, y, 40, 40)
         self.weapon = "KNIFE"
 
     #attaque du slasher (couteau)   
