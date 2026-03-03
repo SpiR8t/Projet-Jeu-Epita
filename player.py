@@ -183,7 +183,16 @@ class MeleeAction(Action):
         game.animations.append(anim)
 
 class LeverAction(Action):
-    pass
+    def __init__(self, id_group, id_lever, host=True):
+        super().__init__("Lever Action", host)
+
+        self.id_group = id_group
+        self.id_lever = id_lever
+
+    def execute(self, game, gameRegister):
+        if gameRegister.levers[self.id_group].locked != True:
+            self.send_to_network(game)
+            gameRegister.levers[self.id_group].toggle
     
 
 
