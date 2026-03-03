@@ -17,6 +17,32 @@ class Enemy(Entity):
         self.AI_state = AI_state #à l'apparition l'IA est en mode "inactif"
         self.level = level
 
+    def update(self, player):
+        dx = player.x - self.x
+        dy = player.y - self.y
+        distance = math.sqrt(dx**2 + dy**2) #distance entre le joueur et l'ennemi
+
+        #mise à jour de l'état de l'IA de l'ennemi
+        if distance <= self.attack_range:
+            self.AI_state = "ATTACK"
+        elif distance <= self.detection_range:
+            self.AI_state = "CHASE"
+        else:
+            self.AI_state = "IDLE"
+
+        #action de l'ennemi en fonction de son état
+        if self.AI_state == "ATTACK":
+            print("fonction qui attaque le joueur") #self.attack(player) : à dev !!
+        elif self.AI_state == "CHASE":
+            print("fonction qui déplace l'ennemi vers le joueur") #self.chase(player) : à dev !!
+    
+    def attack(self, player): # chaque ennemi aura sa fonction attack()
+        pass
+
+
+        
+
+        
 
 # PREMIER ENNEMI : le Slasher
 
@@ -30,12 +56,18 @@ class Slasher(Enemy):
             speed = 5 * level, 
             damage = 5 * level,
             attack_cooldown = 60,
-            detection_range = 50,
-            attack_range = 5,
+            detection_range = 200,
+            attack_range = 50,
             AI_state = "IDLE",
             level = level
         )
         self.weapon = "KNIFE"
         
+    #AJOUTER UNE HITBOX (à faire plus tard peut-être)
 
-
+    #attaque du slasher (couteau)   
+    def attack(self, player):
+        if self.weapon == "KNIFE":
+            # ajouter animation ici
+            # ajouter création zone d'attaque (Rect)
+            pass
