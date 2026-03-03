@@ -15,7 +15,7 @@ class GameStateRegistry:
 
         self.enemies = []                # Tous les ennemis actifs
 
-        self.doors = []                  # Portes interactives
+        self.doors = {}                  # Portes interactives
 
         self.global_flags = {}           # Flags globaux (ex: {"artefact 1": True})
 
@@ -59,6 +59,23 @@ class GameStateRegistry:
     def json_save():
         pass
         # pour sauvegarder plus tard on pourra se servir du registre avec un gros json
+
+    # ==========================
+    # DOORS
+    # ==========================
+
+    def add_door(self,door):
+        """
+        Ajoute une porte dans le dictionnaire des portes,
+        classé par group_id.
+        """
+        group_id = door.group
+
+        if group_id not in self.doors:
+            self.doors[group_id] = []
+
+        door.id = len(self.doors[group_id]) # rajoute l'id dans l'instance (None avant)
+        self.doors[group_id].append(door)
 
 
 # création du registre pour l'importer partout

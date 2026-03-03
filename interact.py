@@ -75,7 +75,17 @@ class Lever:
     
 
 class Door:
-    def __init__(self, inital_state,orientation):
-        self.state = inital_state        # True = ouverte, False = Fermée
-        self.orientation = orientation   # "NE" -> Nord-Est (en haut à droite), "NW" -> Nord-Ouest...
-        self.position = ()
+    def __init__(self, x, y, orientation, group, door_id=None, initial_state = False,):
+        self.state = initial_state        # True = ouverte, False = Fermée
+        self.orientation = orientation   
+        # 20 = NE, 21 = SW, 22 = NW, 23 = SE
+        # C'est une liste de 2 valeurs : la première correspond à l'orientation quand la porte est ouverte et la 2e quand elle est fermée
+        self.position = (x,y)
+        self.id = door_id                  # Identifiant unique
+        self.group = group 
+
+    def open_door(self):
+        if not self.state:
+            self.state = True
+            # Générer un action qui permet de faire passer la porte de son 
+            # apparence d'ouverture à son apparence de fermeture en modifiant la matrice de la map

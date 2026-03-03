@@ -30,7 +30,7 @@ def is_lever(pixel): # je pense faire un vérif sur seulement r et g, et me serv
     return r == 187 and g == 135
 def is_door(pixel): # je pense faire un vérif sur seulement r et g, et me servir du b pour index 
     r,g,b = pixel # et pour l'orientation l'unité de b
-    return r == 122 and (41 <= g <= 44)
+    return r == 122 and (40 <= g <= 47)
 
 
 
@@ -56,10 +56,27 @@ def image_to_matrix(path):
                 matrix[y][x][0] = 1
                 gameRegistry.add_lever(Lever(y,x,pixel[2])) # la couleur blue sert d'id
             elif is_door(pixel):
-                r,g,b = pixel     # 20 = SE, 21 = , 22 = NW, 23 = 
-                matrix[y][x][1] = 20 + g%40 -1
-                matrix[y][x][2] = 20 + g%40-1
+                g = pixel[1]
+                # 20 = NE (ouverture NW), 21 = SW (ouverture NW), 22 = NW (ouverture NE), 23 = SE (ouverture NE)
+                # 24 = NE (ouverture SE), 25 = SW (ouverture SE), 26 = NW (ouverture SW), 27 = SE (ouverture SW)
+                tile_nb1 = 20 + g%40
+                tile_nb2 = tile_nb1
+                if tile_nb1 > 23:
+                    tile_nb2 -= 4
+                matrix[y][x][1] = tile_nb2
+                matrix[y][x][2] = tile_nb2
                 matrix[y][x][0] = 1
+                orientation_list = [tile_nb2]
+                if tile_nb1 <= 21:
+                    orientation_list.append(22) # NW
+                elif tile_nb1 <= 23:
+                    orientation_list.append(20) # NE
+                elif tile_nb1 <= 25:
+                    orientation_list.append(23) # SE
+                else:
+                    orientation_list.append(21) # SW
+                gameRegistry.add_door(Door(x,y,orientation_list,pixel[2]))
+                
             else:
                 matrix[y][x][1] = 0
                 matrix[y][x][2] = 0
