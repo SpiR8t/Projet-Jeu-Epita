@@ -21,6 +21,34 @@ class Enemy(Entity):
         self.facing = "N" # directions possibles : N S E O NE NO SE SO
 
 
+    def update_facing(self, vx, vy):
+        seuil = 20 # seuil de sensibilité pour le changement de direction (MODIFIABLE)
+
+        if abs(vx) < seuil and abs(vy) < seuil: #déplacements négligeables
+            return
+        
+        #calcul de l'angle de direction en degrés
+        angle = math.atan2(vy, vx) * 180 / math.pi
+        angle = (angle + 360) % 360 #cas d'angles négatifs
+
+        if (angle >= 0 and angle < 22.5) or (angle <= 360 and angle >= 337.5):
+            self.facing = "E"
+        elif angle >= 22.5 and angle < 67.5:
+            self.facing = "SE"
+        elif angle >= 67.5 and angle < 112.5:
+            self.facing = "S"
+        elif angle >= 112.5 and angle < 157.5:
+            self.facing = "SO"
+        elif angle >= 157.5 and angle < 202.5:
+            self.facing = "O"
+        elif angle >= 202.5 and angle < 247.5:
+            self.facing = "NO"
+        elif angle >= 247.5 and angle < 292.5:
+            self.facing = "N"
+        else:
+            self.facing = "NE"
+
+
     def attack(self, player): # chaque ennemi aura sa fonction attack()
         pass
 
@@ -44,9 +72,7 @@ class Enemy(Entity):
         #déplacement de la hitbox
         self.hitbox.x, self.hitbox.y = int(self.x), int(self.y)
 
-        #mise à jour de la direction
-        
-
+        self.update_facing(vx, vy)
 
 
     def update(self, player):
