@@ -128,30 +128,14 @@ class SimpleSlashAnimation:
         pygame.draw.arc(screen, (255, 255, 255), rect, start_angle, end_angle, 4)
 
 class Action:
-    def __init__(self, caster, range, name, x=0, y=0, dx=0, dy=0, host=True):
+    def __init__(self, name, host=True):
         """
         Classe mère pour toutes les actions.
 
-        :param caster: Entité qui lance l'action (None si reçu du réseau)
-        :param range: Portée de l'action
-        :param name: Nom de l'action
-        :param x, y: Position si action recréée via réseau
-        :param dx, dy: Direction si action recréée via réseau
-        :param host: True si action créée localement
         """
-
-        self.range = range
+        
         self.name = name
         self.host = host
-
-        # Cas 1 : action créée localement
-        if caster is not None:
-            self.direction = caster.direction
-            self.position = caster.get_pos()
-        # Cas 2 : action reçue via réseau
-        else:
-            self.position = (x, y)
-            self.direction = (dx, dy)
 
     def send_to_network(self, game):
         """
@@ -171,7 +155,17 @@ class Action:
 class MeleeAction(Action):
 
     def __init__(self, caster, range, x=0, y=0, dx=0, dy=0, host=True):
-        super().__init__(caster, range, "Melee", x, y, dx, dy, host)
+        super().__init__("Melee", host)
+        self.range = range
+
+        # Cas 1 : action créée localement
+        if caster is not None:
+            self.direction = caster.direction
+            self.position = caster.get_pos()
+        # Cas 2 : action reçue via réseau
+        else:
+            self.position = (x, y)
+            self.direction = (dx, dy)
 
     def execute(self, game):
         print("Melee action")
@@ -187,6 +181,10 @@ class MeleeAction(Action):
 
         anim = SimpleSlashAnimation(target_x, target_y, (dx, dy))
         game.animations.append(anim)
+
+class LeverAction(Action):
+    pass
+    
 
 
 

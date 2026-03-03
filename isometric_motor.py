@@ -260,5 +260,8 @@ class Map:
                             self.screen.blit(tile_wall, (screen_x, screen_y))
                         elif tile_nb == 10:
                             self.screen.blit(levier_high, (screen_x, screen_y))
+                        elif tile_nb == 11:
+                            self.screen.blit(levier_low, (screen_x, screen_y))
                         elif 20 <= tile_nb <= 24:
                             self.screen.blit(doors[tile_nb-20], (screen_x, screen_y))
+                        
