@@ -1,6 +1,6 @@
 import pygame
 from gameStateRegistry import gameRegistry
-from interact import Lever
+from interact import Lever,Door
 print(gameRegistry.levers)
 # --- Paramètres de base ---
 TILE_WIDTH = 64
@@ -28,6 +28,9 @@ def is_wall(pixel):
 def is_lever(pixel): # je pense faire un vérif sur seulement r et g, et me servir du b pour index
     r,g,b = pixel
     return r == 187 and g == 135
+def is_door(pixel): # je pense faire un vérif sur seulement r et g, et me servir du b pour index 
+    r,g,b = pixel # et pour l'orientation l'unité de b
+    return r == 122 and (41 <= g <= 44)
 
 
 
@@ -52,6 +55,11 @@ def image_to_matrix(path):
                 matrix[y][x][2] = 10
                 matrix[y][x][0] = 1
                 gameRegistry.add_lever(Lever(y,x,pixel[2])) # la couleur blue sert d'id
+            elif is_door(pixel):
+                r,g,b = pixel     # 20 = SE, 21 = , 22 = NW, 23 = 
+                matrix[y][x][1] = 20 + g%40 -1
+                matrix[y][x][2] = 20 + g%40-1
+                matrix[y][x][0] = 1
             else:
                 matrix[y][x][1] = 0
                 matrix[y][x][2] = 0
@@ -174,6 +182,21 @@ class Map:
         levier_high = pygame.image.load(
             "assets/images/game/enigmes/levier_high.png"
         ).convert_alpha()
+        doors = [
+            pygame.image.load(
+                "assets/images/game/tileset/test_door_NE.png"
+            ).convert_alpha(),
+            pygame.image.load(
+                "assets/images/game/tileset/test_door_SW.png"
+            ).convert_alpha(),
+            pygame.image.load(
+                "assets/images/game/tileset/test_door_NW.png"
+            ).convert_alpha(),
+            pygame.image.load(
+                "assets/images/game/tileset/test_door_SE.png"
+            ).convert_alpha()
+
+        ]
         
         avatar1 = pygame.image.load(avatar_j1).convert_alpha()
         avatar2 = pygame.image.load(avatar_j2).convert_alpha()
@@ -220,3 +243,5 @@ class Map:
                             self.screen.blit(tile_wall, (screen_x, screen_y))
                         elif tile_nb == 10:
                             self.screen.blit(levier_high, (screen_x, screen_y))
+                        elif 20 <= tile_nb <= 24:
+                            self.screen.blit(doors[tile_nb-20], (screen_x, screen_y))

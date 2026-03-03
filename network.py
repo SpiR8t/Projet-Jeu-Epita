@@ -49,7 +49,7 @@ def reset_network():
     global network_ready,pc_global,channel,stop_event
     if network_ready:
         network_ready.clear()
-    if not stop_event.is_set():
+    if stop_event != None and not stop_event.is_set():
         stop_event.set()
     pc_global = None
     channel = None
