@@ -189,10 +189,10 @@ class LeverAction(Action):
         self.id_group = id_group
         self.id_lever = id_lever
 
-    def execute(self, game, gameRegister):
-        if gameRegister.levers[self.id_group].locked != True:
+    def execute(self, game, gameRegister, matrix):
+        if gameRegister.levers[self.id_group][self.id_lever].locked != True:
             self.send_to_network(game)
-            gameRegister.levers[self.id_group].toggle
+            gameRegister.levers[self.id_group][self.id_lever].toggle(matrix)
     
 
 

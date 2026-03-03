@@ -303,7 +303,7 @@ def send_data(data):
 
 # ===== Gestion globale du jeu =====
 
-def initiate_game():
+def initiate_game(matrix):
     """Cette fonction permet de lancer la partie en elle-même : c'est elle qui contient la boucle principale"""
     global has_sent_quit
     network_interval = 16  # 1000 ms -> 1 FPS réseau
@@ -361,7 +361,7 @@ def initiate_game():
                 last_network_send = now
 
         # Mise à jour de l'affichage du jeu
-        game_logic.update_game(local_player, distant_player)
+        game_logic.update_game(local_player, distant_player, matrix)
 
     if multi_activated:
         # Annonce à l'autre joueur qu'il quitte si ce n'est pas l'autre qui quitte.
