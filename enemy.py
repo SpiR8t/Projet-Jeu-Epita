@@ -17,6 +17,32 @@ class Enemy(Entity):
         self.AI_state = AI_state #à l'apparition l'IA est en mode "inactif"
         self.level = level
 
+
+    def attack(self, player): # chaque ennemi aura sa fonction attack()
+        pass
+
+
+    def chase(self, player): # déplacement de l'ennemi
+        # vecteurs directeurs vx et vy
+        dx = player.x - self.x
+        dy = player.y - self.y
+
+        if dx == 0 and dy == 0:
+            vx, vy = 0, 0
+        else:
+            distance = math.sqrt(dx**2 + dy**2)
+            vx = dx * self.speed / distance
+            vy = dy * self.speed / distance
+
+        #déplacement de l'ennemi
+        self.x += vx
+        self.y += vy
+
+        #déplacement de la hitbox
+        self.hitbox.move_ip(vx, vy)
+
+
+
     def update(self, player):
         dx = player.x - self.x
         dy = player.y - self.y
@@ -35,9 +61,9 @@ class Enemy(Entity):
             print("fonction qui attaque le joueur") #self.attack(player) : à dev !!
         elif self.AI_state == "CHASE":
             print("fonction qui déplace l'ennemi vers le joueur") #self.chase(player) : à dev !!
-    
-    def attack(self, player): # chaque ennemi aura sa fonction attack()
-        pass
+
+
+
 
 
         
@@ -61,9 +87,8 @@ class Slasher(Enemy):
             AI_state = "IDLE",
             level = level
         )
+        self.hitbox = pygame.Rect(x-20, y-20, 40, 40)
         self.weapon = "KNIFE"
-        
-    #AJOUTER UNE HITBOX (à faire plus tard peut-être)
 
     #attaque du slasher (couteau)   
     def attack(self, player):
