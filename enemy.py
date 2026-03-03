@@ -22,6 +22,8 @@ class Enemy(Entity):
 
 
     def update_facing(self, vx, vy):
+        #on peut aussi utiliser cette fonction pour changer la direction des images des ennemis sur la map
+
         seuil = 20 # seuil de sensibilité pour le changement de direction (MODIFIABLE)
 
         if abs(vx) < seuil and abs(vy) < seuil: #déplacements négligeables
@@ -96,12 +98,6 @@ class Enemy(Entity):
 
 
 
-
-
-        
-
-        
-
 # PREMIER ENNEMI : le Slasher
 
 class Slasher(Enemy):
@@ -120,11 +116,38 @@ class Slasher(Enemy):
             level = level
         )
         self.hitbox = pygame.Rect(x, y, 40, 40)
-        self.weapon = "KNIFE"
 
     #attaque du slasher (couteau)   
+    '''
+    Pour attaquer le joueur, le Slasher crée une zone d'atteinte rectangulaire.
+    La zone est créée en fonction de l'orientation du Slasher (pour que l'attaque se fasse dans la bonne direction)
+    D'AILLEURS : on pourrait créer un type d'ennemi qui met des dégâts tout autour de lui (style Jackie dans Brawl Stars)
+    Le joueur prend des dégâts seulement si sa hitbox touche la zone d'atteinte.
+    '''
     def attack(self, player):
-        if self.weapon == "KNIFE":
-            # ajouter animation ici
-            # ajouter création zone d'attaque (Rect)
-            pass
+        # ajouter animation ici aussi
+        if self.facing == "E":
+            damage_zone = pygame.Rect(self.x+40, self.y+10, self.attack_range, 60)
+        elif self.facing == "SE":
+            damage_zone = pygame.Rect(self.x+10, self.y+10, 30+self.attack_range, 30+self.attack_range)
+        elif self.facing == "S":
+            damage_zone = pygame.Rect(self.x-10, self.y+40, 60, self.attack_range)
+        elif self.facing == "SO":
+            damage_zone = pygame.Rect(self.x-self.attack_range, self.y+10, 30+self.attack_range, 30+self.attack_range)
+        elif self.facing == "O":
+            damage_zone = pygame.Rect(self.x-self.attack_range, self.y-10, self.attack_range, 60)
+        elif self.facing == "NO":
+            damage_zone = pygame.Rect(self.x-self.attack_range, self.y-self.attack_range, 30+self.attack_range, 30+self.attack_range)
+        elif self.facing == "N":
+            damage_zone = pygame.Rect(self.x-10,self.y-self.attack_range, 60, self.attack_range)
+        else: #NE
+            damage_zone = pygame.Rect(self.x+10, self.y-self.attack_range, 30+self.attack_range, 30+self.attack_range)
+        
+        if damage_zone.colliderect(player.hitbox): #player dans la zone
+            print("Damage dealt from Slasher") #peut-être à retirer mais utile pour debug
+            player.take_damage(self.damage)
+
+
+
+
+            
