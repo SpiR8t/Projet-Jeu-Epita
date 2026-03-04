@@ -333,6 +333,10 @@ def initiate_game(matrix):
                         if "Lever Action" in action_names:
                             lever_data = data["info_action"]["Lever Toggle"]
                             game_context.add_action(LeverAction(lever_data[0], lever_data[1], None))
+                        
+                        # if nom de l'action in action_names:
+                        #     recup_data = data[cle action info]
+                        #     game_context.add_action(instance de l'action directement)
 
                     distant_player.x = data["player_coords"][0]
                     distant_player.y = data["player_coords"][1]

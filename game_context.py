@@ -71,6 +71,8 @@ class GameContext:
         for action in self.action:
             if action.name == "Lever Action":
                 action.execute(self, gameRegister, matrix)
+            elif action.name == "Interact Action":
+                action.execute(self, gameRegister)
             else:
                 action.execute(self)
         self.action = []
@@ -85,7 +87,10 @@ class GameContext:
         for anim in self.animations:
             anim.draw(self.screen, self.camera)
 
-    # actions interaction
+    # actions interaction / c'est pour ajouter les infos nécessaire à l'envoi de l'action à l'autre joueur
     def add_info_lever_action(self, lever_group, lever_id):
         self.info_action["Lever Toggle"] = [lever_group, lever_id]
+
+    def add_info_interact_action(self, coords):
+        self.info_action["Interact coords"] = coords
     

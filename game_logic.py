@@ -55,7 +55,11 @@ def update_game(playerL, playerD, matrix):
         if keys[pygame.K_SPACE]: # Sword attack
             action = playerL.try_use(0)
             if action:
-                
+                context.add_action(action)
+        # interact
+        if keys[pygame.K_e]: # Sword attack
+            action = playerL.try_use(1)
+            if action:
                 context.add_action(action)
 
     if keys[pygame.K_ESCAPE]: # Activation du menu pause
@@ -229,6 +233,7 @@ def detect_player_movement(keys, playerL):
             playerL.x += playerL.speed
     
     if moved: playerL.direction = (dx,dy)
+    
 def draw_HUD(playerL):
     HUD_surface = pygame.Surface((WIDTH,HEIGHT),pygame.SRCALPHA)
     HUD_surface.fill((0, 0, 0, 0))

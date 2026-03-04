@@ -1,5 +1,6 @@
 import pygame
 import math
+from isometric_motor import iso_to_cart_tile 
 
 class Entity():
     def __init__(self,x,y,max_hp,speed):
@@ -31,7 +32,7 @@ class Player(Entity):
         super().__init__(x, y, 100,2)
         self.avatar = avatar_image
         self.host = is_host
-        self.skills = [SwordAttack()]
+        self.skills = [SwordAttack(), Interact()]
         
     def try_use(self, index):
         if index < len(self.skills):
@@ -69,6 +70,21 @@ class Skill:
 
     def create_action(self, caster):
         raise NotImplementedError("create_action must be overridden")
+
+class Interact(Skill):
+    def __init__(self):
+        super().__init__(cooldown=40, range=1)
+
+    def try_use(self, caster):
+        if not self.can_use():
+            return None
+        else:
+            self.current_cd = self.cooldown
+            print('can use')
+            return self.create_action(caster)
+
+    def create_action(self, caster):
+        return interactAction(caster.x, caster.y)
 
 class SwordAttack(Skill):
     def __init__(self):
@@ -146,7 +162,7 @@ class Action:
             context.action_created = True
             context.action_name_to_send.append(self.name)
 
-    def execute(self, context):
+    def execute(self):
         """
         À redéfinir dans les classes enfants.
         """
@@ -198,7 +214,33 @@ class LeverAction(Action): # l'action pour switch un levier
             self.send_to_network(context)
             
             gameRegister.levers[self.id_group][self.id_lever].toggle(matrix)
-    
 
+class interactAction(Action):
+    def __init__(self, x,y, host=True):
+        super().__init__("Interact Action", host)
+        self.x = x
+        self.y = y
 
+    def send_to_network(self, context, coords_carto): # on envoie les coordonnées de l'endroit de l'interaction avec
+        super().send_to_network(context)
+        context.add_info_interact_action(coords_carto)
 
+    def leverVerif(self, gameRegister, x,y): # une méthode pour checker les levier, il en faudra d'autres pour les autres éléments
+        for group in gameRegister.levers:
+            for lever in gameRegister.levers[group]:
+                if lever.position == (x,y):
+                    return (lever.group, lever.id)
+
+    def execute(self, context, gameRegister):
+        
+        carto = iso_to_cart_tile(self.x, self.y)
+        self.send_to_network(context, carto)
+        # vérif pour levier
+        lever = self.leverVerif(gameRegister, carto[0],carto[1])
+        if (lever) :
+            context.add_action(LeverAction(lever[0], lever[1]))
+
+        # vérif pour d'autres choses interactive par la suite
+        # ->
+
+        # if interact a fait qlq chose il faudra faire animation interaction
