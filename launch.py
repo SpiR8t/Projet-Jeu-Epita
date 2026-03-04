@@ -45,7 +45,7 @@ def main():
         if MULTIPLAYER:
             display_menu(context)
 
-        initiate_game(map1)
+        initiate_game()
         # Joueur
         reset_game(context) # Reset le jeu pour une nouvelle partie
 

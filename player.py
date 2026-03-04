@@ -1,6 +1,5 @@
 import pygame
 import math
-from isometric_motor import iso_to_cart_tile 
 
 class Entity():
     def __init__(self,x,y,max_hp,speed):
@@ -32,7 +31,7 @@ class Player(Entity):
         super().__init__(x, y, 100,2)
         self.avatar = avatar_image
         self.host = is_host
-        self.skills = [SwordAttack(), Interact()]
+        self.skills = [SwordAttack()]
         
     def try_use(self, index):
         if index < len(self.skills):
@@ -70,21 +69,6 @@ class Skill:
 
     def create_action(self, caster):
         raise NotImplementedError("create_action must be overridden")
-
-class Interact(Skill):
-    def __init__(self):
-        super().__init__(cooldown=40, range=1)
-
-    def try_use(self, caster):
-        if not self.can_use():
-            return None
-        else:
-            self.current_cd = self.cooldown
-            print('can use')
-            return self.create_action(caster)
-
-    def create_action(self, caster):
-        return interactAction(caster.x, caster.y)
 
 class SwordAttack(Skill):
     def __init__(self):
@@ -144,35 +128,21 @@ class SimpleSlashAnimation:
         pygame.draw.arc(screen, (255, 255, 255), rect, start_angle, end_angle, 4)
 
 class Action:
-    def __init__(self, name, host=True):
+    def __init__(self, caster, range, name, x=0, y=0, dx=0, dy=0, host=True):
         """
         Classe mère pour toutes les actions.
 
+        :param caster: Entité qui lance l'action (None si reçu du réseau)
+        :param range: Portée de l'action
+        :param name: Nom de l'action
+        :param x, y: Position si action recréée via réseau
+        :param dx, dy: Direction si action recréée via réseau
+        :param host: True si action créée localement
         """
-        
+
+        self.range = range
         self.name = name
         self.host = host
-
-    def send_to_network(self, context):
-        """
-        Gère l'envoi réseau si nécessaire.
-        """
-        print("send")
-        if self.host:
-            context.action_created = True
-            context.action_name_to_send.append(self.name)
-
-    def execute(self):
-        """
-        À redéfinir dans les classes enfants.
-        """
-        raise NotImplementedError("execute() doit être implémentée.")
-
-class MeleeAction(Action):
-
-    def __init__(self, caster, range, x=0, y=0, dx=0, dy=0, host=True):
-        super().__init__("Melee", host)
-        self.range = range
 
         # Cas 1 : action créée localement
         if caster is not None:
@@ -183,11 +153,31 @@ class MeleeAction(Action):
             self.position = (x, y)
             self.direction = (dx, dy)
 
-    def execute(self, context):
+    def send_to_network(self, game):
+        """
+        Gère l'envoi réseau si nécessaire.
+        """
+        print("send")
+        if self.host:
+            game.action_created = True
+            game.action_name_to_send.append(self.name)
+
+    def execute(self, game):
+        """
+        À redéfinir dans les classes enfants.
+        """
+        raise NotImplementedError("execute() doit être implémentée.")
+
+class MeleeAction(Action):
+
+    def __init__(self, caster, range, x=0, y=0, dx=0, dy=0, host=True):
+        super().__init__(caster, range, "Melee", x, y, dx, dy, host)
+
+    def execute(self, game):
         print("Melee action")
 
         # gestion réseau commune
-        self.send_to_network(context)
+        self.send_to_network(game)
 
         dx, dy = self.direction
 
@@ -196,51 +186,7 @@ class MeleeAction(Action):
         target_y = self.position[1] - 16 + dy * 32
 
         anim = SimpleSlashAnimation(target_x, target_y, (dx, dy))
-        context.animations.append(anim)
+        game.animations.append(anim)
 
-class LeverAction(Action): # l'action pour switch un levier
-    def __init__(self, id_group, id_lever, host=True):
-        super().__init__("Lever Action", host)
 
-        self.id_group = id_group
-        self.id_lever = id_lever
 
-    def send_to_network(self, context):
-        super().send_to_network(context)
-        context.add_info_lever_action(self.id_group, self.id_lever) # on ajoute une instruction pour envoyer les
-                                                                    # infos du levier dans le multi 
-    def execute(self, context, gameRegister, matrix):
-        if gameRegister.levers[self.id_group][self.id_lever].locked != True:
-            self.send_to_network(context)
-            
-            gameRegister.levers[self.id_group][self.id_lever].toggle(matrix)
-
-class interactAction(Action):
-    def __init__(self, x,y, host=True):
-        super().__init__("Interact Action", host)
-        self.x = x
-        self.y = y
-
-    def send_to_network(self, context, coords_carto): # on envoie les coordonnées de l'endroit de l'interaction avec
-        super().send_to_network(context)
-        context.add_info_interact_action(coords_carto)
-
-    def leverVerif(self, gameRegister, x,y): # une méthode pour checker les levier, il en faudra d'autres pour les autres éléments
-        for group in gameRegister.levers:
-            for lever in gameRegister.levers[group]:
-                if lever.position == (x,y):
-                    return (lever.group, lever.id)
-
-    def execute(self, context, gameRegister):
-        
-        carto = iso_to_cart_tile(self.x, self.y)
-        self.send_to_network(context, carto)
-        # vérif pour levier
-        lever = self.leverVerif(gameRegister, carto[0],carto[1])
-        if (lever) :
-            context.add_action(LeverAction(lever[0], lever[1]))
-
-        # vérif pour d'autres choses interactive par la suite
-        # ->
-
-        # if interact a fait qlq chose il faudra faire animation interaction
