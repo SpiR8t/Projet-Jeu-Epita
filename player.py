@@ -32,6 +32,7 @@ class Player(Entity):
         self.avatar = avatar_image
         self.host = is_host
         self.skills = [SwordAttack()]
+        self.hitbox = pygame.Rect(self.x, self.y, 40, 40)
         
     def try_use(self, index):
         if index < len(self.skills):
