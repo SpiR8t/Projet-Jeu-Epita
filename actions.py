@@ -39,10 +39,10 @@ class EditMapAction(Action):
         self.tile_nb = (tile_nb0,tile_nb1,tile_nb2)
 
     def execute(self, game_context):
-        print("Changement map")
+        print("Changement map", self.x, self.y, self.tile_nb)
         # gestion réseau commune
         self.send_to_network(game_context)
 
-        game_context.map.tiles[self.x][self.y][0] = self.tile_nb[0]
-        game_context.map.tiles[self.x][self.y][1] = self.tile_nb[1]
-        game_context.map.tiles[self.x][self.y][2] = self.tile_nb[2]
+        game_context.map.tiles[self.y][self.x][0] = self.tile_nb[0]
+        game_context.map.tiles[self.y][self.x][1] = self.tile_nb[1]
+        game_context.map.tiles[self.y][self.x][2] = self.tile_nb[2]

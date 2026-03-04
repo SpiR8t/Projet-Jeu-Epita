@@ -62,10 +62,10 @@ def update_game(playerL, playerD):
         # ========= Temporaire pour tester degats ==============
         if keys[pygame.K_c]: # Changement de la map : fait spawn une porte au milieu
             if now() - last_key_pressed >= KEY_COOLDOWN:
-                x_tile,y_tile = iso_to_cart_tile(-2400, 4800)
-                action = actions.EditMapAction("Pilier centre map",x_tile,y_tile, 1,20,20)
-                if action:
-                    context.add_action(action)
+                for door in gameRegistry.doors[255]:
+                    action = door.open_close()
+                    if action:
+                        context.add_action(action)
                 last_key_pressed = now()
         # ======================================================
 
