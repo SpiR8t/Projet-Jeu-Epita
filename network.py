@@ -330,6 +330,9 @@ def initiate_game(matrix):
                         action_names = data["action"]
                         if "Melee" in action_names: # on check pour chacun des noms d'action
                             game_context.add_action(MeleeAction(None, 32, data["player_coords"][0], data["player_coords"][1], data["player_direction"][0], data["player_direction"][1], host=False))
+                        if "Lever Action" in action_names:
+                            lever_data = data["info_action"]["Lever Toggle"]
+                            game_context.add_action(LeverAction(lever_data[0], lever_data[1], None))
 
                     distant_player.x = data["player_coords"][0]
                     distant_player.y = data["player_coords"][1]
@@ -350,9 +353,11 @@ def initiate_game(matrix):
                         "player_coords": local_player.get_pos(),
                         "player_direction": local_player.direction,
                         "action": game_context.action_name_to_send,
+                        "info_action": game_context.info_action,
                     }))
                     game_context.action_created = False
                     game_context.action_name_to_send = []
+                    game_context.info_action = {}
                 else:
                     send_data(json.dumps({
                         "msg":"",

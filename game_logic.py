@@ -114,7 +114,7 @@ def update_game(playerL, playerD, matrix):
     check_player_life_state(playerL)
 
     # animations des compétences
-    context.execute_actions()
+    context.execute_actions(gameRegistry, matrix)
     context.update_animations()
     context.draw_animations()
 

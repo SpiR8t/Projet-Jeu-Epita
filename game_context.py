@@ -12,11 +12,15 @@ class GameContext:
         self.host_player = playerH
         self.client_player = playerC
 
-        # Animations des compétences
+        # Animations et compétences
         self.animations = []
         self.action = []
+        # Pour envoyer au multi
         self.action_created = False
         self.action_name_to_send = []
+        self.info_action = {} # pour l'instant ça contient les infos des levier
+                              # mais on pourra rajouter bien d'autres choses
+
         # Parametres dev
         self.multiplayer = True
         self.hud = True
@@ -63,9 +67,12 @@ class GameContext:
     def add_action(self, action):
         self.action.append(action)
 
-    def execute_actions(self):
+    def execute_actions(self, gameRegister, matrix):
         for action in self.action:
-            action.execute(self)
+            if action.name == "Lever Action":
+                action.execute(self, gameRegister, matrix)
+            else:
+                action.execute(self)
         self.action = []
 
     def update_animations(self):
@@ -77,4 +84,8 @@ class GameContext:
     def draw_animations(self):
         for anim in self.animations:
             anim.draw(self.screen, self.camera)
+
+    # actions interaction
+    def add_info_lever_action(self, lever_group, lever_id):
+        self.info_action["Lever Toggle"] = [lever_group, lever_id]
     

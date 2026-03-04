@@ -137,16 +137,16 @@ class Action:
         self.name = name
         self.host = host
 
-    def send_to_network(self, game):
+    def send_to_network(self, context):
         """
         Gère l'envoi réseau si nécessaire.
         """
         print("send")
         if self.host:
-            game.action_created = True
-            game.action_name_to_send.append(self.name)
+            context.action_created = True
+            context.action_name_to_send.append(self.name)
 
-    def execute(self, game):
+    def execute(self, context):
         """
         À redéfinir dans les classes enfants.
         """
@@ -167,11 +167,11 @@ class MeleeAction(Action):
             self.position = (x, y)
             self.direction = (dx, dy)
 
-    def execute(self, game):
+    def execute(self, context):
         print("Melee action")
 
         # gestion réseau commune
-        self.send_to_network(game)
+        self.send_to_network(context)
 
         dx, dy = self.direction
 
@@ -180,18 +180,23 @@ class MeleeAction(Action):
         target_y = self.position[1] - 16 + dy * 32
 
         anim = SimpleSlashAnimation(target_x, target_y, (dx, dy))
-        game.animations.append(anim)
+        context.animations.append(anim)
 
-class LeverAction(Action):
+class LeverAction(Action): # l'action pour switch un levier
     def __init__(self, id_group, id_lever, host=True):
         super().__init__("Lever Action", host)
 
         self.id_group = id_group
         self.id_lever = id_lever
 
-    def execute(self, game, gameRegister, matrix):
+    def send_to_network(self, context):
+        super().send_to_network(context)
+        context.add_info_lever_action(self.id_group, self.id_lever) # on ajoute une instruction pour envoyer les
+                                                                    # infos du levier dans le multi 
+    def execute(self, context, gameRegister, matrix):
         if gameRegister.levers[self.id_group][self.id_lever].locked != True:
-            self.send_to_network(game)
+            self.send_to_network(context)
+            
             gameRegister.levers[self.id_group][self.id_lever].toggle(matrix)
     
 
