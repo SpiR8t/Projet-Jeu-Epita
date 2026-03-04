@@ -17,6 +17,10 @@ class GameContext:
         self.action = []
         self.action_created = False
         self.action_name_to_send = []
+
+        # Ennemis
+        self.enemies = []
+
         # Parametres dev
         self.multiplayer = True
         self.hud = True

@@ -1,6 +1,7 @@
 import pygame
 import math
-from player import Entity
+from player import Entity, Action
+from game_context import GameContext
 
 '''
 On crée une classe globale Enemy, elle-même une sous-classe de Entity (dans player.py).
@@ -68,14 +69,15 @@ class Enemy(Entity):
             vx = dx * self.speed / distance
             vy = dy * self.speed / distance
 
+        #mise à jour de la direction
+        self.update_facing(vx, vy)
+
         #déplacement de l'ennemi
         self.x += vx
         self.y += vy
 
         #déplacement de la hitbox
         self.hitbox.x, self.hitbox.y = int(self.x), int(self.y)
-
-        self.update_facing(vx, vy)
 
 
     def update(self, player):
@@ -96,10 +98,13 @@ class Enemy(Entity):
             self.current_attack_cooldown -= 1
 
         #action de l'ennemi en fonction de son état
+        action = None
         if self.AI_state == "ATTACK":
-            self.attack(player)
+            action = self.attack(player)
         elif self.AI_state == "CHASE":
             self.chase(player)
+
+        return action
 
 
 
@@ -154,6 +159,26 @@ class Slasher(Enemy):
                 player.take_damage(self.damage)
             
             self.current_attack_cooldown = self.attack_cooldown #remise à l'état initial du cooldown
+
+            return SlasherAttack(self, self.attack_range) #on retourne l'action pour le réseau
+        return None #si cooldown pas terminé
+
+
+class SlasherAttack(Action):
+    def __init__(self, caster, range=50, x=0, y=0, facing="N", host=True):
+        super.__init__(caster, range, "SlasherAttack", x, y, 0, 0, host)
+
+        if caster:
+            self.facing = caster.facing
+        else: #si action provenant du réseau
+            self.facing = facing
+
+    def execute(self, game):
+        print("Slasher attack executée")
+        self.send_to_network(game)
+    
+
+
 
 
 '''

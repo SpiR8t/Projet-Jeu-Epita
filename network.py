@@ -11,6 +11,8 @@ from queue import Queue
 from player import *
 import game_logic
 
+from enemy import *
+
 
 # Ajout des paramètres de la base de donnée Firebase
 API_KEY = "AIzaSyCYI_3pSmQTPU2YtLcMlPCW0ch8qurqbEs"

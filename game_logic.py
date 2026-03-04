@@ -22,7 +22,7 @@ def share_info(gamecontext):
     # Scale les images :
     full_heart = pygame.transform.smoothscale(full_heart,(HEIGHT//20,HEIGHT//20))
 
-def update_game(playerL, playerD):
+def update_game(playerL, playerD,):
     """
     Cette fonction correspond à ce qu'il se passe dans la boucle principale du jeu.
     playerL -> player local, playerD  -> player distant
@@ -54,6 +54,12 @@ def update_game(playerL, playerD):
             action = playerL.try_use(0)
             if action:
                 
+                context.add_action(action)
+
+        # Mise à jour des ennemis
+        for enemy in context.enemies:
+            action = enemy.update(playerL)
+            if action:
                 context.add_action(action)
 
     if keys[pygame.K_ESCAPE]: # Activation du menu pause
