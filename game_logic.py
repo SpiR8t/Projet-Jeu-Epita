@@ -214,6 +214,11 @@ def detect_player_movement(keys, playerL):
             playerL.x += playerL.speed
     
     if moved: playerL.direction = (dx,dy)
+
+    #mise à jour de la hitbox
+    playerL.hitbox.x, playerL.hitbox.y = int(playerL.x), int(playerL.y)
+
+
 def draw_HUD(playerL):
     HUD_surface = pygame.Surface((WIDTH,HEIGHT),pygame.SRCALPHA)
     HUD_surface.fill((0, 0, 0, 0))
