@@ -153,9 +153,12 @@ class Slasher(Enemy):
                 print("Damage dealt from Slasher") #peut-être à retirer mais utile pour debug
                 player.take_damage(self.damage)
             
-            self.current_attack_cooldown = self.attack_cooldown
+            self.current_attack_cooldown = self.attack_cooldown #remise à l'état initial du cooldown
 
 
+'''
+ici prochainement : la classe Flinger, un ennemi qui tire de loin
+'''
 
 
             
