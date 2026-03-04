@@ -2,6 +2,9 @@ import pygame
 from isometric_motor import *
 from menu_components import Button, TEXT, display_title
 from gameStateRegistry import gameRegistry
+
+import actions
+
 KEY_COOLDOWN = 300
 
 last_key_pressed = 0
@@ -56,19 +59,30 @@ def update_game(playerL, playerD):
                 
                 context.add_action(action)
 
+        # ========= Temporaire pour tester degats ==============
+        if keys[pygame.K_c]: # Changement de la map : fait spawn une porte au milieu
+            if now() - last_key_pressed >= KEY_COOLDOWN:
+                x_tile,y_tile = iso_to_cart_tile(-2400, 4800)
+                action = actions.EditMapAction("Pilier centre map",x_tile,y_tile, 1,20,20)
+                if action:
+                    context.add_action(action)
+                last_key_pressed = now()
+        # ======================================================
+
+
     if keys[pygame.K_ESCAPE]: # Activation du menu pause
         if now() - last_key_pressed >= KEY_COOLDOWN:
             context.pause_switch()
             last_key_pressed = now()
 
     # ========= Temporaire pour tester degats ==============
-    if keys[pygame.K_k]: # Activation du menu pause
+    if keys[pygame.K_k]: # Retrait de PV au joueur local
         if now() - last_key_pressed >= KEY_COOLDOWN-200:
             playerL.take_damage(1)
             last_key_pressed = now()
 
     # ========= Temporaire pour débug ======================
-    if keys[pygame.K_g]: # Activation du menu pause
+    if keys[pygame.K_g]: # affichage des leviers
         if now() - last_key_pressed >= KEY_COOLDOWN-200:
             print(gameRegistry.levers)
             last_key_pressed = now()
@@ -220,6 +234,7 @@ def detect_player_movement(keys, playerL):
             playerL.x += playerL.speed
     
     if moved: playerL.direction = (dx,dy)
+
 def draw_HUD(playerL):
     HUD_surface = pygame.Surface((WIDTH,HEIGHT),pygame.SRCALPHA)
     HUD_surface.fill((0, 0, 0, 0))

@@ -1,5 +1,6 @@
 import pygame
 import math
+from actions import Action
 
 class Entity():
     def __init__(self,x,y,max_hp,speed):
@@ -127,31 +128,6 @@ class SimpleSlashAnimation:
 
         pygame.draw.arc(screen, (255, 255, 255), rect, start_angle, end_angle, 4)
 
-class Action:
-    def __init__(self, name, host=True):
-        """
-        Classe mère pour toutes les actions.
-
-        """
-        
-        self.name = name
-        self.host = host
-
-    def send_to_network(self, game):
-        """
-        Gère l'envoi réseau si nécessaire.
-        """
-        print("send")
-        if self.host:
-            game.action_created = True
-            game.action_name_to_send.append(self.name)
-
-    def execute(self, game):
-        """
-        À redéfinir dans les classes enfants.
-        """
-        raise NotImplementedError("execute() doit être implémentée.")
-
 class MeleeAction(Action):
 
     def __init__(self, caster, range, x=0, y=0, dx=0, dy=0, host=True):
@@ -167,11 +143,11 @@ class MeleeAction(Action):
             self.position = (x, y)
             self.direction = (dx, dy)
 
-    def execute(self, game):
+    def execute(self, game_context):
         print("Melee action")
 
         # gestion réseau commune
-        self.send_to_network(game)
+        self.send_to_network(game_context)
 
         dx, dy = self.direction
 
@@ -180,11 +156,4 @@ class MeleeAction(Action):
         target_y = self.position[1] - 16 + dy * 32
 
         anim = SimpleSlashAnimation(target_x, target_y, (dx, dy))
-        game.animations.append(anim)
-
-class LeverAction(Action):
-    pass
-    
-
-
-
+        game_context.animations.append(anim)
