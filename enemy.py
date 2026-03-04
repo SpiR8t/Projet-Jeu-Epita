@@ -15,6 +15,7 @@ class Enemy(Entity):
         self.attack_cooldown = attack_cooldown #nombre de frames entre chaque attaque d'un ennemi (pour la vitesse d'attaque)
         self.detection_range = detection_range #zone de détection du joueur
         self.attack_range = attack_range #portée de l'attaque (à cette distance l'ennemi s'arrête et attaque le joueur)
+        self.current_attack_cooldown = attack_cooldown
         self.AI_state = AI_state #à l'apparition l'IA est en mode "inactif"
         self.level = level
 
@@ -90,11 +91,15 @@ class Enemy(Entity):
         else:
             self.AI_state = "IDLE"
 
+        # update du cooldown
+        if self.current_attack_cooldown > 0:
+            self.current_attack_cooldown -= 1
+
         #action de l'ennemi en fonction de son état
         if self.AI_state == "ATTACK":
             self.attack(player)
         elif self.AI_state == "CHASE":
-            self.chase(player) #self.chase(player) : à dev !!
+            self.chase(player)
 
 
 
@@ -125,27 +130,30 @@ class Slasher(Enemy):
     Le joueur prend des dégâts seulement si sa hitbox touche la zone d'atteinte.
     '''
     def attack(self, player):
-        # ajouter animation ici aussi
-        if self.facing == "E":
-            damage_zone = pygame.Rect(self.x+40, self.y+10, self.attack_range, 60)
-        elif self.facing == "SE":
-            damage_zone = pygame.Rect(self.x+10, self.y+10, 30+self.attack_range, 30+self.attack_range)
-        elif self.facing == "S":
-            damage_zone = pygame.Rect(self.x-10, self.y+40, 60, self.attack_range)
-        elif self.facing == "SO":
-            damage_zone = pygame.Rect(self.x-self.attack_range, self.y+10, 30+self.attack_range, 30+self.attack_range)
-        elif self.facing == "O":
-            damage_zone = pygame.Rect(self.x-self.attack_range, self.y-10, self.attack_range, 60)
-        elif self.facing == "NO":
-            damage_zone = pygame.Rect(self.x-self.attack_range, self.y-self.attack_range, 30+self.attack_range, 30+self.attack_range)
-        elif self.facing == "N":
-            damage_zone = pygame.Rect(self.x-10,self.y-self.attack_range, 60, self.attack_range)
-        else: #NE
-            damage_zone = pygame.Rect(self.x+10, self.y-self.attack_range, 30+self.attack_range, 30+self.attack_range)
+        if self.current_attack_cooldown <= 0:
+            # ajouter animation ici aussi
+            if self.facing == "E":
+               damage_zone = pygame.Rect(self.x+40, self.y+10, self.attack_range, 60)
+            elif self.facing == "SE":
+                damage_zone = pygame.Rect(self.x+10, self.y+10, 30+self.attack_range, 30+self.attack_range)
+            elif self.facing == "S":
+                damage_zone = pygame.Rect(self.x-10, self.y+40, 60, self.attack_range)
+            elif self.facing == "SO":
+                damage_zone = pygame.Rect(self.x-self.attack_range, self.y+10, 30+self.attack_range, 30+self.attack_range)
+            elif self.facing == "O":
+                damage_zone = pygame.Rect(self.x-self.attack_range, self.y-10, self.attack_range, 60)
+            elif self.facing == "NO":
+                damage_zone = pygame.Rect(self.x-self.attack_range, self.y-self.attack_range, 30+self.attack_range, 30+self.attack_range)
+            elif self.facing == "N":
+                damage_zone = pygame.Rect(self.x-10,self.y-self.attack_range, 60, self.attack_range)
+            else: #NE
+                damage_zone = pygame.Rect(self.x+10, self.y-self.attack_range, 30+self.attack_range, 30+self.attack_range)
         
-        if damage_zone.colliderect(player.hitbox): #player dans la zone
-            print("Damage dealt from Slasher") #peut-être à retirer mais utile pour debug
-            player.take_damage(self.damage)
+            if damage_zone.colliderect(player.hitbox): #player dans la zone
+                print("Damage dealt from Slasher") #peut-être à retirer mais utile pour debug
+                player.take_damage(self.damage)
+            
+            self.current_attack_cooldown = self.attack_cooldown
 
 
 
