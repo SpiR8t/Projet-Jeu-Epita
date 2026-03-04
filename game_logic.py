@@ -185,8 +185,10 @@ def detect_player_movement(keys, playerL):
             player1_rightfoot[0], player1_rightfoot[1] + playerL.speed
         )
         if (
-            map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
-            and map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0
+            (map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
+            and map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0)
+            or (24 <= map_tiles[l_x_grid_player1][l_y_grid_player1][1] <= 27
+            and 24 <= map_tiles[r_x_grid_player1][r_y_grid_player1][1] <= 27)
         ):
             playerL.y += playerL.speed
     
@@ -204,8 +206,10 @@ def detect_player_movement(keys, playerL):
         )
 
         if (
-            map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
-            and map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0
+            (map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
+            and map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0)
+            or (24 <= map_tiles[l_x_grid_player1][l_y_grid_player1][1] <= 27
+            and 24 <= map_tiles[r_x_grid_player1][r_y_grid_player1][1] <= 27)
         ):
             playerL.y -= playerL.speed
 
@@ -218,7 +222,10 @@ def detect_player_movement(keys, playerL):
             player1_leftfoot[0] - playerL.speed, player1_leftfoot[1]
         )
 
-        if map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0:
+        if (
+            map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
+            or 24 <= map_tiles[l_x_grid_player1][l_y_grid_player1][1] <= 27
+        ):
             playerL.x -= playerL.speed
 
     if keys[pygame.K_RIGHT]:
@@ -230,7 +237,11 @@ def detect_player_movement(keys, playerL):
             player1_rightfoot[0] + playerL.speed, player1_rightfoot[1]
         )
 
-        if map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0:
+
+        if (
+            map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0
+            or 24 <= map_tiles[r_x_grid_player1][r_y_grid_player1][1] <= 27
+        ):
             playerL.x += playerL.speed
     
     if moved: playerL.direction = (dx,dy)

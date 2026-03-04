@@ -80,8 +80,9 @@ class Door:
     def __init__(self, x, y, orientation, group, door_id=None, initial_state = False,):
         self.state = initial_state        # True = ouverte, False = Fermée
         self.orientation = orientation   
-        # 20 = NE, 21 = SW, 22 = NW, 23 = SE
-        # C'est une liste de 2 valeurs : la première correspond à l'orientation quand la porte est ouverte et la 2e quand elle est fermée
+        # 20 = NE, 21 = SW, 22 = NW, 23 = SE  en étant fermée
+        # 24 = NE, 25 = SW, 26 = NW, 27 = SE  en étant ouverte
+        # C'est une liste de 2 valeurs : la première correspond à l'orientation quand la porte est fermée et la 2e quand elle est ouverte
         self.position = (x,y)             #coordonnées dans la matrice de la map
         self.id = door_id                  # Identifiant unique
         self.group = group 

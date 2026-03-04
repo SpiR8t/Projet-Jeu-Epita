@@ -49,5 +49,5 @@ Les tests sont fait dans l'ordre des lignes du tableau donc on applique la valeu
 | --- | --- | --- | --- | --- |
 | `106` | `190` | `48` | Place un mur | 1 2 2 |
 | `187` | `135` | `b` | Place un levier par défaut désactivé, appartenant au group `b` | 1 0 10 |
-| `122` | `40 <= g <= 47` | `b` | Place une porte appartenant au groupe `b`, par défaut fermée, avec `g` définissant l’orientation d’ouverture et de fermeture en suivant cette logique : 40 = NE (ouverture NW), 41 = SW (ouverture NW), 42 = NW (ouverture NE), 43 = SE (ouverture NE) 44 = NE (ouverture SE), 45 = SW (ouverture SE), 46 = NW (ouverture SW), 47 = SE (ouverture SW) | 1 (20,21,22 ou 23) (20,21,22 ou 23) |
+| `122` | `40 <= g <= 47` | `b` | Place une porte appartenant au groupe `b`, par défaut fermée, avec `g` définissant l’orientation d’ouverture et de fermeture en suivant cette logique :   40 = NE (ouverture NW), 41 = SW (ouverture NW), 42 = NW (ouverture NE), 43 = SE (ouverture NE)   44 = NE (ouverture SE), 45 = SW (ouverture SE), 46 = NW (ouverture SW), 47 = SE (ouverture SW).   Les tuiles entre 20 et 23 sont considéré comme des portes ouvertes et entre 24 et 27 comme des portes fermées. | 1 (20 à 27) (20 à 27) |
 | `r` | `g` | `b` | Place uniquement du sol | 1 0 0 |

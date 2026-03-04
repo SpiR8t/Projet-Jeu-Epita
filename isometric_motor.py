@@ -57,8 +57,8 @@ def image_to_matrix(path):
                 gameRegistry.add_lever(Lever(y,x,pixel[2])) # la couleur blue sert d'id
             elif is_door(pixel):
                 g = pixel[1]
-                # 20 = NE (ouverture NW), 21 = SW (ouverture NW), 22 = NW (ouverture NE), 23 = SE (ouverture NE)
-                # 24 = NE (ouverture SE), 25 = SW (ouverture SE), 26 = NW (ouverture SW), 27 = SE (ouverture SW)
+                # 40 = NE (ouverture NW), 41 = SW (ouverture NW), 42 = NW (ouverture NE), 43 = SE (ouverture NE)
+                # 44 = NE (ouverture SE), 45 = SW (ouverture SE), 46 = NW (ouverture SW), 47 = SE (ouverture SW)
                 tile_nb1 = 20 + g%40
                 tile_nb2 = tile_nb1
                 if tile_nb1 > 23:
@@ -68,13 +68,13 @@ def image_to_matrix(path):
                 matrix[y][x][0] = 1
                 orientation_list = [tile_nb2]
                 if tile_nb1 <= 21:
-                    orientation_list.append(22) # NW
+                    orientation_list.append(26) # NW
                 elif tile_nb1 <= 23:
-                    orientation_list.append(20) # NE
+                    orientation_list.append(24) # NE
                 elif tile_nb1 <= 25:
-                    orientation_list.append(23) # SE
+                    orientation_list.append(27) # SE
                 else:
-                    orientation_list.append(21) # SW
+                    orientation_list.append(25) # SW
                 gameRegistry.add_door(Door(x,y,orientation_list,pixel[2]))
                 
             else:
@@ -262,6 +262,9 @@ class Map:
                             self.screen.blit(levier_high, (screen_x, screen_y))
                         elif tile_nb == 11:
                             self.screen.blit(levier_low, (screen_x, screen_y))
-                        elif 20 <= tile_nb <= 24:
-                            self.screen.blit(doors[tile_nb-20], (screen_x, screen_y))
+                        elif 20 <= tile_nb <= 27:
+                            index = tile_nb-20
+                            if tile_nb > 23:
+                                index -= 4
+                            self.screen.blit(doors[index], (screen_x, screen_y))
                         
