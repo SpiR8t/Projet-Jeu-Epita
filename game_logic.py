@@ -2,6 +2,8 @@ import pygame
 from isometric_motor import *
 from menu_components import Button, TEXT, display_title
 from gameStateRegistry import gameRegistry
+from player import LeverAction
+
 KEY_COOLDOWN = 300
 
 last_key_pressed = 0
@@ -22,7 +24,7 @@ def share_info(gamecontext):
     # Scale les images :
     full_heart = pygame.transform.smoothscale(full_heart,(HEIGHT//20,HEIGHT//20))
 
-def update_game(playerL, playerD):
+def update_game(playerL, playerD, matrix):
     """
     Cette fonction correspond à ce qu'il se passe dans la boucle principale du jeu.
     playerL -> player local, playerD  -> player distant
@@ -53,7 +55,11 @@ def update_game(playerL, playerD):
         if keys[pygame.K_SPACE]: # Sword attack
             action = playerL.try_use(0)
             if action:
-                
+                context.add_action(action)
+        # interact
+        if keys[pygame.K_e]: # Sword attack
+            action = playerL.try_use(1)
+            if action:
                 context.add_action(action)
 
     if keys[pygame.K_ESCAPE]: # Activation du menu pause
@@ -71,6 +77,13 @@ def update_game(playerL, playerD):
     if keys[pygame.K_g]: # Activation du menu pause
         if now() - last_key_pressed >= KEY_COOLDOWN-200:
             print(gameRegistry.levers)
+            last_key_pressed = now()
+
+    # ========= Temporaire pour tester levier ======================
+    if keys[pygame.K_h]: # Activation du menu pause
+        if now() - last_key_pressed >= KEY_COOLDOWN-200:
+            action = LeverAction(46,2)
+            action.execute(context, gameRegistry, matrix)
             last_key_pressed = now()
     # ======================================================
 
@@ -105,7 +118,7 @@ def update_game(playerL, playerD):
     check_player_life_state(playerL)
 
     # animations des compétences
-    context.execute_actions()
+    context.execute_actions(gameRegistry, matrix)
     context.update_animations()
     context.draw_animations()
 
@@ -220,6 +233,7 @@ def detect_player_movement(keys, playerL):
             playerL.x += playerL.speed
     
     if moved: playerL.direction = (dx,dy)
+    
 def draw_HUD(playerL):
     HUD_surface = pygame.Surface((WIDTH,HEIGHT),pygame.SRCALPHA)
     HUD_surface.fill((0, 0, 0, 0))
