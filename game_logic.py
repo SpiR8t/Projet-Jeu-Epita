@@ -56,7 +56,11 @@ def update_game(playerL, playerD):
         if keys[pygame.K_SPACE]: # Sword attack
             action = playerL.try_use(0)
             if action:
-                
+                context.add_action(action)
+        # interact
+        if keys[pygame.K_e]: # Sword attack
+            action = playerL.try_use(1)
+            if action:
                 context.add_action(action)
 
         # ========= Temporaire pour tester degats ==============
@@ -85,6 +89,13 @@ def update_game(playerL, playerD):
     if keys[pygame.K_g]: # affichage des leviers
         if now() - last_key_pressed >= KEY_COOLDOWN-200:
             print(gameRegistry.levers)
+            last_key_pressed = now()
+
+    # ========= Temporaire pour tester levier ======================
+    if keys[pygame.K_h]: 
+        if now() - last_key_pressed >= KEY_COOLDOWN:
+            action = actions.LeverAction(46,2)
+            action.execute(context, gameRegistry, context.map)
             last_key_pressed = now()
     # ======================================================
 
@@ -119,7 +130,7 @@ def update_game(playerL, playerD):
     check_player_life_state(playerL)
 
     # animations des compétences
-    context.execute_actions()
+    context.execute_actions(gameRegistry)
     context.update_animations()
     context.draw_animations()
 

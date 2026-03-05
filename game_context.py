@@ -12,11 +12,15 @@ class GameContext:
         self.host_player = playerH
         self.client_player = playerC
 
-        # Animations des compétences
+        # Animations et compétences
         self.animations = []
         self.action = []
+        # Pour envoyer au multi
         self.action_created = False
         self.action_name_to_send = []
+        self.info_action = {} # pour l'instant ça contient les infos des levier
+                              # mais on pourra rajouter bien d'autres choses
+
         # Parametres dev
         self.multiplayer = True
         self.hud = True
@@ -63,9 +67,14 @@ class GameContext:
     def add_action(self, action):
         self.action.append(action)
 
-    def execute_actions(self):
+    def execute_actions(self, gameRegister):
         for action in self.action:
-            action.execute(self)
+            if action.name == "Lever Action":
+                action.execute(self, gameRegister, self.map)
+            elif action.name == "Interact Action":
+                action.execute(self, gameRegister)
+            else:
+                action.execute(self)
         self.action = []
 
     def update_animations(self):
@@ -77,4 +86,14 @@ class GameContext:
     def draw_animations(self):
         for anim in self.animations:
             anim.draw(self.screen, self.camera)
+
+    # actions interaction / c'est pour ajouter les infos nécessaire à l'envoi de l'action à l'autre joueur
+    def add_info_lever_action(self, lever_group, lever_id):
+        self.info_action["Lever Toggle"] = [lever_group, lever_id]
+
+    def add_info_interact_action(self, coords):
+        self.info_action["Interact coords"] = coords
+
+    def add_info_edit_map_action(self, x, y, tile_nb0, tile_nb1, tile_nb2):
+        self.info_action[f"Edit Map ({x},{y})"] = [x, y, tile_nb0, tile_nb1, tile_nb2]
     

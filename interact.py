@@ -4,7 +4,7 @@
 import actions
 
 class Lever:
-    def __init__(self, x, y, group, lever_id=None, initial_state=False):
+    def __init__(self, x, y, group, lever_id=None, initial_state=True):
         self.id = lever_id                  # Identifiant unique
         self.group = group                  # Groupe logique (optionnel)
         self.state = initial_state          # True = activé, False = désactivé
@@ -30,13 +30,20 @@ class Lever:
     # Interaction
     # -------------------------
 
-    def toggle(self):
+    def update_matrix(self, matrix):
+        if self.state == True:
+            matrix.tiles[self.position[0]][self.position[1]][2] = 10
+        else:
+            matrix.tiles[self.position[0]][self.position[1]][2] = 11
+
+
+    def toggle(self, matrix):
         """Inverse l'état du levier."""
         if self.locked:
             return
         
         self.state = not self.state
-        self.on_toggle()
+        self.on_toggle(matrix)
 
     # -------------------------
     # Logique de propagation
@@ -51,13 +58,14 @@ class Lever:
     # Événement déclenché
     # -------------------------
 
-    def on_toggle(self):
+    def on_toggle(self, matrix):
         """
         Méthode appelée à chaque changement d'état.
         Tu peux la modifier selon ton gameplay.
         """
         print(f"Lever {self.id} -> {'ON' if self.state else 'OFF'}")
         self.propagate()
+        self.update_matrix(matrix)
 
     # -------------------------
     # Utilitaires
@@ -99,7 +107,6 @@ class Door:
         else:
             tile_nb = self.orientation[0]
         action = actions.EditMapAction(
-            "opendoor-("+str(self.position[0])+","+str(self.position[1])+")",
             self.position[0],
             self.position[1],
             1,tile_nb,tile_nb

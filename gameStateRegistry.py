@@ -80,4 +80,3 @@ class GameStateRegistry:
 
 # création du registre pour l'importer partout
 gameRegistry = GameStateRegistry()
-print(gameRegistry.levers)

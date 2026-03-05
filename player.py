@@ -1,6 +1,6 @@
 import pygame
-import math
-from actions import Action
+
+from actions import MeleeAction, interactAction
 
 class Entity():
     def __init__(self,x,y,max_hp,speed):
@@ -32,7 +32,7 @@ class Player(Entity):
         super().__init__(x, y, 100,2)
         self.avatar = avatar_image
         self.host = is_host
-        self.skills = [SwordAttack()]
+        self.skills = [SwordAttack(), Interact()]
         
     def try_use(self, index):
         if index < len(self.skills):
@@ -71,89 +71,24 @@ class Skill:
     def create_action(self, caster):
         raise NotImplementedError("create_action must be overridden")
 
+class Interact(Skill):
+    def __init__(self):
+        super().__init__(cooldown=40, range=1)
+
+    def try_use(self, caster):
+        if not self.can_use():
+            return None
+        else:
+            self.current_cd = self.cooldown
+            print('can use')
+            return self.create_action(caster)
+
+    def create_action(self, caster):
+        return interactAction(caster.x, caster.y)
+
 class SwordAttack(Skill):
     def __init__(self):
         super().__init__(cooldown=100, range=1)
 
     def create_action(self, caster):
         return MeleeAction(caster, self.range)
-
-class SimpleSlashAnimation:
-    def __init__(self, x, y, direction, duration=8):
-        self.x = x
-        self.y = y
-        self.direction = direction
-        self.duration = duration
-        self.timer = 0
-        self.finished = False
-
-    def update(self):
-        self.timer += 1
-        if self.timer >= self.duration:
-            self.finished = True
-
-    def draw(self, screen, camera):
-        screen_x, screen_y = camera.apply(self.x, self.y)
-
-        size = 40
-        rect = pygame.Rect(
-            screen_x - size//2,
-            screen_y - size//2,
-            size,
-            size
-        )
-
-        dx, dy = self.direction
-
-        # angles en radians
-        if (dx, dy) == (0, -1):  # haut
-            start_angle = math.radians(200)
-            end_angle = math.radians(340)
-
-        elif (dx, dy) == (0, 1):  # bas
-            start_angle = math.radians(20)
-            end_angle = math.radians(160)
-
-        elif (dx, dy) == (-1, 0):  # gauche
-            start_angle = math.radians(110)
-            end_angle = math.radians(250)
-
-        elif (dx, dy) == (1, 0):  # droite
-            start_angle = math.radians(-70)
-            end_angle = math.radians(70)
-
-        else:
-            start_angle = 0
-            end_angle = math.pi
-
-        pygame.draw.arc(screen, (255, 255, 255), rect, start_angle, end_angle, 4)
-
-class MeleeAction(Action):
-
-    def __init__(self, caster, range, x=0, y=0, dx=0, dy=0, host=True):
-        super().__init__("Melee", host)
-        self.range = range
-
-        # Cas 1 : action créée localement
-        if caster is not None:
-            self.direction = caster.direction
-            self.position = caster.get_pos()
-        # Cas 2 : action reçue via réseau
-        else:
-            self.position = (x, y)
-            self.direction = (dx, dy)
-
-    def execute(self, game_context):
-        print("Melee action")
-
-        # gestion réseau commune
-        self.send_to_network(game_context)
-
-        dx, dy = self.direction
-
-        # position devant le joueur
-        target_x = self.position[0] + 16 + dx * 32
-        target_y = self.position[1] - 16 + dy * 32
-
-        anim = SimpleSlashAnimation(target_x, target_y, (dx, dy))
-        game_context.animations.append(anim)

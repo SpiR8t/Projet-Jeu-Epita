@@ -121,7 +121,7 @@ def display_menu(context):
 
             continue_btn = Button(T["continue"], 7*HEIGHT//12, "continue",screen)
             continue_btn.draw(screen, mouse_pos)
-            if continue_btn.is_clicked(mouse_pos) and context.mouse_pressed and not context.mouse_pressed_last:
+            if continue_btn.is_clicked(mouse_pos) and context.mouse_pressed and not context.mouse_pressed_last and code_multi != "":
                 page = "loading"
                 # envoi du code de partie :
                 if not asked_network:
