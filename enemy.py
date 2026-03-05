@@ -19,14 +19,20 @@ class Enemy(Entity):
         self.current_attack_cooldown = attack_cooldown
         self.AI_state = AI_state #à l'apparition l'IA est en mode "inactif"
         self.level = level
+        #TEST : offsets pour centrer les hitbox
+        self.hitbox_offset_x = 0
+        self.hitbox_offset_y = 0
 
-        self.facing = "N" # directions possibles : N S E O NE NO SE SO
+        self.facing = "O" # directions possibles : N S E O NE NO SE SO
+        self.direction = (0,1) #pas utilisé mais évite les problèmes de définition
+        self.damage_zone = None #zone créée par un ennemi (ex : Slasher) infligeant des dégâts au joueur.
+        #NB : on associe damage_zone directement à la classe pour la récupérer dans game_logic et ainsi pouvoir debug les combats plus facilement
 
 
     def update_facing(self, vx, vy):
         #on peut aussi utiliser cette fonction pour changer la direction des images des ennemis sur la map
 
-        seuil = 20 # seuil de sensibilité pour le changement de direction (MODIFIABLE)
+        seuil = 0.1 # seuil de sensibilité pour le changement de direction (MODIFIABLE)
 
         if abs(vx) < seuil and abs(vy) < seuil: #déplacements négligeables
             return
@@ -59,8 +65,9 @@ class Enemy(Entity):
 
     def chase(self, player): # déplacement de l'ennemi
         # vecteurs directeurs vx et vy
-        dx = player.x - self.x
-        dy = player.y - self.y
+        #on prend le centre de la hitbox du joueur comme cible
+        dx = player.hitbox.centerx - self.hitbox.centerx
+        dy = player.hitbox.centery - self.hitbox.centery
 
         if dx == 0 and dy == 0:
             vx, vy = 0, 0
@@ -77,16 +84,16 @@ class Enemy(Entity):
         self.y += vy
 
         #déplacement de la hitbox
-        self.hitbox.x, self.hitbox.y = int(self.x), int(self.y)
+        self.hitbox.x, self.hitbox.y = int(self.x + self.hitbox_offset_x), int(self.y + self.hitbox_offset_y)
 
 
     def update(self, player):
-        dx = player.x - self.x
-        dy = player.y - self.y
+        dx = player.hitbox.centerx - self.hitbox.centerx
+        dy = player.hitbox.centery - self.hitbox.centery
         distance = math.sqrt(dx**2 + dy**2) #distance entre le joueur et l'ennemi
 
         #mise à jour de l'état de l'IA de l'ennemi
-        if distance <= self.attack_range:
+        if distance <= self.attack_range + 10: #POUR LE TEST : on ajoute 10 car hitbox de l'ennemi de test trop petite donc visuellement l'ennemi se rapproche trop du joueur
             self.AI_state = "ATTACK"
         elif distance <= self.detection_range:
             self.AI_state = "CHASE"
@@ -117,15 +124,18 @@ class Slasher(Enemy):
             y = y,
             #remplacer les valeurs actuelles par des valeurs plus cohérentes lors des tests !!!
             max_hp = 50 + (50*level),
-            speed = 5 * level, 
+            speed = 1 * level, #à remodifier probablement
             damage = 5 * level,
             attack_cooldown = 60,
-            detection_range = 200,
-            attack_range = 50,
+            detection_range = 300,
+            attack_range = 25,
             AI_state = "IDLE",
             level = level
         )
-        self.hitbox = pygame.Rect(x, y, 40, 40)
+        self.hitbox = pygame.Rect(x, y, 20, 20) #taille de la hitbox à adapter au pixel art (NB : il faut aussi réadapter les zones d'attaque en conséquence)
+        #POUR TEST : offsets pour centrer la hitbox du Slasher
+        self.hitbox_offset_x = 5
+        self.hitbox_offset_y = -60
 
     #attaque du slasher (couteau)   
     '''
@@ -135,26 +145,27 @@ class Slasher(Enemy):
     Le joueur prend des dégâts seulement si sa hitbox touche la zone d'atteinte.
     '''
     def attack(self, player):
+        #self.damage_zone = None #MISE A JOUR DE LA DAMAGE ZONE (pas indispensable mais plus propre)
         if self.current_attack_cooldown <= 0:
             # ajouter animation ici aussi
             if self.facing == "E":
-               damage_zone = pygame.Rect(self.x+40, self.y+10, self.attack_range, 60)
+               self.damage_zone = pygame.Rect(self.hitbox.x+20, self.hitbox.y-5, self.attack_range, 30)
             elif self.facing == "SE":
-                damage_zone = pygame.Rect(self.x+10, self.y+10, 30+self.attack_range, 30+self.attack_range)
+                self.damage_zone = pygame.Rect(self.hitbox.x+5, self.hitbox.y+5, 10+self.attack_range, 10+self.attack_range)
             elif self.facing == "S":
-                damage_zone = pygame.Rect(self.x-10, self.y+40, 60, self.attack_range)
+                self.damage_zone = pygame.Rect(self.hitbox.x-5, self.hitbox.y+20, 30, self.attack_range)
             elif self.facing == "SO":
-                damage_zone = pygame.Rect(self.x-self.attack_range, self.y+10, 30+self.attack_range, 30+self.attack_range)
+                self.damage_zone = pygame.Rect(self.hitbox.x-self.attack_range, self.hitbox.y+5, 10+self.attack_range, 10+self.attack_range)
             elif self.facing == "O":
-                damage_zone = pygame.Rect(self.x-self.attack_range, self.y-10, self.attack_range, 60)
+                self.damage_zone = pygame.Rect(self.hitbox.x-self.attack_range, self.hitbox.y-5, self.attack_range, 30)
             elif self.facing == "NO":
-                damage_zone = pygame.Rect(self.x-self.attack_range, self.y-self.attack_range, 30+self.attack_range, 30+self.attack_range)
+                self.damage_zone = pygame.Rect(self.hitbox.x-self.attack_range+5, self.hitbox.y-self.attack_range+5, 10+self.attack_range, 10+self.attack_range)
             elif self.facing == "N":
-                damage_zone = pygame.Rect(self.x-10,self.y-self.attack_range, 60, self.attack_range)
+                self.damage_zone = pygame.Rect(self.hitbox.x-5,self.hitbox.y-self.attack_range, 30, self.attack_range)
             else: #NE
-                damage_zone = pygame.Rect(self.x+10, self.y-self.attack_range, 30+self.attack_range, 30+self.attack_range)
+                self.damage_zone = pygame.Rect(self.hitbox.x+10, self.hitbox.y-self.attack_range+5, 10+self.attack_range, 10+self.attack_range)
         
-            if damage_zone.colliderect(player.hitbox): #player dans la zone
+            if self.damage_zone.colliderect(player.hitbox): #player dans la zone
                 print("Damage dealt from Slasher") #peut-être à retirer mais utile pour debug
                 player.take_damage(self.damage)
             
@@ -166,7 +177,7 @@ class Slasher(Enemy):
 
 class SlasherAttack(Action):
     def __init__(self, caster, range=50, x=0, y=0, facing="N", host=True):
-        super.__init__(caster, range, "SlasherAttack", x, y, 0, 0, host)
+        super().__init__(caster, range, "SlasherAttack", x, y, 0, 0, host)
 
         if caster:
             self.facing = caster.facing

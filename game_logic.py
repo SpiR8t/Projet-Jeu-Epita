@@ -94,6 +94,35 @@ def update_game(playerL, playerD,):
         playerD.avatar,
     )
 
+
+    # --- AFFICHAGE TEST ---
+    for e in context.enemies:
+        # affichage de l'ennemi
+        pos_ecran = context.camera.apply(e.x, e.y)
+        context.screen.blit(e.image, (pos_ecran[0], pos_ecran[1] - 64))
+        
+        #affichage de la hitbox de l'ennemi
+        e_x, e_y = context.camera.apply(e.hitbox.x, e.hitbox.y)
+        pygame.draw.rect(context.screen, (0,0,255), (e_x, e_y, e.hitbox.width, e.hitbox.height), 2)
+
+        #CREATION DU RECTANGLE ROUGE
+        if e.damage_zone != None: # si une zone d'attaque existe
+            # conversion map -> écran via la caméra
+            rect_pos = context.camera.apply(e.damage_zone.x, e.damage_zone.y)
+        
+            # on crée le rectangle à afficher
+            draw_rect = pygame.Rect(rect_pos[0], rect_pos[1], e.damage_zone.width, e.damage_zone.height)
+        
+            # rectangle rouge
+            pygame.draw.rect(context.screen, (255, 0, 0), draw_rect, 2)
+    
+    #MÊME CHOSE POUR LES JOUEURS :
+    p_x, p_y = context.camera.apply(playerL.hitbox.x, playerL.hitbox.y)
+    pygame.draw.rect(context.screen, (0, 0, 255), (p_x, p_y, playerL.hitbox.width, playerL.hitbox.height), 2)
+    # ----------------------
+
+
+
     # Draw du HUD
     if context.hud:
         draw_HUD(playerL)
@@ -218,6 +247,8 @@ def detect_player_movement(keys, playerL):
 
         if map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0:
             playerL.x += playerL.speed
+    #POUR TEST : mise à jour des coordonnées de la hitbox
+    playerL.hitbox.x, playerL.hitbox.y = int(playerL.x + playerL.hitbox_offset_x), int(playerL.y + playerL.hitbox_offset_y)
     
     if moved: playerL.direction = (dx,dy)
 def draw_HUD(playerL):
