@@ -80,8 +80,9 @@ class Enemy(Entity):
         self.update_facing(vx, vy)
 
         #déplacement de l'ennemi
-        self.x += vx
-        self.y += vy
+        if distance > self.attack_range + 10 and distance <= self.detection_range: #pour éviter que l'ennemi se rapproche trop du joueur. POUR LE TEST : on rajoute 10 pour la même raison.
+            self.x += vx
+            self.y += vy
 
         #déplacement de la hitbox
         self.hitbox.x, self.hitbox.y = int(self.x + self.hitbox_offset_x), int(self.y + self.hitbox_offset_y)
@@ -145,7 +146,7 @@ class Slasher(Enemy):
     Le joueur prend des dégâts seulement si sa hitbox touche la zone d'atteinte.
     '''
     def attack(self, player):
-        #self.damage_zone = None #MISE A JOUR DE LA DAMAGE ZONE (pas indispensable mais plus propre)
+        self.damage_zone = None #MISE A JOUR DE LA DAMAGE ZONE (pas indispensable mais plus propre)
         if self.current_attack_cooldown <= 0:
             # ajouter animation ici aussi
             if self.facing == "E":
@@ -170,6 +171,8 @@ class Slasher(Enemy):
                 player.take_damage(self.damage)
             
             self.current_attack_cooldown = self.attack_cooldown #remise à l'état initial du cooldown
+
+            self.chase(player) #mise à jour de la direction de l'attaque au cas où le joueur aurait bougé
 
             return SlasherAttack(self, self.attack_range) #on retourne l'action pour le réseau
         return None #si cooldown pas terminé
