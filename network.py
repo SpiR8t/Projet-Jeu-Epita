@@ -9,6 +9,7 @@ from random import *
 from queue import Queue
 
 from player import *
+import actions
 import game_logic
 
 from enemy import *
@@ -51,7 +52,7 @@ def reset_network():
     global network_ready,pc_global,channel,stop_event
     if network_ready:
         network_ready.clear()
-    if not stop_event.is_set():
+    if stop_event != None and not stop_event.is_set():
         stop_event.set()
     pc_global = None
     channel = None
@@ -330,8 +331,19 @@ def initiate_game():
                         # ajouter l'action à la file d'action du context
 
                         action_names = data["action"]
-                        if "Melee" in action_names: # on check pour chacun des noms d'action
-                            game_context.add_action(MeleeAction(None, 32, data["player_coords"][0], data["player_coords"][1], data["player_direction"][0], data["player_direction"][1], host=False))
+                        for action in action_names:
+                            if "Melee" in action: # on check pour chacun des noms d'action
+                                game_context.add_action(MeleeAction(None, 32, data["player_coords"][0], data["player_coords"][1], data["player_direction"][0], data["player_direction"][1], host=False))
+                            if "Lever Action" in action:
+                                action_data = data["info_action"]["Lever Toggle"]
+                                game_context.add_action(actions.LeverAction(action_data[0], action_data[1], None))
+                            if "Edit Map" in action:
+                                action_data = data["info_action"][action]
+                                game_context.add_action(actions.EditMapAction(action_data[0], action_data[1], action_data[2], action_data[3], action_data[4], None))
+
+                            # if nom de l'action in action_names:
+                            #     recup_data = data[cle action info]
+                            #     game_context.add_action(instance de l'action directement)
 
                     distant_player.x = data["player_coords"][0]
                     distant_player.y = data["player_coords"][1]
@@ -352,9 +364,11 @@ def initiate_game():
                         "player_coords": local_player.get_pos(),
                         "player_direction": local_player.direction,
                         "action": game_context.action_name_to_send,
+                        "info_action": game_context.info_action,
                     }))
                     game_context.action_created = False
                     game_context.action_name_to_send = []
+                    game_context.info_action = {}
                 else:
                     send_data(json.dumps({
                         "msg":"",

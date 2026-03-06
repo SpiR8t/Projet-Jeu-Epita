@@ -1,6 +1,9 @@
 import pygame
 from isometric_motor import *
 from menu_components import Button, TEXT, display_title
+from gameStateRegistry import gameRegistry
+
+import actions
 
 KEY_COOLDOWN = 300
 
@@ -14,7 +17,7 @@ full_heart = pygame.image.load("assets/images/game/HUD/full_heart.png")
 
 def share_info(gamecontext):
     """Partage les informations globales nécéssaires au fichier game_logic.py"""
-    global context,HEIGHT,WIDTH,full_heart,half_heart,empty_heart
+    global context, HEIGHT,WIDTH,full_heart,half_heart,empty_heart
     context = gamecontext
     HEIGHT = context.screen.get_height()
     WIDTH = context.screen.get_width()
@@ -53,8 +56,23 @@ def update_game(playerL, playerD,):
         if keys[pygame.K_SPACE]: # Sword attack
             action = playerL.try_use(0)
             if action:
-                
                 context.add_action(action)
+        # interact
+        if keys[pygame.K_e]: # Sword attack
+            action = playerL.try_use(1)
+            if action:
+                context.add_action(action)
+
+        # ========= Temporaire pour tester degats ==============
+        if keys[pygame.K_c]: # Changement de la map : fait spawn une porte au milieu
+            if now() - last_key_pressed >= KEY_COOLDOWN:
+                for door in gameRegistry.doors[255]:
+                    action = door.open_close()
+                    if action:
+                        context.add_action(action)
+                last_key_pressed = now()
+        # ======================================================
+
 
         # Mise à jour des ennemis
         for enemy in context.enemies:
@@ -68,9 +86,22 @@ def update_game(playerL, playerD,):
             last_key_pressed = now()
 
     # ========= Temporaire pour tester degats ==============
-    if keys[pygame.K_k]: # Activation du menu pause
+    if keys[pygame.K_k]: # Retrait de PV au joueur local
         if now() - last_key_pressed >= KEY_COOLDOWN-200:
             playerL.take_damage(1)
+            last_key_pressed = now()
+
+    # ========= Temporaire pour débug ======================
+    if keys[pygame.K_g]: # affichage des leviers
+        if now() - last_key_pressed >= KEY_COOLDOWN-200:
+            print(gameRegistry.levers)
+            last_key_pressed = now()
+
+    # ========= Temporaire pour tester levier ======================
+    if keys[pygame.K_h]: 
+        if now() - last_key_pressed >= KEY_COOLDOWN:
+            action = actions.LeverAction(46,2)
+            action.execute(context, gameRegistry, context.map)
             last_key_pressed = now()
     # ======================================================
 
@@ -134,7 +165,7 @@ def update_game(playerL, playerD,):
     check_player_life_state(playerL)
 
     # animations des compétences
-    context.execute_actions()
+    context.execute_actions(gameRegistry)
     context.update_animations()
     context.draw_animations()
 
@@ -200,8 +231,10 @@ def detect_player_movement(keys, playerL):
             player1_rightfoot[0], player1_rightfoot[1] + playerL.speed
         )
         if (
-            map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
-            and map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0
+            (map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
+            and map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0)
+            or (24 <= map_tiles[l_x_grid_player1][l_y_grid_player1][1] <= 27
+            and 24 <= map_tiles[r_x_grid_player1][r_y_grid_player1][1] <= 27)
         ):
             playerL.y += playerL.speed
     
@@ -219,8 +252,10 @@ def detect_player_movement(keys, playerL):
         )
 
         if (
-            map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
-            and map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0
+            (map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
+            and map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0)
+            or (24 <= map_tiles[l_x_grid_player1][l_y_grid_player1][1] <= 27
+            and 24 <= map_tiles[r_x_grid_player1][r_y_grid_player1][1] <= 27)
         ):
             playerL.y -= playerL.speed
 
@@ -233,7 +268,10 @@ def detect_player_movement(keys, playerL):
             player1_leftfoot[0] - playerL.speed, player1_leftfoot[1]
         )
 
-        if map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0:
+        if (
+            map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
+            or 24 <= map_tiles[l_x_grid_player1][l_y_grid_player1][1] <= 27
+        ):
             playerL.x -= playerL.speed
 
     if keys[pygame.K_RIGHT]:
@@ -245,13 +283,18 @@ def detect_player_movement(keys, playerL):
             player1_rightfoot[0] + playerL.speed, player1_rightfoot[1]
         )
 
-        if map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0:
+
+        if (
+            map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0
+            or 24 <= map_tiles[r_x_grid_player1][r_y_grid_player1][1] <= 27
+        ):
             playerL.x += playerL.speed
 
     # mise à jour des coordonnées de la hitbox
     playerL.hitbox.x, playerL.hitbox.y = int(playerL.x + playerL.hitbox_offset_x), int(playerL.y + playerL.hitbox_offset_y)
     
     if moved: playerL.direction = (dx,dy)
+
 def draw_HUD(playerL):
     HUD_surface = pygame.Surface((WIDTH,HEIGHT),pygame.SRCALPHA)
     HUD_surface.fill((0, 0, 0, 0))
