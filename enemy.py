@@ -17,13 +17,13 @@ class Enemy(Entity):
         self.detection_range = detection_range #zone de détection du joueur
         self.attack_range = attack_range #portée de l'attaque (à cette distance l'ennemi s'arrête et attaque le joueur)
         self.current_attack_cooldown = attack_cooldown
-        self.AI_state = AI_state #à l'apparition l'IA est en mode "inactif"
+        self.AI_state = AI_state # à l'apparition l'IA est en mode "inactif"
         self.level = level
-        #TEST : offsets pour centrer les hitbox
+        # offsets pour centrer les hitbox
         self.hitbox_offset_x = 0
         self.hitbox_offset_y = 0
 
-        self.facing = "O" # directions possibles : N S E O NE NO SE SO
+        self.facing = "N" # directions possibles : N S E O NE NO SE SO
         self.direction = (0,1) #pas utilisé mais évite les problèmes de définition
         self.damage_zone = None #zone créée par un ennemi (ex : Slasher) infligeant des dégâts au joueur.
         #NB : on associe damage_zone directement à la classe pour la récupérer dans game_logic et ainsi pouvoir debug les combats plus facilement
@@ -80,7 +80,7 @@ class Enemy(Entity):
         self.update_facing(vx, vy)
 
         #déplacement de l'ennemi
-        if distance > self.attack_range + 10 and distance <= self.detection_range: #pour éviter que l'ennemi se rapproche trop du joueur. POUR LE TEST : on rajoute 10 pour la même raison.
+        if distance > self.attack_range + 10 and distance <= self.detection_range: #pour éviter que l'ennemi se rapproche trop du joueur
             self.x += vx
             self.y += vy
 
@@ -94,7 +94,7 @@ class Enemy(Entity):
         distance = math.sqrt(dx**2 + dy**2) #distance entre le joueur et l'ennemi
 
         #mise à jour de l'état de l'IA de l'ennemi
-        if distance <= self.attack_range + 10: #POUR LE TEST : on ajoute 10 car hitbox de l'ennemi de test trop petite donc visuellement l'ennemi se rapproche trop du joueur
+        if distance <= self.attack_range + 10:
             self.AI_state = "ATTACK"
         elif distance <= self.detection_range:
             self.AI_state = "CHASE"

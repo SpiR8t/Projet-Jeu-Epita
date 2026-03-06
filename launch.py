@@ -38,13 +38,16 @@ def main():
     context = GameContext(screen, clock, playerH, playerC, map1, camera)
     context.set_dev_params(MULTIPLAYER,HUD)
 
+    '''
     #==========================================
-    #TEST
-    slasher_img = pygame.image.load("test.png")
+    #TEST (penser à décommenter la partie sur l'affichage dans game_logic.py)
+    slasher_img = pygame.image.load("assets/images/test.png")
     test_enemy = Slasher(-2300,4800,1)
     test_enemy.image = slasher_img
     context.enemies.append(test_enemy)
+    # BONUS : quand on aura les images des vrais ennemis on pourra peut-être utiliser un mask pour créer les hitbox automatiquement avec get_bounding_rect()
     #==========================================
+    '''
 
     if not MULTIPLAYER:
         share_context_multi(context)
