@@ -45,7 +45,7 @@ def main():
     test_enemy = Slasher(-2300,4800,1)
     test_enemy.image = slasher_img
     context.enemies.append(test_enemy)
-    # BONUS : quand on aura les images des vrais ennemis on pourra peut-être utiliser un mask pour créer les hitbox automatiquement avec get_bounding_rect()
+    # PENSER A UTILISER DES SPRITESHEET POUR NE PAS SURCHARGER LES ASSETS ET LE CODE
     #==========================================
     '''
 
