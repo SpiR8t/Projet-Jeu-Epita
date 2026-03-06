@@ -1,6 +1,6 @@
 import pygame
 from gameStateRegistry import gameRegistry
-from interact import Lever
+from interact import Lever,Door
 print(gameRegistry.levers)
 # --- Paramètres de base ---
 TILE_WIDTH = 64
@@ -28,6 +28,9 @@ def is_wall(pixel):
 def is_lever(pixel): # je pense faire un vérif sur seulement r et g, et me servir du b pour index
     r,g,b = pixel
     return r == 187 and g == 135
+def is_door(pixel): # je pense faire un vérif sur seulement r et g, et me servir du b pour index 
+    r,g,b = pixel # et pour l'orientation l'unité de b
+    return r == 122 and (40 <= g <= 47)
 
 
 
@@ -52,6 +55,28 @@ def image_to_matrix(path):
                 matrix[y][x][2] = 10
                 matrix[y][x][0] = 1
                 gameRegistry.add_lever(Lever(y,x,pixel[2])) # la couleur blue sert d'id
+            elif is_door(pixel):
+                g = pixel[1]
+                # 40 = NE (ouverture NW), 41 = SW (ouverture NW), 42 = NW (ouverture NE), 43 = SE (ouverture NE)
+                # 44 = NE (ouverture SE), 45 = SW (ouverture SE), 46 = NW (ouverture SW), 47 = SE (ouverture SW)
+                tile_nb1 = 20 + g%40
+                tile_nb2 = tile_nb1
+                if tile_nb1 > 23:
+                    tile_nb2 -= 4
+                matrix[y][x][1] = tile_nb2
+                matrix[y][x][2] = tile_nb2
+                matrix[y][x][0] = 1
+                orientation_list = [tile_nb2]
+                if tile_nb1 <= 21:
+                    orientation_list.append(26) # NW
+                elif tile_nb1 <= 23:
+                    orientation_list.append(24) # NE
+                elif tile_nb1 <= 25:
+                    orientation_list.append(27) # SE
+                else:
+                    orientation_list.append(25) # SW
+                gameRegistry.add_door(Door(x,y,orientation_list,pixel[2]))
+                
             else:
                 matrix[y][x][1] = 0
                 matrix[y][x][2] = 0
@@ -174,6 +199,21 @@ class Map:
         levier_high = pygame.image.load(
             "assets/images/game/enigmes/levier_high.png"
         ).convert_alpha()
+        doors = [
+            pygame.image.load(
+                "assets/images/game/tileset/test_door_NE.png"
+            ).convert_alpha(),
+            pygame.image.load(
+                "assets/images/game/tileset/test_door_SW.png"
+            ).convert_alpha(),
+            pygame.image.load(
+                "assets/images/game/tileset/test_door_NW.png"
+            ).convert_alpha(),
+            pygame.image.load(
+                "assets/images/game/tileset/test_door_SE.png"
+            ).convert_alpha()
+
+        ]
         
         avatar1 = pygame.image.load(avatar_j1).convert_alpha()
         avatar2 = pygame.image.load(avatar_j2).convert_alpha()
@@ -222,3 +262,9 @@ class Map:
                             self.screen.blit(levier_high, (screen_x, screen_y))
                         elif tile_nb == 11:
                             self.screen.blit(levier_low, (screen_x, screen_y))
+                        elif 20 <= tile_nb <= 27:
+                            index = tile_nb-20
+                            if tile_nb > 23:
+                                index -= 4
+                            self.screen.blit(doors[index], (screen_x, screen_y))
+                        

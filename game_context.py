@@ -67,10 +67,10 @@ class GameContext:
     def add_action(self, action):
         self.action.append(action)
 
-    def execute_actions(self, gameRegister, matrix):
+    def execute_actions(self, gameRegister):
         for action in self.action:
             if action.name == "Lever Action":
-                action.execute(self, gameRegister, matrix)
+                action.execute(self, gameRegister, self.map)
             elif action.name == "Interact Action":
                 action.execute(self, gameRegister)
             else:
@@ -93,4 +93,7 @@ class GameContext:
 
     def add_info_interact_action(self, coords):
         self.info_action["Interact coords"] = coords
+
+    def add_info_edit_map_action(self, x, y, tile_nb0, tile_nb1, tile_nb2):
+        self.info_action[f"Edit Map ({x},{y})"] = [x, y, tile_nb0, tile_nb1, tile_nb2]
     

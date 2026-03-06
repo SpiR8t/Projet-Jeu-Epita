@@ -9,6 +9,7 @@ from random import *
 from queue import Queue
 
 from player import *
+import actions
 import game_logic
 
 
@@ -49,7 +50,7 @@ def reset_network():
     global network_ready,pc_global,channel,stop_event
     if network_ready:
         network_ready.clear()
-    if not stop_event.is_set():
+    if stop_event != None and not stop_event.is_set():
         stop_event.set()
     pc_global = None
     channel = None
@@ -303,7 +304,7 @@ def send_data(data):
 
 # ===== Gestion globale du jeu =====
 
-def initiate_game(matrix):
+def initiate_game():
     """Cette fonction permet de lancer la partie en elle-même : c'est elle qui contient la boucle principale"""
     global has_sent_quit
     network_interval = 16  # 1000 ms -> 1 FPS réseau
@@ -328,15 +329,19 @@ def initiate_game(matrix):
                         # ajouter l'action à la file d'action du context
 
                         action_names = data["action"]
-                        if "Melee" in action_names: # on check pour chacun des noms d'action
-                            game_context.add_action(MeleeAction(None, 32, data["player_coords"][0], data["player_coords"][1], data["player_direction"][0], data["player_direction"][1], host=False))
-                        if "Lever Action" in action_names:
-                            lever_data = data["info_action"]["Lever Toggle"]
-                            game_context.add_action(LeverAction(lever_data[0], lever_data[1], None))
-                        
-                        # if nom de l'action in action_names:
-                        #     recup_data = data[cle action info]
-                        #     game_context.add_action(instance de l'action directement)
+                        for action in action_names:
+                            if "Melee" in action: # on check pour chacun des noms d'action
+                                game_context.add_action(MeleeAction(None, 32, data["player_coords"][0], data["player_coords"][1], data["player_direction"][0], data["player_direction"][1], host=False))
+                            if "Lever Action" in action:
+                                action_data = data["info_action"]["Lever Toggle"]
+                                game_context.add_action(actions.LeverAction(action_data[0], action_data[1], None))
+                            if "Edit Map" in action:
+                                action_data = data["info_action"][action]
+                                game_context.add_action(actions.EditMapAction(action_data[0], action_data[1], action_data[2], action_data[3], action_data[4], None))
+
+                            # if nom de l'action in action_names:
+                            #     recup_data = data[cle action info]
+                            #     game_context.add_action(instance de l'action directement)
 
                     distant_player.x = data["player_coords"][0]
                     distant_player.y = data["player_coords"][1]
@@ -370,7 +375,7 @@ def initiate_game(matrix):
                 last_network_send = now
 
         # Mise à jour de l'affichage du jeu
-        game_logic.update_game(local_player, distant_player, matrix)
+        game_logic.update_game(local_player, distant_player)
 
     if multi_activated:
         # Annonce à l'autre joueur qu'il quitte si ce n'est pas l'autre qui quitte.
