@@ -126,7 +126,7 @@ def update_game(playerL, playerD,):
     )
 
     '''
-    # --- AFFICHAGE TEST ---
+    # --- AFFICHAGE TEST (ne pas supprimer)---
     for e in context.enemies:
         # affichage de l'ennemi
         pos_ecran = context.camera.apply(e.x, e.y)

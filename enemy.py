@@ -1,6 +1,7 @@
 import pygame
 import math
-from player import Entity, Action
+from player import Entity
+from actions import SlasherAttack
 from game_context import GameContext
 
 '''
@@ -176,23 +177,6 @@ class Slasher(Enemy):
 
             return SlasherAttack(self, self.attack_range) #on retourne l'action pour le réseau
         return None #si cooldown pas terminé
-
-
-class SlasherAttack(Action):
-    def __init__(self, caster, range=50, x=0, y=0, facing="N", host=True):
-        super().__init__(caster, range, "SlasherAttack", x, y, 0, 0, host)
-
-        if caster:
-            self.facing = caster.facing
-        else: #si action provenant du réseau
-            self.facing = facing
-
-    def execute(self, game):
-        print("Slasher attack executée")
-        self.send_to_network(game)
-    
-
-
 
 
 '''

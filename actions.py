@@ -121,3 +121,17 @@ class interactAction(Action):
         # ->
 
         # if interact a fait qlq chose il faudra faire animation interaction
+
+
+class SlasherAttack(Action):
+    def __init__(self, caster, range=50, x=0, y=0, facing="N", host=True):
+        super().__init__("SlasherAttack", host)
+
+        if caster:
+            self.facing = caster.facing
+        else: #si action provenant du réseau
+            self.facing = facing
+
+    def execute(self, game):
+        print("Slasher attack executée")
+        self.send_to_network(game)
