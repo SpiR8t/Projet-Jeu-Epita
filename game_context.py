@@ -18,6 +18,9 @@ class GameContext:
         # Pour envoyer au multi
         self.action_created = False
         self.action_name_to_send = []
+
+        # Ennemis
+        self.enemies = []
         self.info_action = {} # pour l'instant ça contient les infos des levier
                               # mais on pourra rajouter bien d'autres choses
 

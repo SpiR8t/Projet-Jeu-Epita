@@ -32,7 +32,13 @@ class Player(Entity):
         super().__init__(x, y, 100,2)
         self.avatar = avatar_image
         self.host = is_host
+
         self.skills = [SwordAttack(), Interact()]
+        self.hitbox = pygame.Rect(x, y, 30, 50)
+        # offset pour centrer la hitbox des joueurs (variables modifiables)
+        self.hitbox_offset_x = 0
+        self.hitbox_offset_y = -50
+
         
     def try_use(self, index):
         if index < len(self.skills):
