@@ -38,7 +38,7 @@ def image_to_matrix(path):
     image = load_image(path)
     width, height = image.size
 
-    matrix = [[[0, 0, 0] for i in range(width)] for j in range(height)]
+    matrix = [[[0, 0, 0] for _ in range(width)] for _ in range(height)]
 
     for y in range(height):
         for x in range(width):
@@ -184,7 +184,7 @@ class Map:
             (screen.get_width() / tile_width) * 2.5
         )  # 2.5 possiblement à modifier pour optimiser la taille
 
-    def draw_map(self, camera, x_j1, y_j1, avatar_j1, x_j2, y_j2, avatar_j2):
+    def draw_map(self, camera, x_j1, y_j1, frame_j1, x_j2, y_j2, frame_j2):
         """fonction qui affiche la map (tiles) ainsi que les deux joueurs"""
 
         tile_wall = pygame.image.load(
@@ -215,8 +215,8 @@ class Map:
 
         ]
         
-        avatar1 = pygame.image.load(avatar_j1).convert_alpha()
-        avatar2 = pygame.image.load(avatar_j2).convert_alpha()
+        #avatar1 = pygame.image.load("assets/images/game/players/avatar.png").convert_alpha()
+        # avatar2 = pygame.image.load(avatar_j2).convert_alpha()
 
         j1_pos = iso_to_cart_tile(x_j1, y_j1)
         j2_pos = iso_to_cart_tile(x_j2, y_j2)
@@ -233,14 +233,15 @@ class Map:
 
                         x_j1, y_j1 = camera.apply(x_j1, y_j1)
                         self.screen.blit(
-                            avatar1, (x_j1, y_j1 - 64)
+                            frame_j1, (x_j1, y_j1 - 64)
                         )  # pour le décalage par rapport à la hauteur du pixel art avatar
+
 
                     if x == j2_pos[0] and y == j2_pos[1] and z == 1:
 
                         x_j2, y_j2 = camera.apply(x_j2, y_j2)
                         self.screen.blit(
-                            avatar2, (x_j2, y_j2 - 64)
+                            frame_j2, (x_j2, y_j2 - 64)
                         )  # pour le décalage par rapport à la hauteur du pixel art avatar
 
                     tile_nb = self.tiles[x][y][z]

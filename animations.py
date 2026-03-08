@@ -1,6 +1,26 @@
 import math
 import pygame
 
+class SpriteSheet:
+    """
+    Class pour la gestion des spritesheet pour les joueurs, ennemis et autres animations 'statiques' 
+    c'est à dire ne se déplaçant pas.
+    """
+    def __init__(self, image_path):
+        self.sheet = pygame.image.load(image_path).convert_alpha()
+
+    def get_frame(self, x, y, width, height, scale=1):
+        frame = pygame.Surface((width, height), pygame.SRCALPHA)
+        frame.blit(self.sheet, (0, 0), (x, y, width, height))
+        if scale != 1:
+            frame = pygame.transform.scale(frame, (int(width * scale), int(height * scale)))
+        return frame
+
+    def get_animation(self, row, num_frames, frame_width, frame_height, scale=1):
+        y = row * frame_height
+        return [self.get_frame(i * frame_width, y, frame_width, frame_height, scale)
+                for i in range(num_frames)]
+
 class SimpleSlashAnimation:
     def __init__(self, x, y, direction, duration=8):
         self.x = x
