@@ -102,7 +102,7 @@ def update_game(playerL, playerD):
     # Fond
     context.screen.fill((50, 50, 60))
 
-    # centre la caméro sur le player
+    # centre la caméra sur le player
     x_player1, y_player1 = playerL.get_pos()
     x_player2, y_player2 = playerD.get_pos()
 

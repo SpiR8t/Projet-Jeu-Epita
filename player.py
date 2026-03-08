@@ -107,6 +107,13 @@ class Player(Entity):
         for skill in self.skills:
             skill.update()
 
+    def get_infos(self):
+        return {
+            "position": self.get_pos(),
+            "direction": self.direction,
+            "is_moving": self.is_moving
+        }
+
 
 """Partie sur les skills et les compétences """
 

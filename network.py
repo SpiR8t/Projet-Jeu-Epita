@@ -331,7 +331,7 @@ def initiate_game():
                         action_names = data["action"]
                         for action in action_names:
                             if "Melee" in action: # on check pour chacun des noms d'action
-                                game_context.add_action(MeleeAction(None, 32, data["player_coords"][0], data["player_coords"][1], data["player_direction"][0], data["player_direction"][1], host=False))
+                                game_context.add_action(MeleeAction(None, 32, data["player_infos"]["position"][0], data["player_infos"]["position"][1], data["player_infos"]["direction"][0], data["player_infos"]["direction"][1], host=False))
                             if "Lever Action" in action:
                                 action_data = data["info_action"]["Lever Toggle"]
                                 game_context.add_action(actions.LeverAction(action_data[0], action_data[1], None))
@@ -343,8 +343,10 @@ def initiate_game():
                             #     recup_data = data[cle action info]
                             #     game_context.add_action(instance de l'action directement)
 
-                    distant_player.x = data["player_coords"][0]
-                    distant_player.y = data["player_coords"][1]
+                    distant_player.x = data["player_infos"]["position"][0]
+                    distant_player.y = data["player_infos"]["position"][1]
+                    distant_player.direction = tuple(data["player_infos"]["direction"])
+                    distant_player.is_moving = data["player_infos"]["is_moving"]
 
                 
         # Gestion boucle réseau :
@@ -359,8 +361,7 @@ def initiate_game():
                 if game_context.action_created: # c'est ici qu'on peut rajouter des variables 
                     send_data(json.dumps({      # à transferer pour la gestion des actions
                         "msg":"action_created",
-                        "player_coords": local_player.get_pos(),
-                        "player_direction": local_player.direction,
+                        "player_infos": local_player.get_infos(),
                         "action": game_context.action_name_to_send,
                         "info_action": game_context.info_action,
                     }))
@@ -370,7 +371,7 @@ def initiate_game():
                 else:
                     send_data(json.dumps({
                         "msg":"",
-                        "player_coords": local_player.get_pos()
+                        "player_infos": local_player.get_infos()
                     }))
                 last_network_send = now
 
@@ -382,7 +383,11 @@ def initiate_game():
         if not distant_player_quitting:
             send_data(json.dumps({
                 "msg": "player_quitting",
-                "player_coords": (0,0)
+                "player_infos": {
+                    "position": (0,0),
+                    "direction": (0,1),
+                    "is_moving": False
+                }
             }))
         time.sleep(0.5)
         stop_event.set()
