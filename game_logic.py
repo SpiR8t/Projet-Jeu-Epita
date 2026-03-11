@@ -51,6 +51,7 @@ def update_game(playerL, playerD):
         # Movements
         playerL.detect_movement(keys, map_tiles)
         playerL.update()
+        
 
         # Skill
         if keys[pygame.K_SPACE]: # Sword attack
@@ -133,7 +134,7 @@ def update_game(playerL, playerD):
     context.execute_actions(gameRegistry)
     context.update_animations()
     context.draw_animations()
-
+    # pygame.draw.circle(context.screen, (255, 0, 0), (context.camera.apply(playerL.get_pos()[0], playerL.get_pos()[1])), 4) #débug
     pygame.display.flip()
     context.clock.tick(60)
 
