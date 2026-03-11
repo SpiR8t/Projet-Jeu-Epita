@@ -1,7 +1,7 @@
 import pygame
 from gameStateRegistry import gameRegistry
 from interact import Lever,Door
-print(gameRegistry.levers)
+
 # --- Paramètres de base ---
 TILE_WIDTH = 64
 TILE_HEIGHT = 32
@@ -116,15 +116,6 @@ def iso_to_cart_tile(screen_x, screen_y, z=0):
     # renvoyer les coordonées arrondies pour les tuiles
     return int(cart_x), int(cart_y)
 
-
-def deduce_foots_from_iso_coords(player_x, player_y):
-    """
-    Fonction qui déduit la position des pieds gauches et droits à partir des coordonnées du joueur (déjà en isométrique)
-
-    Param: player_x et player_y sont les coordonnées représentant la position du joueur gardé dans l'objet Player
-    """
-
-    return ((player_x - 32, player_y), (player_x + 1, player_y))
 
 
 def display_ranges(x_j1, y_j1, size):
