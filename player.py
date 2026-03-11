@@ -42,6 +42,9 @@ class Player(Entity):
         for skill in self.skills:
             skill.update()
 
+
+    # ====== Méthodes pour le déplacement
+
     def deduce_foots_from_iso_coords(self, player_x, player_y):
         """
         Fonction qui déduit la position des pieds gauches et droits à partir des coordonnées du joueur (déjà en isométrique)
@@ -51,90 +54,60 @@ class Player(Entity):
 
         return ((player_x - 32, player_y), (player_x + 1, player_y))
 
-    def detect_movement(self, keys, map_tiles):
+    def is_walkable(self, map_tiles, x, y):
+        tile = map_tiles[x][y][1]
+        return tile == 0 or 24 <= tile <= 27
+    
+    def foot_can_move(self, map_tiles, x, y):
         from isometric_motor import iso_to_cart_tile # pour éviter import circulaire au chargement
-        dx,dy = 0,0
+
+        grid_x, grid_y = iso_to_cart_tile(x,y)
+
+        return self.is_walkable(map_tiles, grid_x, grid_y)
+
+    def detect_movement(self, keys, map_tiles):
+        dx, dy = 0, 0
         moved = False
-        # récupération de la position du player pour vérifier les collisions durant le déplacement
-        # les collisions sont gérées en regardant la position futur
-        x_player1, y_player1 = self.get_pos()
-        player1_leftfoot, player1_rightfoot = self.deduce_foots_from_iso_coords(
-            x_player1, y_player1
+
+        x_player, y_player = self.get_pos()
+
+        left_foot, right_foot = self.deduce_foots_from_iso_coords(x_player, y_player)
+
+        # directions clavier
+        if keys[pygame.K_DOWN]:
+            dy = 1
+        if keys[pygame.K_UP]:
+            dy = -1
+        if keys[pygame.K_LEFT]:
+            dx = -1
+        if keys[pygame.K_RIGHT]:
+            dx = 1
+
+        if dx == 0 and dy == 0:
+            return
+
+        moved = True
+
+        # positions futures des pieds
+        left_future = (
+            left_foot[0] + dx * self.speed,
+            left_foot[1] + dy * self.speed,
         )
 
-        if keys[pygame.K_DOWN]:
-            dy += 1
-            moved = True
+        right_future = (
+            right_foot[0] + dx * self.speed,
+            right_foot[1] + dy * self.speed,
+        )
 
-            # left foot
-            l_x_grid_player1, l_y_grid_player1 = iso_to_cart_tile(
-                player1_leftfoot[0], player1_leftfoot[1] + self.speed
-            )
-            # right foot
-            r_x_grid_player1, r_y_grid_player1 = iso_to_cart_tile(
-                player1_rightfoot[0], player1_rightfoot[1] + self.speed
-            )
-            if (
-                (map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
-                and map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0)
-                or (24 <= map_tiles[l_x_grid_player1][l_y_grid_player1][1] <= 27
-                and 24 <= map_tiles[r_x_grid_player1][r_y_grid_player1][1] <= 27)
-            ):
-                self.y += self.speed
-        
-        if keys[pygame.K_UP]:
-            dy -= 1
-            moved = True
+        if (
+            self.foot_can_move(map_tiles, *left_future)
+            and self.foot_can_move(map_tiles, *right_future)
+        ):
+            self.x += dx * self.speed
+            self.y += dy * self.speed
 
-            # left foot
-            l_x_grid_player1, l_y_grid_player1 = iso_to_cart_tile(
-                player1_leftfoot[0], player1_leftfoot[1] - self.speed
-            )
-            # right foot
-            r_x_grid_player1, r_y_grid_player1 = iso_to_cart_tile(
-                player1_rightfoot[0], player1_rightfoot[1] - self.speed
-            )
-
-            if (
-                (map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
-                and map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0)
-                or (24 <= map_tiles[l_x_grid_player1][l_y_grid_player1][1] <= 27
-                and 24 <= map_tiles[r_x_grid_player1][r_y_grid_player1][1] <= 27)
-            ):
-                self.y -= self.speed
-
-        if keys[pygame.K_LEFT]:
-            dx -= 1
-            moved = True
-
-            # left foot
-            l_x_grid_player1, l_y_grid_player1 = iso_to_cart_tile(
-                player1_leftfoot[0] - self.speed, player1_leftfoot[1]
-            )
-
-            if (
-                map_tiles[l_x_grid_player1][l_y_grid_player1][1] == 0
-                or 24 <= map_tiles[l_x_grid_player1][l_y_grid_player1][1] <= 27
-            ):
-                self.x -= self.speed
-
-        if keys[pygame.K_RIGHT]:
-            dx += 1
-            moved = True
-
-            # right foot
-            r_x_grid_player1, r_y_grid_player1 = iso_to_cart_tile(
-                player1_rightfoot[0] + self.speed, player1_rightfoot[1]
-            )
-
-
-            if (
-                map_tiles[r_x_grid_player1][r_y_grid_player1][1] == 0
-                or 24 <= map_tiles[r_x_grid_player1][r_y_grid_player1][1] <= 27
-            ):
-                self.x += self.speed
-        
-        if moved: self.direction = (dx,dy)
+        if moved:
+            self.direction = (dx, dy)
 
 
 """Partie sur les skills et les compétences """
