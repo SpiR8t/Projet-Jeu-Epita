@@ -38,7 +38,7 @@ def main():
     context = GameContext(screen, clock, playerH, playerC, map1, camera)
     context.set_dev_params(MULTIPLAYER,HUD)
 
-    '''
+    
     #==========================================
     #TEST (penser à décommenter la partie sur l'affichage dans game_logic.py)
     slasher_img = pygame.image.load("assets/images/test.png")
@@ -47,7 +47,7 @@ def main():
     context.enemies.append(test_enemy)
     # PENSER A UTILISER DES SPRITESHEET POUR NE PAS SURCHARGER LES ASSETS ET LE CODE
     #==========================================
-    '''
+    
 
     if not MULTIPLAYER:
         share_context_multi(context)

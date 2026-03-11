@@ -32,6 +32,7 @@ class Player(Entity):
         super().__init__(x, y, 100,2)
         self.avatar = avatar_image
         self.host = is_host
+        self.direction = (0,-1)
 
         self.skills = [SwordAttack(), Interact()]
         self.hitbox = pygame.Rect(x, y, 30, 50)

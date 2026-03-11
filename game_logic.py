@@ -125,7 +125,7 @@ def update_game(playerL, playerD,):
         playerD.avatar,
     )
 
-    '''
+    
     # --- AFFICHAGE TEST ---
     for e in context.enemies:
         # affichage de l'ennemi
@@ -151,7 +151,7 @@ def update_game(playerL, playerD,):
     p_x, p_y = context.camera.apply(playerL.hitbox.x, playerL.hitbox.y)
     pygame.draw.rect(context.screen, (0, 0, 255), (p_x, p_y, playerL.hitbox.width, playerL.hitbox.height), 2)
     # ----------------------
-    '''
+    
 
 
     # Draw du HUD

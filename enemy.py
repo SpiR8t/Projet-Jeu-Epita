@@ -1,6 +1,7 @@
 import pygame
 import math
-from player import Entity, Action
+from player import Entity
+from actions import Action
 from game_context import GameContext
 
 '''
@@ -180,7 +181,12 @@ class Slasher(Enemy):
 
 class SlasherAttack(Action):
     def __init__(self, caster, range=50, x=0, y=0, facing="N", host=True):
-        super().__init__(caster, range, "SlasherAttack", x, y, 0, 0, host)
+        super().__init__("SlasherAttack", host)
+
+        self.caster = caster
+        self.range = range
+        self.x = x
+        self.y = y
 
         if caster:
             self.facing = caster.facing
