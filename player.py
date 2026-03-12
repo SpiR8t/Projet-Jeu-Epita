@@ -52,7 +52,7 @@ class Player(Entity):
         Param: player_x et player_y sont les coordonnées représentant la position du joueur gardé dans l'objet Player
         """
 
-        return ((player_x - 32, player_y), (player_x + 1, player_y))
+        return ((player_x - 32, player_y), (player_x + 1, player_y))  # il va falloir adapter au sprite du joueur
 
     def is_walkable(self, map_tiles, x, y):
         tile = map_tiles[x][y][1]
