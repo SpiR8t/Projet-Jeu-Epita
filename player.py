@@ -55,23 +55,35 @@ class Player(Entity):
 
         return ((player_x - 32, player_y), (player_x + 1, player_y))  # il va falloir adapter au sprite du joueur
 
-    def is_walkable(self, map_tiles, x, y):
+    def is_walkable(self, map_tiles, x, y, x_float, y_float):
         tile = map_tiles[x][y][1]
-        return tile == 0 or 24 <= tile <= 27
-    
+        print(tile)
+        walkable = False
+        if tile == 0:
+            walkable = True
+        elif 24 == tile and y_float % 1 >= 0.2: # le but est de comparer l'endroit sur la tile
+            walkable = True
+        elif 25 == tile and y_float % 1 <= 0.8: # pareil
+            walkable = True
+        elif 26 == tile and x_float % 1 >= 0.2:
+            walkable = True
+        elif 27 == tile and x_float % 1 <= 0.8:
+            walkable = True
+
+        return walkable
     def foot_can_move(self, map_tiles, x, y):
         from isometric_motor import iso_to_cart_tile # pour éviter import circulaire au chargement
 
-        grid_x, grid_y = iso_to_cart_tile(x,y)
-
-        return self.is_walkable(map_tiles, grid_x, grid_y)
+        grid_x, grid_y = iso_to_cart_tile(x,y, decimals=True)
+        print(grid_x, grid_y)
+        return self.is_walkable(map_tiles, int(grid_x), int(grid_y), grid_x, grid_y)
 
     def detect_movement(self, keys, map_tiles):
         dx, dy = 0, 0
         moved = False
 
         x_player, y_player = self.get_pos()
-
+        
         left_foot, right_foot = self.deduce_foots_from_iso_coords(x_player, y_player)
 
         # directions clavier

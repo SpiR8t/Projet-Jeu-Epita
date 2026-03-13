@@ -99,7 +99,7 @@ def cart_to_iso(x, y, z=0):
     return screen_x, screen_y
 
 
-def iso_to_cart_tile(screen_x, screen_y, z=0):
+def iso_to_cart_tile(screen_x, screen_y, z=0, decimals=False):
     """
     Fonction qui passe les coordonnées isométrique (à l'écran) en cartésien pour retrouver la position sur la matrice 3d
 
@@ -114,6 +114,8 @@ def iso_to_cart_tile(screen_x, screen_y, z=0):
     cart_y = (iso_y / (TILE_HEIGHT / 2) - iso_x / (TILE_WIDTH / 2)) / 2
 
     # renvoyer les coordonées arrondies pour les tuiles
+    if decimals:
+        return cart_x, cart_y
     return int(cart_x), int(cart_y)
 
 
