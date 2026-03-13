@@ -11,8 +11,9 @@ Cette classe regroupe toutes les fonctions et méthodes liées à un ennemi.
 '''
 class Enemy(Entity):
     #les coordonnées x et y correspondent à la position du coin supérieur gauche de l'ennemi (important pour les hitbox)
-    def __init__(self, x, y, max_hp, speed, damage, attack_cooldown, detection_range, attack_range, AI_state="IDLE", level=1):
+    def __init__(self, id, x, y, max_hp, speed, damage, attack_cooldown, detection_range, attack_range, AI_state="IDLE", level=1):
         super().__init__(x, y, max_hp, speed)
+        self.id = id
         self.damage = damage
         self.attack_cooldown = attack_cooldown #nombre de frames entre chaque attaque d'un ennemi (pour la vitesse d'attaque)
         self.detection_range = detection_range #zone de détection du joueur
@@ -120,8 +121,9 @@ class Enemy(Entity):
 # PREMIER ENNEMI : le Slasher
 
 class Slasher(Enemy):
-    def __init__(self, x, y, level=1): # niveaux possibles : 1, 2 ou 3
+    def __init__(self, num_id, x, y, level=1): # niveaux possibles : 1, 2 ou 3
         super().__init__(
+            id = num_id, # Correspond à l'index de l'ennemie dans la liste ennemies de game_contexte
             x = x,
             y = y,
             #remplacer les valeurs actuelles par des valeurs plus cohérentes lors des tests !!!
@@ -177,6 +179,15 @@ class Slasher(Enemy):
 
             return SlasherAttack(self, self.attack_range) #on retourne l'action pour le réseau
         return None #si cooldown pas terminé
+    
+    def state_info(self):
+        infos = {
+            "position": (self.x,self.y),
+            "facing": self.facing,
+            "direction": self.direction,
+            "hp": self.hp
+        }
+        return "Slasher_"+self.id, infos
 
 
 class SlasherAttack(Action):

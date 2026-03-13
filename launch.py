@@ -17,7 +17,7 @@ def main():
 
     # Paramètres pour le dev :
     FULLSCREEN = False   # Fenêtre ou fullscreen
-    MULTIPLAYER = False  # Activation du multijoueur
+    MULTIPLAYER = True  # Activation du multijoueur
     HUD = True           # Activation du HUD
 
     if FULLSCREEN:
@@ -42,7 +42,7 @@ def main():
     #==========================================
     #TEST (penser à décommenter la partie sur l'affichage dans game_logic.py)
     slasher_img = pygame.image.load("assets/images/test.png")
-    test_enemy = Slasher(-2300,4800,1)
+    test_enemy = Slasher(0,-2300,4800,1)
     test_enemy.image = slasher_img
     context.enemies.append(test_enemy)
     # PENSER A UTILISER DES SPRITESHEET POUR NE PAS SURCHARGER LES ASSETS ET LE CODE

@@ -64,7 +64,7 @@ def update_game(playerL, playerD,):
                 context.add_action(action)
 
         # ========= Temporaire pour tester degats ==============
-        if keys[pygame.K_c]: # Changement de la map : fait spawn une porte au milieu
+        if keys[pygame.K_c]: # Changement de la map : ouvre/ferme toutes les portes du groupe 255
             if now() - last_key_pressed >= KEY_COOLDOWN:
                 for door in gameRegistry.doors[255]:
                     action = door.open_close()
@@ -75,10 +75,11 @@ def update_game(playerL, playerD,):
 
 
         # Mise à jour des ennemis
-        for enemy in context.enemies:
-            action = enemy.update(playerL)
-            if action:
-                context.add_action(action)
+        if playerL.host:
+            for enemy in context.enemies:
+                action = enemy.update(playerL)
+                if action:
+                    context.add_action(action)
 
     if keys[pygame.K_ESCAPE]: # Activation du menu pause
         if now() - last_key_pressed >= KEY_COOLDOWN:
