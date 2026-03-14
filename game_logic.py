@@ -74,50 +74,52 @@ def update_game(playerL, playerD):
                 last_key_pressed = now()
         # ======================================================
 
+        # ========= Temporaire pour tester degats ==============
+        if keys[pygame.K_k]: # Retrait de PV au joueur local
+            if now() - last_key_pressed >= KEY_COOLDOWN-200:
+                playerL.take_damage(1)
+                last_key_pressed = now()
+
+        # ========= Temporaire pour débug ======================
+        if keys[pygame.K_g]: # affichage des leviers
+            if now() - last_key_pressed >= KEY_COOLDOWN-200:
+                print(gameRegistry.levers)
+                last_key_pressed = now()
+
+        # ========= Temporaire pour tester levier ======================
+        if keys[pygame.K_h]: 
+            if now() - last_key_pressed >= KEY_COOLDOWN:
+                action = actions.LeverAction(46,2)
+                action.execute(context, gameRegistry, context.map)
+                last_key_pressed = now()
+        # ======================================================
+
 
     if keys[pygame.K_ESCAPE]: # Activation du menu pause
         if now() - last_key_pressed >= KEY_COOLDOWN:
             context.pause_switch()
             last_key_pressed = now()
 
-    # ========= Temporaire pour tester degats ==============
-    if keys[pygame.K_k]: # Retrait de PV au joueur local
-        if now() - last_key_pressed >= KEY_COOLDOWN-200:
-            playerL.take_damage(1)
-            last_key_pressed = now()
-
-    # ========= Temporaire pour débug ======================
-    if keys[pygame.K_g]: # affichage des leviers
-        if now() - last_key_pressed >= KEY_COOLDOWN-200:
-            print(gameRegistry.levers)
-            last_key_pressed = now()
-
-    # ========= Temporaire pour tester levier ======================
-    if keys[pygame.K_h]: 
-        if now() - last_key_pressed >= KEY_COOLDOWN:
-            action = actions.LeverAction(46,2)
-            action.execute(context, gameRegistry, context.map)
-            last_key_pressed = now()
-    # ======================================================
-
     # Fond
     context.screen.fill((50, 50, 60))
 
-    # centre la caméro sur le player
+    # centre la caméra sur le player
     x_player1, y_player1 = playerL.get_pos()
     x_player2, y_player2 = playerD.get_pos()
 
-    # print("Coords : x = ",x_player, "y = ", y_player)
+    playerL.update_animation()
+    playerD.update_animation()
+
     context.camera.follow(x_player1, y_player1, 0.05)
     # afficher la map, avec le décalage imposé par la caméra
     context.map.draw_map(
         context.camera,
         x_player1,
         y_player1,
-        playerL.avatar,
+        playerL.image,
         x_player2,
         y_player2,
-        playerD.avatar,
+        playerD.image,
     )
 
     # Draw du HUD
