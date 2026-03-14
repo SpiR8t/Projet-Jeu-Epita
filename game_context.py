@@ -20,13 +20,16 @@ class GameContext:
         self.action_name_to_send = []
 
         # Ennemis
-        self.enemies = []
+        self.ennemies = [] # contient les objets ennemies
+
+
         self.info_action = {} # pour l'instant ça contient les infos des levier
                               # mais on pourra rajouter bien d'autres choses
 
         # Parametres dev
         self.multiplayer = True
         self.hud = True
+        self.hitboxs = True
 
         # Jeu
         self.game_code = ""
@@ -41,10 +44,11 @@ class GameContext:
 
         self.quitting = False # ferme le jeu
 
-    def set_dev_params(self,multi,hud):
+    def set_dev_params(self,multi,hud,hitboxs):
         """Méthode pour définir les paramètres servant au dev"""
         self.multiplayer = multi
         self.hud = hud
+        self.hitboxs = hitboxs
 
     def edit_game_code(self,newcode):
         self.game_code=newcode

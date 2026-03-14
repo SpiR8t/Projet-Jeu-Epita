@@ -1,7 +1,7 @@
 import pygame
 from gameStateRegistry import gameRegistry
 from interact import Lever,Door
-print(gameRegistry.levers)
+
 # --- Paramètres de base ---
 TILE_WIDTH = 64
 TILE_HEIGHT = 32
@@ -38,7 +38,7 @@ def image_to_matrix(path):
     image = load_image(path)
     width, height = image.size
 
-    matrix = [[[0, 0, 0] for i in range(width)] for j in range(height)]
+    matrix = [[[0, 0, 0] for _ in range(width)] for _ in range(height)]
 
     for y in range(height):
         for x in range(width):
@@ -99,7 +99,7 @@ def cart_to_iso(x, y, z=0):
     return screen_x, screen_y
 
 
-def iso_to_cart_tile(screen_x, screen_y, z=0):
+def iso_to_cart_tile(screen_x, screen_y, z=0, decimals=False):
     """
     Fonction qui passe les coordonnées isométrique (à l'écran) en cartésien pour retrouver la position sur la matrice 3d
 
@@ -114,17 +114,10 @@ def iso_to_cart_tile(screen_x, screen_y, z=0):
     cart_y = (iso_y / (TILE_HEIGHT / 2) - iso_x / (TILE_WIDTH / 2)) / 2
 
     # renvoyer les coordonées arrondies pour les tuiles
+    if decimals:
+        return cart_x, cart_y
     return int(cart_x), int(cart_y)
 
-
-def deduce_foots_from_iso_coords(player_x, player_y):
-    """
-    Fonction qui déduit la position des pieds gauches et droits à partir des coordonnées du joueur (déjà en isométrique)
-
-    Param: player_x et player_y sont les coordonnées représentant la position du joueur gardé dans l'objet Player
-    """
-
-    return ((player_x - 32, player_y), (player_x + 1, player_y))
 
 
 def display_ranges(x_j1, y_j1, size):
@@ -184,7 +177,17 @@ class Map:
             (screen.get_width() / tile_width) * 2.5
         )  # 2.5 possiblement à modifier pour optimiser la taille
 
-    def draw_map(self, camera, x_j1, y_j1, avatar_j1, x_j2, y_j2, avatar_j2):
+    def draw_player(self, position, position_iso, frame, x, y, camera, screen):
+
+        if x == position[0] and y == position[1]:
+            (x_j,y_j) = position_iso
+            x_j, y_j = camera.apply(x_j, y_j)
+            screen.blit(
+                frame, (x_j-(57//2)-7, y_j - 68)
+            )  # pour le décalage par rapport à la hauteur et la largeur du sprite (centré sur son pied gauche)
+            
+
+    def draw_map(self, camera, x_j1, y_j1, frame_j1, x_j2, y_j2, frame_j2):
         """fonction qui affiche la map (tiles) ainsi que les deux joueurs"""
 
         tile_wall = pygame.image.load(
@@ -215,8 +218,8 @@ class Map:
 
         ]
         
-        avatar1 = pygame.image.load(avatar_j1).convert_alpha()
-        avatar2 = pygame.image.load(avatar_j2).convert_alpha()
+        #avatar1 = pygame.image.load("assets/images/game/players/avatar.png").convert_alpha()
+        # avatar2 = pygame.image.load(avatar_j2).convert_alpha()
 
         j1_pos = iso_to_cart_tile(x_j1, y_j1)
         j2_pos = iso_to_cart_tile(x_j2, y_j2)
@@ -229,28 +232,24 @@ class Map:
         for x in range(x_min, x_max):
             for y in range(y_min, y_max):
                 for z in range(self.map_levels):
-                    if x == j1_pos[0] and y == j1_pos[1] and z == 1:
-
-                        x_j1, y_j1 = camera.apply(x_j1, y_j1)
-                        self.screen.blit(
-                            avatar1, (x_j1, y_j1 - 64)
-                        )  # pour le décalage par rapport à la hauteur du pixel art avatar
-
-                    if x == j2_pos[0] and y == j2_pos[1] and z == 1:
-
-                        x_j2, y_j2 = camera.apply(x_j2, y_j2)
-                        self.screen.blit(
-                            avatar2, (x_j2, y_j2 - 64)
-                        )  # pour le décalage par rapport à la hauteur du pixel art avatar
-
+                    
                     tile_nb = self.tiles[x][y][z]
 
-                    # si tile_nb != 0 (n'est pas vide) alors on affiche la tuile correspondante
+                    # condition pour l'affichage si le joueur passe devant une porte censée le cacher
+                    # on l'affiche avant dans ce cas
+                    hidden = False
+                    if tile_nb == 25 or tile_nb == 27:
+                        hidden = True
 
+                    if hidden and (z == 1 or z == 0):
+                        self.draw_player(j1_pos, (x_j1,y_j1), frame_j1, x, y, camera, self.screen)
+                        self.draw_player(j2_pos, (x_j2,y_j2), frame_j2, x, y, camera, self.screen)
+
+                    # si tile_nb != 0 (n'est pas vide) alors on affiche la tuile correspondante
                     if tile_nb != 0:
                         # Chaque condition correspond à une tuile différente
                         # ===== C'est ici pour rajouter l'affichage d'un élément
-                        # ===== il faut simplement faire un condition à l'image des autres
+                        # ===== il faut simplement faire une condition à l'image des autres
                         # ===== avec le bon numero et ajouter l'image au début de la méthode
                         screen_x, screen_y = cart_to_iso(x, y, z)
                         screen_x, screen_y = camera.apply(screen_x, screen_y)
@@ -266,5 +265,13 @@ class Map:
                             index = tile_nb-20
                             if tile_nb > 23:
                                 index -= 4
+
+                            player_behind = False
+
+                            if tile_nb in [20,24]:
+                                if j1_pos[1] < y:
+                                    player_behind = True
                             self.screen.blit(doors[index], (screen_x, screen_y))
-                        
+                    if not hidden and z == 2:
+                        self.draw_player(j1_pos, (x_j1,y_j1), frame_j1, x, y, camera, self.screen)
+                        self.draw_player(j2_pos, (x_j2,y_j2), frame_j2, x, y, camera, self.screen)
