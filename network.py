@@ -332,7 +332,7 @@ def initiate_game():
                         action_names = data["action"]
                         for action in action_names:
                             if "Melee" in action: # on check pour chacun des noms d'action
-                                game_context.add_action(MeleeAction(None, 32, data["player_coords"][0], data["player_coords"][1], data["player_direction"][0], data["player_direction"][1], host=False))
+                                game_context.add_action(MeleeAction(None, 32, data["player_infos"]["position"][0], data["player_infos"]["position"][1], data["player_infos"]["direction"][0], data["player_infos"]["direction"][1], host=False))
                             if "Lever Action" in action:
                                 action_data = data["info_action"]["Lever Toggle"]
                                 game_context.add_action(actions.LeverAction(action_data[0], action_data[1], None))
@@ -359,13 +359,14 @@ def initiate_game():
                             game_context.ennemies[ennemi_id].hitbox.height = infos["hitbox"][3]
 
                     # gestion du joueur distant
-                    distant_player.x = data["player_coords"][0]
-                    distant_player.y = data["player_coords"][1]
-                    distant_player.hitbox.x = data["player_hitbox"][0]
-                    distant_player.hitbox.y = data["player_hitbox"][1]
-                    distant_player.hitbox.width = data["player_hitbox"][2]
-                    distant_player.hitbox.height = data["player_hitbox"][3]
-
+                    distant_player.x = data["player_infos"]["position"][0]
+                    distant_player.y = data["player_infos"]["position"][1]
+                    distant_player.hitbox.x = data["player_infos"]["hitbox"][0]
+                    distant_player.hitbox.y = data["player_infos"]["hitbox"][1]
+                    distant_player.hitbox.width = data["player_infos"]["hitbox"][2]
+                    distant_player.hitbox.height = data["player_infos"]["hitbox"][3]
+                    distant_player.direction = tuple(data["player_infos"]["direction"])
+                    distant_player.is_moving = data["player_infos"]["is_moving"]
                 
         # Gestion boucle réseau :
         if (
@@ -378,9 +379,7 @@ def initiate_game():
                 # Envoie des messages
                 data_to_send = {
                     "msg":"",
-                    "player_coords": local_player.get_pos(),
-                    "player_direction": local_player.direction,
-                    "player_hitbox": [local_player.hitbox.x,local_player.hitbox.y,local_player.hitbox.width,local_player.hitbox.height],
+                    "player_infos": local_player.get_infos(),
                     "ennemies": {}
                 }
                 if game_context.action_created: # c'est ici qu'on peut rajouter des variables 
