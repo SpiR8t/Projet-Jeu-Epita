@@ -35,6 +35,7 @@ class Player(Entity):
         self.host = is_host
         self.skills = [SwordAttack(), Interact()]
         self.hitbox = pygame.Rect(self.x, self.y, 40, 40)
+        self.direction = (-1,-1)
 
         # Gestion de la spritesheet
         FRAME_W, FRAME_H = 57, 57
@@ -98,6 +99,7 @@ class Player(Entity):
         else:
             self.image = self.idle_frames[self.last_direction]
 
+        
     def try_use(self, index):
         if index < len(self.skills):
             return self.skills[index].try_use(self)
@@ -113,6 +115,84 @@ class Player(Entity):
             "direction": self.direction,
             "is_moving": self.is_moving
         }
+
+
+    # ====== Méthodes pour le déplacement
+
+    def deduce_foots_from_iso_coords(self, player_x, player_y):
+        """
+        Fonction qui déduit la position des pieds gauches et droits à partir des coordonnées du joueur (déjà en isométrique)
+
+        Param: player_x et player_y sont les coordonnées représentant la position du joueur gardé dans l'objet Player
+        """
+
+        return ((player_x - 32, player_y), (player_x + 1, player_y))  # il va falloir adapter au sprite du joueur
+
+    def is_walkable(self, map_tiles, x, y, x_float, y_float):
+        tile = map_tiles[x][y][1]
+        # print(tile)
+        walkable = False
+        if tile == 0:
+            walkable = True
+        elif 24 == tile and y_float % 1 >= 0.2: # le but est de comparer l'endroit sur la tile
+            walkable = True
+        elif 25 == tile and y_float % 1 <= 0.8: # pareil
+            walkable = True
+        elif 26 == tile and x_float % 1 >= 0.2:
+            walkable = True
+        elif 27 == tile and x_float % 1 <= 0.8:
+            walkable = True
+
+        return walkable
+    def foot_can_move(self, map_tiles, x, y):
+        from isometric_motor import iso_to_cart_tile # pour éviter import circulaire au chargement
+
+        grid_x, grid_y = iso_to_cart_tile(x,y, decimals=True)
+        # print(grid_x, grid_y)
+        return self.is_walkable(map_tiles, int(grid_x), int(grid_y), grid_x, grid_y)
+
+    def detect_movement(self, keys, map_tiles):
+        dx, dy = 0, 0
+        moved = False
+
+        x_player, y_player = self.get_pos()
+        
+        left_foot, right_foot = self.deduce_foots_from_iso_coords(x_player, y_player)
+
+        # directions clavier
+        if keys[pygame.K_DOWN]:
+            dy = 1
+        if keys[pygame.K_UP]:
+            dy = -1
+        if keys[pygame.K_LEFT]:
+            dx = -1
+        if keys[pygame.K_RIGHT]:
+            dx = 1
+
+        if dx == 0 and dy == 0:
+            self.is_moving = False
+            return
+
+        # positions futures des pieds
+        left_future = (
+            left_foot[0] + dx * self.speed,
+            left_foot[1] + dy * self.speed,
+        )
+
+        right_future = (
+            right_foot[0] + dx * self.speed,
+            right_foot[1] + dy * self.speed,
+        )
+
+        if (
+            self.foot_can_move(map_tiles, *left_future)
+            and self.foot_can_move(map_tiles, *right_future)
+        ):
+            self.x += dx * self.speed
+            self.y += dy * self.speed
+
+        self.direction = (dx, dy)
+        self.is_moving = True
 
 
 """Partie sur les skills et les compétences """

@@ -16,7 +16,7 @@ def main():
 
     # Paramètres pour le dev :
     FULLSCREEN = False   # Fenêtre ou fullscreen
-    MULTIPLAYER = True  # Activation du multijoueur
+    MULTIPLAYER = False  # Activation du multijoueur
     HUD = True           # Activation du HUD
 
     if FULLSCREEN:
