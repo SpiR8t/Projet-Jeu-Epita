@@ -12,7 +12,7 @@ from player import *
 import actions
 import game_logic
 
-from enemy import *
+from ennemy import *
 
 
 # Ajout des paramètres de la base de donnée Firebase
@@ -326,7 +326,6 @@ def initiate_game():
                     distant_player_quitting = True
                     print("L'autre joueur a quitté la partie")
                 else:
-
                     if data["msg"] == "action_created":
                         # ajouter l'action à la file d'action du context
 
@@ -345,8 +344,27 @@ def initiate_game():
                             #     recup_data = data[cle action info]
                             #     game_context.add_action(instance de l'action directement)
 
+                    # gestion des ennemis
+                    for ennemi,infos in data["ennemies"].items():
+                        ennemi_id = int(ennemi[-3:])
+                        if "Slasher" in ennemi:
+                            game_context.ennemies[ennemi_id].x = infos["position"][0]
+                            game_context.ennemies[ennemi_id].y = infos["position"][1]
+                            game_context.ennemies[ennemi_id].facing = infos["facing"]
+                            game_context.ennemies[ennemi_id].direction = infos["direction"]
+                            game_context.ennemies[ennemi_id].hp = infos["hp"]
+                            game_context.ennemies[ennemi_id].hitbox.x = infos["hitbox"][0]
+                            game_context.ennemies[ennemi_id].hitbox.y = infos["hitbox"][1]
+                            game_context.ennemies[ennemi_id].hitbox.width = infos["hitbox"][2]
+                            game_context.ennemies[ennemi_id].hitbox.height = infos["hitbox"][3]
+
+                    # gestion du joueur distant
                     distant_player.x = data["player_coords"][0]
                     distant_player.y = data["player_coords"][1]
+                    distant_player.hitbox.x = data["player_hitbox"][0]
+                    distant_player.hitbox.y = data["player_hitbox"][1]
+                    distant_player.hitbox.width = data["player_hitbox"][2]
+                    distant_player.hitbox.height = data["player_hitbox"][3]
 
                 
         # Gestion boucle réseau :
@@ -358,22 +376,30 @@ def initiate_game():
             now = game_logic.now()
             if now - last_network_send >= network_interval:
                 # Envoie des messages
+                data_to_send = {
+                    "msg":"",
+                    "player_coords": local_player.get_pos(),
+                    "player_direction": local_player.direction,
+                    "player_hitbox": [local_player.hitbox.x,local_player.hitbox.y,local_player.hitbox.width,local_player.hitbox.height],
+                    "ennemies": {}
+                }
                 if game_context.action_created: # c'est ici qu'on peut rajouter des variables 
-                    send_data(json.dumps({      # à transferer pour la gestion des actions
-                        "msg":"action_created",
-                        "player_coords": local_player.get_pos(),
-                        "player_direction": local_player.direction,
-                        "action": game_context.action_name_to_send,
-                        "info_action": game_context.info_action,
-                    }))
+                    data_to_send["msg"] = "action_created"
+                    data_to_send["action"] = game_context.action_name_to_send
+                    data_to_send["info_action"] = game_context.info_action
                     game_context.action_created = False
                     game_context.action_name_to_send = []
                     game_context.info_action = {}
-                else:
-                    send_data(json.dumps({
-                        "msg":"",
-                        "player_coords": local_player.get_pos()
-                    }))
+
+                if local_player.host:
+                    for ennemi in game_context.ennemies:
+                        key,vals = ennemi.state_info()
+                        # Chaque clé correspond au nom de l'ennemie (ex : Slasher) puis d'un underscore 
+                        # puis son identifiant sur 3 chiffre qui correspond à sa position dans la liste ennemie
+                        # du game_context et la valeur c'est un dico qui contient tout les parametres à modifier
+                        data_to_send["ennemies"][key] = vals
+                
+                send_data(json.dumps(data_to_send))
                 last_network_send = now
 
         # Mise à jour de l'affichage du jeu
@@ -383,8 +409,7 @@ def initiate_game():
         # Annonce à l'autre joueur qu'il quitte si ce n'est pas l'autre qui quitte.
         if not distant_player_quitting:
             send_data(json.dumps({
-                "msg": "player_quitting",
-                "player_coords": (0,0)
+                "msg": "player_quitting"
             }))
         time.sleep(0.5)
         stop_event.set()

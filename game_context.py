@@ -20,9 +20,7 @@ class GameContext:
         self.action_name_to_send = []
 
         # Ennemis
-        self.enemies = [] # contient les objets ennemies
-        self.enemies_infos = [] # contient les infos des ennemies ou chaque clé est l'identifiant de l'ennemie
-
+        self.ennemies = [] # contient les objets ennemies
 
 
         self.info_action = {} # pour l'instant ça contient les infos des levier

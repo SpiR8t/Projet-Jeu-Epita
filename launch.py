@@ -5,7 +5,7 @@ import sys
 
 from game_context import GameContext
 from player import *
-from enemy import *
+from ennemy import *
 from isometric_motor import *
 
 from network import initiate_game,share_context_multi,reset_network
@@ -44,7 +44,7 @@ def main():
     slasher_img = pygame.image.load("assets/images/test.png")
     test_enemy = Slasher(0,-2300,4800,1)
     test_enemy.image = slasher_img
-    context.enemies.append(test_enemy)
+    context.ennemies.append(test_enemy)
     # PENSER A UTILISER DES SPRITESHEET POUR NE PAS SURCHARGER LES ASSETS ET LE CODE
     #==========================================
     

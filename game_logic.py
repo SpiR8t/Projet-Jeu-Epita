@@ -74,12 +74,12 @@ def update_game(playerL, playerD,):
         # ======================================================
 
 
-        # Mise à jour des ennemis
-        if playerL.host:
-            for enemy in context.enemies:
-                action = enemy.update(playerL)
-                if action:
-                    context.add_action(action)
+    # Mise à jour des ennemis
+    if playerL.host:
+        for ennemy in context.ennemies:
+            action = ennemy.update(playerL)
+            if action:
+                context.add_action(action)
 
     if keys[pygame.K_ESCAPE]: # Activation du menu pause
         if now() - last_key_pressed >= KEY_COOLDOWN:
@@ -128,29 +128,31 @@ def update_game(playerL, playerD,):
 
     
     # --- AFFICHAGE TEST ---
-    for e in context.enemies:
+    for e in context.ennemies:
         # affichage de l'ennemi
         pos_ecran = context.camera.apply(e.x, e.y)
         context.screen.blit(e.image, (pos_ecran[0], pos_ecran[1] - 64))
 
         #affichage de la hitbox de l'ennemi
         e_x, e_y = context.camera.apply(e.hitbox.x, e.hitbox.y)
-        pygame.draw.rect(context.screen, (0,0,255), (e_x, e_y, e.hitbox.width, e.hitbox.height), 2)
+        pygame.draw.rect(context.screen, (255,125,0), (e_x, e_y, e.hitbox.width, e.hitbox.height), 2)
 
         #CREATION DU RECTANGLE ROUGE
         if e.damage_zone != None: # si une zone d'attaque existe
             # conversion map -> écran via la caméra
             rect_pos = context.camera.apply(e.damage_zone.x, e.damage_zone.y)
-        
+
             # on crée le rectangle à afficher
             draw_rect = pygame.Rect(rect_pos[0], rect_pos[1], e.damage_zone.width, e.damage_zone.height)
-        
+
             # rectangle rouge
             pygame.draw.rect(context.screen, (255, 0, 0), draw_rect, 2)
-    
+
     #MÊME CHOSE POUR LES JOUEURS :
     p_x, p_y = context.camera.apply(playerL.hitbox.x, playerL.hitbox.y)
     pygame.draw.rect(context.screen, (0, 0, 255), (p_x, p_y, playerL.hitbox.width, playerL.hitbox.height), 2)
+    p_x, p_y = context.camera.apply(playerD.hitbox.x, playerD.hitbox.y)
+    pygame.draw.rect(context.screen, (255, 0, 255), (p_x, p_y, playerD.hitbox.width, playerD.hitbox.height), 2)
     # ----------------------
     
 

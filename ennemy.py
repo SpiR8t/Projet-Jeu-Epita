@@ -185,9 +185,13 @@ class Slasher(Enemy):
             "position": (self.x,self.y),
             "facing": self.facing,
             "direction": self.direction,
-            "hp": self.hp
+            "hp": self.hp,
+            "hitbox": [self.hitbox.x,self.hitbox.y,self.hitbox.width,self.hitbox.height]
         }
-        return "Slasher_"+self.id, infos
+        str_id = str(self.id)
+        while len(str_id) < 3:
+            str_id = "0"+str_id
+        return "Slasher_"+str_id, infos
 
 
 class SlasherAttack(Action):
