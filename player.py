@@ -33,13 +33,19 @@ class Player(Entity):
         super().__init__(x, y, 100,2)
         self.avatar = avatar_image
         self.host = is_host
+        self.direction = (0,-1)
+
         self.skills = [SwordAttack(), Interact()]
-        self.hitbox = pygame.Rect(self.x, self.y, 40, 40)
+        
+        # offset pour centrer la hitbox des joueurs (variables modifiables)
+        self.hitbox_offset_x = -3
+        self.hitbox_offset_y = -54
+        self.hitbox = pygame.Rect(self.x+self.hitbox_offset_x, self.y+self.hitbox_offset_y, 23, 57)
         self.direction = (-1,-1)
 
         # Gestion de la spritesheet
         FRAME_W, FRAME_H = 57, 57
-        SCALE = 1.5 #64/57
+        SCALE = 1.5
         if is_host:
             walk_sheet = SpriteSheet("assets\images\game\players\sprite_sheet_Aeden_walk_temp.png")
             idle_sheet = SpriteSheet("assets\images\game\players\sprite_sheet_Aeden_still_temp.png")
@@ -113,7 +119,8 @@ class Player(Entity):
         return {
             "position": self.get_pos(),
             "direction": self.direction,
-            "is_moving": self.is_moving
+            "is_moving": self.is_moving,
+            "hitbox": [self.hitbox.x,self.hitbox.y,self.hitbox.width,self.hitbox.height],
         }
 
 
@@ -153,7 +160,6 @@ class Player(Entity):
 
     def detect_movement(self, keys, map_tiles):
         dx, dy = 0, 0
-        moved = False
 
         x_player, y_player = self.get_pos()
         
@@ -190,6 +196,8 @@ class Player(Entity):
         ):
             self.x += dx * self.speed
             self.y += dy * self.speed
+
+        self.hitbox.x, self.hitbox.y = int(self.x + self.hitbox_offset_x), int(self.y + self.hitbox_offset_y)
 
         self.direction = (dx, dy)
         self.is_moving = True

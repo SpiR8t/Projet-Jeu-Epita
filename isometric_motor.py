@@ -183,8 +183,8 @@ class Map:
             (x_j,y_j) = position_iso
             x_j, y_j = camera.apply(x_j, y_j)
             screen.blit(
-                frame, (x_j, y_j - 64)
-            )  # pour le décalage par rapport à la hauteur du pixel art avatar
+                frame, (x_j-(57//2)-7, y_j - 68)
+            )  # pour le décalage par rapport à la hauteur et la largeur du sprite (centré sur son pied gauche)
             
 
     def draw_map(self, camera, x_j1, y_j1, frame_j1, x_j2, y_j2, frame_j2):

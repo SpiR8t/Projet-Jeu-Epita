@@ -5,6 +5,7 @@ import sys
 
 from game_context import GameContext
 from player import *
+from ennemy import *
 from isometric_motor import *
 
 from network import initiate_game,share_context_multi,reset_network
@@ -17,7 +18,8 @@ def main():
     # Paramètres pour le dev :
     FULLSCREEN = False   # Fenêtre ou fullscreen
     MULTIPLAYER = False  # Activation du multijoueur
-    HUD = True           # Activation du HUD
+    HUD = True          # Activation de l'affichage du HUD
+    HITBOXS = True     # Activation de l'affichage des hitboxs
 
     if FULLSCREEN:
         screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
@@ -35,7 +37,18 @@ def main():
 
 
     context = GameContext(screen, clock, playerH, playerC, map1, camera)
-    context.set_dev_params(MULTIPLAYER,HUD)
+    context.set_dev_params(MULTIPLAYER,HUD,HITBOXS)
+
+    
+    #==========================================
+    #TEST (penser à décommenter la partie sur l'affichage dans game_logic.py)
+    slasher_img = pygame.image.load("assets/images/test.png")
+    test_enemy = Slasher(0,-2300,4800,1)
+    test_enemy.image = slasher_img
+    context.ennemies.append(test_enemy)
+    # PENSER A UTILISER DES SPRITESHEET POUR NE PAS SURCHARGER LES ASSETS ET LE CODE
+    #==========================================
+    
 
     if not MULTIPLAYER:
         share_context_multi(context)
