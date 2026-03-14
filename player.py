@@ -166,13 +166,13 @@ class Player(Entity):
         left_foot, right_foot = self.deduce_foots_from_iso_coords(x_player, y_player)
 
         # directions clavier
-        if keys[pygame.K_DOWN]:
+        if keys[pygame.K_s]:
             dy = 1
-        if keys[pygame.K_UP]:
+        if keys[pygame.K_z]:
             dy = -1
-        if keys[pygame.K_LEFT]:
+        if keys[pygame.K_q]:
             dx = -1
-        if keys[pygame.K_RIGHT]:
+        if keys[pygame.K_d]:
             dx = 1
 
         if dx == 0 and dy == 0:

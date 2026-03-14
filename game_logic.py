@@ -64,10 +64,10 @@ def update_game(playerL, playerD,):
             if action:
                 context.add_action(action)
 
-        # ========= Temporaire pour tester degats ==============
+        # ========= Temporaire pour tester les portes ==============
         if keys[pygame.K_c]: # Changement de la map : ouvre/ferme toutes les portes du groupe 255
             if now() - last_key_pressed >= KEY_COOLDOWN:
-                for door in gameRegistry.doors[255]:
+                for door in gameRegistry.doors[46]:
                     action = door.open_close()
                     if action:
                         context.add_action(action)
