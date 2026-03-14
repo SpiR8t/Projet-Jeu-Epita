@@ -128,9 +128,38 @@ def update_game(playerL, playerD,):
         y_player2,
         playerD.image,
     )
+    # Affichage des ennemis (À integrer dans le code du moteur isométique plus tard)
+    for e in context.ennemies:
+        # affichage de l'ennemi
+        pos_ecran = context.camera.apply(e.x, e.y)
+        context.screen.blit(e.image, (pos_ecran[0], pos_ecran[1] - 64))
 
-    
-    # --- AFFICHAGE TEST ---
+    if context.hitboxs:
+        draw_hitboxs(playerL,playerD)
+
+    # Draw du HUD
+    if context.hud:
+        draw_HUD(playerL)
+
+    if context.pause:
+        display_menu_pause(mouse_pos)
+
+
+    check_player_life_state(playerL)
+
+    # animations des compétences
+    context.execute_actions(gameRegistry)
+    context.update_animations()
+    context.draw_animations()
+    # pygame.draw.circle(context.screen, (255, 0, 0), (context.camera.apply(playerL.get_pos()[0], playerL.get_pos()[1])), 4) #débug
+    pygame.display.flip()
+    context.clock.tick(60)
+
+def now():
+    """Renvoie l'heure du jeu (en tick)"""
+    return pygame.time.get_ticks()
+
+def draw_hitboxs(playerL,playerD):
     for e in context.ennemies:
         # affichage de l'ennemi
         pos_ecran = context.camera.apply(e.x, e.y)
@@ -156,32 +185,6 @@ def update_game(playerL, playerD,):
     pygame.draw.rect(context.screen, (0, 0, 255), (p_x, p_y, playerL.hitbox.width, playerL.hitbox.height), 2)
     p_x, p_y = context.camera.apply(playerD.hitbox.x, playerD.hitbox.y)
     pygame.draw.rect(context.screen, (255, 0, 255), (p_x, p_y, playerD.hitbox.width, playerD.hitbox.height), 2)
-    # ----------------------
-    
-
-
-    # Draw du HUD
-    if context.hud:
-        draw_HUD(playerL)
-
-    if context.pause:
-        display_menu_pause(mouse_pos)
-
-
-    check_player_life_state(playerL)
-
-    # animations des compétences
-    context.execute_actions(gameRegistry)
-    context.update_animations()
-    context.draw_animations()
-    # pygame.draw.circle(context.screen, (255, 0, 0), (context.camera.apply(playerL.get_pos()[0], playerL.get_pos()[1])), 4) #débug
-    pygame.display.flip()
-    context.clock.tick(60)
-
-
-def now():
-    """Renvoie l'heure du jeu (en tick)"""
-    return pygame.time.get_ticks()
 
 def display_menu_pause(mouse_pos):
     """ Affiche le menu pause pour quitter le jeu ou retourner au menu principale"""

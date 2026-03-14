@@ -18,7 +18,8 @@ def main():
     # Paramètres pour le dev :
     FULLSCREEN = False   # Fenêtre ou fullscreen
     MULTIPLAYER = False  # Activation du multijoueur
-    HUD = True           # Activation du HUD
+    HUD = True          # Activation de l'affichage du HUD
+    HITBOXS = True     # Activation de l'affichage des hitboxs
 
     if FULLSCREEN:
         screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
@@ -36,7 +37,7 @@ def main():
 
 
     context = GameContext(screen, clock, playerH, playerC, map1, camera)
-    context.set_dev_params(MULTIPLAYER,HUD)
+    context.set_dev_params(MULTIPLAYER,HUD,HITBOXS)
 
     
     #==========================================
