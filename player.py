@@ -7,7 +7,7 @@ class Entity():
     def __init__(self,x,y,max_hp,speed):
         self.x_spawn = x
         self.y_spawn = y
-        self.x = x
+        self.x = x # pour les joueur (x,y) correspond au coin bas droit du sprite normalement
         self.y = y
         self.hp = max_hp
         self.max_hp = max_hp
