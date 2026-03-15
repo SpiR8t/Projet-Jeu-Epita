@@ -30,9 +30,8 @@ class Entity():
     
 
 class Player(Entity):
-    def __init__(self, x, y, avatar_image, is_host):
+    def __init__(self, x, y, is_host):
         super().__init__(x, y, 100,2)
-        self.avatar = avatar_image
         self.host = is_host
         self.direction = (0,-1)
 
@@ -48,11 +47,11 @@ class Player(Entity):
         FRAME_W, FRAME_H = 57, 57
         SCALE = 1.5
         if is_host:
-            walk_sheet = SpriteSheet("assets\images\game\players\sprite_sheet_Aeden_walk_temp.png")
-            idle_sheet = SpriteSheet("assets\images\game\players\sprite_sheet_Aeden_still_temp.png")
+            walk_sheet = SpriteSheet("assets/images/game/players/sprite_sheet_Aeden_walk.png")
+            idle_sheet = SpriteSheet("assets/images/game/players/sprite_sheet_Aeden_still.png")
         else:
-            walk_sheet = SpriteSheet("assets\images\game\players\sprite_sheet_Lyra_walk.png")
-            idle_sheet = SpriteSheet("assets\images\game\players\sprite_sheet_Lyra_still.png")
+            walk_sheet = SpriteSheet("assets/images/game/players/sprite_sheet_Lyra_walk.png")
+            idle_sheet = SpriteSheet("assets/images/game/players/sprite_sheet_Lyra_still.png")
 
         # Walk animation
         self.walk_animations = {

@@ -32,7 +32,13 @@ def is_door(pixel): # je pense faire un vérif sur seulement r et g, et me servi
     r,g,b = pixel # et pour l'orientation l'unité de b
     return r == 122 and (40 <= g <= 47)
 
+def is_rock(pixel):
+    r, g, b = pixel
+    return r == 158
 
+def is_grass(pixel):
+    r, g, b = pixel
+    return r == 109
 
 def image_to_matrix(path):
     image = load_image(path)
@@ -46,7 +52,7 @@ def image_to_matrix(path):
             # y_r = height - y - 1
             # x_r = width - x - 1
             # pour reverse la map dans les deux directions: remplacer par le x/y _reverse
-            if is_wall(pixel):
+            if is_wall(pixel): # sera remplacé à terme par is_rock ou autre
                 matrix[y][x][1] = 2
                 matrix[y][x][2] = 2
                 matrix[y][x][0] = 1
@@ -55,6 +61,14 @@ def image_to_matrix(path):
                 matrix[y][x][2] = 10
                 matrix[y][x][0] = 1
                 gameRegistry.add_lever(Lever(y,x,pixel[2])) # la couleur blue sert d'id
+            elif is_grass(pixel):
+                matrix[y][x][1] = 0
+                matrix[y][x][2] = 0
+                matrix[y][x][0] = 3
+            elif is_rock(pixel):
+                matrix[y][x][1] = 0
+                matrix[y][x][2] = 0
+                matrix[y][x][0] = 2
             elif is_door(pixel):
                 g = pixel[1]
                 # 40 = NE (ouverture NW), 41 = SW (ouverture NW), 42 = NW (ouverture NE), 43 = SE (ouverture NE)
@@ -191,10 +205,13 @@ class Map:
         """fonction qui affiche la map (tiles) ainsi que les deux joueurs"""
 
         tile_wall = pygame.image.load(
-            "assets/images/game/tileset/tilesettestwall.png"
+            "assets/images/game/tileset/cube_64_final_6.png"
         ).convert_alpha()
         tile_floor = pygame.image.load(
-            "assets/images/game/tileset/tilesettestfloor.png"
+            "assets/images/game/tileset/cube_64_final_4.png"
+        ).convert_alpha()
+        tile_grass = pygame.image.load(
+            "assets/images/game/tileset/cube_64_final_5.png"
         ).convert_alpha()
         levier_low = pygame.image.load(
             "assets/images/game/enigmes/levier_low.png"
@@ -215,11 +232,7 @@ class Map:
             pygame.image.load(
                 "assets/images/game/tileset/test_door_SE.png"
             ).convert_alpha()
-
         ]
-        
-        #avatar1 = pygame.image.load("assets/images/game/players/avatar.png").convert_alpha()
-        # avatar2 = pygame.image.load(avatar_j2).convert_alpha()
 
         j1_pos = iso_to_cart_tile(x_j1, y_j1)
         j2_pos = iso_to_cart_tile(x_j2, y_j2)
@@ -257,6 +270,8 @@ class Map:
                             self.screen.blit(tile_floor, (screen_x, screen_y))
                         elif tile_nb == 2:
                             self.screen.blit(tile_wall, (screen_x, screen_y))
+                        elif tile_nb == 3:
+                            self.screen.blit(tile_grass, (screen_x, screen_y))
                         elif tile_nb == 10:
                             self.screen.blit(levier_high, (screen_x, screen_y))
                         elif tile_nb == 11:

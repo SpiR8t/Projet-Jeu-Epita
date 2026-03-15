@@ -17,7 +17,7 @@ def main():
 
     # Paramètres pour le dev :
     FULLSCREEN = False   # Fenêtre ou fullscreen
-    MULTIPLAYER = False  # Activation du multijoueur
+    MULTIPLAYER = True  # Activation du multijoueur
     HUD = True          # Activation de l'affichage du HUD
     HITBOXS = True     # Activation de l'affichage des hitboxs
 
@@ -37,8 +37,8 @@ def main():
     
 
     # Joueur
-    playerH = Player(-2400, 4800, "assets/images/game/players/avatar.png", True)  # joueur host
-    playerC = Player(-2300, 4800, "assets/images/game/players/avatar2.png", False)  # joueur client
+    playerH = Player(-2400, 4800, True)  # joueur host
+    playerC = Player(-2300, 4800, False)  # joueur client
 
 
     context = GameContext(screen, clock, playerH, playerC, map1, camera)
@@ -72,8 +72,8 @@ def main():
 
 def reset_game(context):
     """Cette fonction reset tout ce qu'il faut reset pour recommencer une nouvelle partie après en avoir quitté une"""
-    context.host_player = Player(-2400, 4800, "assets/images/game/players/avatar.png", True)  # joueur host
-    context.client_player = Player(-2300, 4800, "assets/images/game/players/avatar2.png", False)  # joueur client
+    context.host_player = Player(-2400, 4800, True)  # joueur host
+    context.client_player = Player(-2300, 4800, False)  # joueur client
 
     context.reset()
     reset_network()
