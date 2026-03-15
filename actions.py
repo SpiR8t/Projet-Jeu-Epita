@@ -86,11 +86,12 @@ class LeverAction(Action): # l'action pour switch un levier
         super().send_to_network(context)
         context.add_info_lever_action(self.id_group, self.id_lever) # on ajoute une instruction pour envoyer les
                                                                     # infos du levier dans le multi 
-    def execute(self, context, gameRegister, matrix):
+    def execute(self, context, gameRegister, map):
         if gameRegister.levers[self.id_group][self.id_lever].locked != True:
             self.send_to_network(context)
             
-            gameRegister.levers[self.id_group][self.id_lever].toggle(matrix)
+            gameRegister.levers[self.id_group][self.id_lever].toggle(map)
+            gameRegister.check_open_door(self.id_group, context)
 
 class interactAction(Action):
     def __init__(self, x,y, host=True):

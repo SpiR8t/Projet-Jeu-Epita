@@ -30,42 +30,39 @@ class Lever:
     # Interaction
     # -------------------------
 
-    def update_matrix(self, matrix):
+    def update_matrix(self, map):
         if self.state == True:
-            matrix.tiles[self.position[0]][self.position[1]][2] = 10
+            map.tiles[self.position[0]][self.position[1]][2] = 10
         else:
-            matrix.tiles[self.position[0]][self.position[1]][2] = 11
+            map.tiles[self.position[0]][self.position[1]][2] = 11
 
 
-    def toggle(self, matrix):
+    def toggle(self, map, initial=True):
         """Inverse l'état du levier."""
         if self.locked:
             return
         
         self.state = not self.state
-        self.on_toggle(matrix)
+        self.on_toggle(map, initial)
 
     # -------------------------
     # Logique de propagation
     # -------------------------
 
-    def propagate(self):
+    def propagate(self,map):
         """Applique l'état aux leviers liés."""
         for lever in self.links:
-            lever.toggle()
+            lever.toggle(map, False)
 
     # -------------------------
     # Événement déclenché
     # -------------------------
 
-    def on_toggle(self, matrix):
-        """
-        Méthode appelée à chaque changement d'état.
-        Tu peux la modifier selon ton gameplay.
-        """
+    def on_toggle(self, map, initial):
         print(f"Lever {self.id} -> {'ON' if self.state else 'OFF'}")
-        self.propagate()
-        self.update_matrix(matrix)
+        if initial:
+            self.propagate(map)
+        self.update_matrix(map)
 
     # -------------------------
     # Utilitaires

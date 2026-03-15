@@ -30,6 +30,11 @@ def main():
 
     map1 = Map(map_tiles, TILE_WIDTH, TILE_HEIGHT, screen)
     camera = Camera(screen.get_width(), screen.get_height())
+    
+    print(gameRegistry.levers)
+    gameRegistry.setup(map1) # c'est la commande à appeler pour mélanger les leviers et creer les liens
+    # on pourra rajouter tes les autres setups nécessaires aux énigmes différentes 
+    
 
     # Joueur
     playerH = Player(-2400, 4800, "assets/images/game/players/avatar.png", True)  # joueur host
