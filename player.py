@@ -25,6 +25,7 @@ class Entity():
         self.x = self.x_spawn
         self.y = self.y_spawn
         self.hp = self.max_hp
+        self.hitbox.x, self.hitbox.y = int(self.x + self.hitbox_offset_x), int(self.y + self.hitbox_offset_y)
 
     
 
