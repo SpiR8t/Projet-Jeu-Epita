@@ -74,8 +74,8 @@ class Enemy(Entity):
 
         if self.path_timer <= 0 or not self.path:
             #conversion des coordonnées en cartésien (tuiles)
-            start = iso_to_cart_tile(int(self.hitbox.centerx), int(self.hitbox.centery))
-            target = iso_to_cart_tile(int(player.hitbox.centerx), int(player.hitbox.centery))
+            start = iso_to_cart_tile(int(self.hitbox.x + 10), int(self.hitbox.y + 20)) #valeurs adaptées à la version test (ennemi = point rouge dont la hitbox fait 20x20 pixels), à modifier
+            target = iso_to_cart_tile(int(player.x), int(player.y))
 
             self.path = astar(start,target) # création du nouveau chemin
             if self.path:
@@ -89,8 +89,8 @@ class Enemy(Entity):
             target_iso_x += 0
             target_iso_y += TILE_HEIGHT // 2
            
-            dx = target_iso_x - self.hitbox.centerx
-            dy = target_iso_y - self.hitbox.centery
+            dx = target_iso_x - self.hitbox.x - 10
+            dy = target_iso_y - self.hitbox.y - 20
             distance_to_tile = math.sqrt(dx**2 + dy**2)
             if distance_to_tile > self.speed:
                 # vecteurs directeurs vx et vy (on prend le centre de la hitbox de l'ennemi comme repère)
