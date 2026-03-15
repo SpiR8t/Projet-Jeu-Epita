@@ -63,6 +63,8 @@ def astar(start,target): #prend directement les coordonnées cartésiennes des t
     g = {start: 0} # coût total depuis le départ
 
     while open_set:
+        if not iswalkable(target[0],target[1]): # sécurité pour éviter les longs calculs infinis
+            return None
         current_node = heapq.heappop(open_set) # on récupère le meilleur Node (celui avec le plus petit f (= g + heuristic(Node, target)))
         current_pos = current_node.position
 
