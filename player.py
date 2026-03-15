@@ -48,11 +48,11 @@ class Player(Entity):
         FRAME_W, FRAME_H = 57, 57
         SCALE = 1.5
         if is_host:
-            walk_sheet = SpriteSheet("assets\images\game\players\sprite_sheet_Aeden_walk_temp.png")
-            idle_sheet = SpriteSheet("assets\images\game\players\sprite_sheet_Aeden_still_temp.png")
+            walk_sheet = SpriteSheet("assets/images/game/players/sprite_sheet_Aeden_walk.png")
+            idle_sheet = SpriteSheet("assets/images/game/players/sprite_sheet_Aeden_still.png")
         else:
-            walk_sheet = SpriteSheet("assets\images\game\players\sprite_sheet_Lyra_walk.png")
-            idle_sheet = SpriteSheet("assets\images\game\players\sprite_sheet_Lyra_still.png")
+            walk_sheet = SpriteSheet("assets/images/game/players/sprite_sheet_Lyra_walk.png")
+            idle_sheet = SpriteSheet("assets/images/game/players/sprite_sheet_Lyra_still.png")
 
         # Walk animation
         self.walk_animations = {

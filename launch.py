@@ -17,7 +17,7 @@ def main():
 
     # Paramètres pour le dev :
     FULLSCREEN = False   # Fenêtre ou fullscreen
-    MULTIPLAYER = False  # Activation du multijoueur
+    MULTIPLAYER = True  # Activation du multijoueur
     HUD = True          # Activation de l'affichage du HUD
     HITBOXS = True     # Activation de l'affichage des hitboxs
 
