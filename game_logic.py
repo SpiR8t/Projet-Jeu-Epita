@@ -163,7 +163,7 @@ def draw_hitboxs(playerL,playerD):
     for e in context.ennemies:
         # affichage de l'ennemi
         pos_ecran = context.camera.apply(e.x, e.y)
-        context.screen.blit(e.image, (pos_ecran[0], pos_ecran[1] - 64))
+        context.screen.blit(e.image, (int(pos_ecran[0]), int(pos_ecran[1]) - 64))
 
         #affichage de la hitbox de l'ennemi
         e_x, e_y = context.camera.apply(e.hitbox.x, e.hitbox.y)

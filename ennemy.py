@@ -3,6 +3,8 @@ import math
 from player import Entity
 from actions import Action
 from game_context import GameContext
+from isometric_motor import iso_to_cart_tile, cart_to_iso, TILE_HEIGHT
+from pathfinding import *
 
 '''
 On crée une classe globale Enemy, elle-même une sous-classe de Entity (dans player.py).
@@ -11,16 +13,18 @@ Cette classe regroupe toutes les fonctions et méthodes liées à un ennemi.
 '''
 class Enemy(Entity):
     #les coordonnées x et y correspondent à la position du coin supérieur gauche de l'ennemi (important pour les hitbox)
-    def __init__(self, id, x, y, max_hp, speed, damage, attack_cooldown, detection_range, attack_range, AI_state="IDLE", level=1):
+    def __init__(self, id, x, y, max_hp, speed, damage, attack_cooldown, attack_range, AI_state="IDLE", level=1):
         super().__init__(x, y, max_hp, speed)
         self.id = id
         self.damage = damage
         self.attack_cooldown = attack_cooldown #nombre de frames entre chaque attaque d'un ennemi (pour la vitesse d'attaque)
-        self.detection_range = detection_range #zone de détection du joueur
         self.attack_range = attack_range #portée de l'attaque (à cette distance l'ennemi s'arrête et attaque le joueur)
         self.current_attack_cooldown = attack_cooldown
         self.AI_state = AI_state # à l'apparition l'IA est en mode "inactif"
         self.level = level
+        self.path = [] #chemin que doit parcourir l'ennemi
+        self.path_timer = 0 # délai actuel avant de mettre à jour le path
+
         # offsets pour centrer les hitbox
         self.hitbox_offset_x = 0
         self.hitbox_offset_y = 0
@@ -66,25 +70,45 @@ class Enemy(Entity):
 
 
     def chase(self, player): # déplacement de l'ennemi
-        # vecteurs directeurs vx et vy
-        #on prend le centre de la hitbox du joueur comme cible
-        dx = player.hitbox.centerx - self.hitbox.centerx
-        dy = player.hitbox.centery - self.hitbox.centery
+        self.path_timer -= 1
 
-        if dx == 0 and dy == 0:
-            vx, vy = 0, 0
-        else:
-            distance = math.sqrt(dx**2 + dy**2)
-            vx = dx * self.speed / distance
-            vy = dy * self.speed / distance
+        if self.path_timer <= 0 or not self.path:
+            #conversion des coordonnées en cartésien (tuiles)
+            start = iso_to_cart_tile(int(self.hitbox.centerx), int(self.hitbox.centery))
+            target = iso_to_cart_tile(int(player.hitbox.centerx), int(player.hitbox.centery))
 
-        #mise à jour de la direction
-        self.update_facing(vx, vy)
+            self.path = astar(start,target) # création du nouveau chemin
+            if self.path:
+                self.path.pop(0) #on enlève la première tuile car c'est la tuile de départ
+            self.path_timer = 30 # reset du timer toutes les 30 frames
 
-        #déplacement de l'ennemi
-        if distance > self.attack_range + 10 and distance <= self.detection_range: #pour éviter que l'ennemi se rapproche trop du joueur
-            self.x += vx
-            self.y += vy
+        if self.path:
+            target_iso_x, target_iso_y = cart_to_iso(self.path[0][0], self.path[0][1])
+
+            # correction des valeurs pour viser le centre de la tuile
+            target_iso_x += 0
+            target_iso_y += TILE_HEIGHT // 2
+           
+            dx = target_iso_x - self.hitbox.centerx
+            dy = target_iso_y - self.hitbox.centery
+            distance_to_tile = math.sqrt(dx**2 + dy**2)
+            if distance_to_tile > self.speed:
+                # vecteurs directeurs vx et vy (on prend le centre de la hitbox de l'ennemi comme repère)
+                vx = dx * self.speed / distance_to_tile
+                vy = dy * self.speed / distance_to_tile
+
+                #mise à jour de la direction
+                self.update_facing(vx, vy)
+
+                #on vérifie la distance par rapport au joueur avant le déplacement
+                distance_to_player = math.sqrt((player.hitbox.centerx - self.hitbox.centerx)**2 + (player.hitbox.centery - self.hitbox.centery)**2)
+                # déplacement de l'ennemi
+                if distance_to_player > self.attack_range:
+                    self.x += vx
+                    self.y += vy
+                # si on a atteint la tuile
+                if distance_to_tile < self.speed * 1.5:
+                    self.path.pop(0)
 
         #déplacement de la hitbox
         self.hitbox.x, self.hitbox.y = int(self.x + self.hitbox_offset_x), int(self.y + self.hitbox_offset_y)
@@ -98,10 +122,9 @@ class Enemy(Entity):
         #mise à jour de l'état de l'IA de l'ennemi
         if distance <= self.attack_range + 10:
             self.AI_state = "ATTACK"
-        elif distance <= self.detection_range:
-            self.AI_state = "CHASE"
+            self.update_facing(dx,dy) # pour que les ennemis soient toujours dans la bonne direction
         else:
-            self.AI_state = "IDLE"
+            self.AI_state = "CHASE"
 
         # update du cooldown
         if self.current_attack_cooldown > 0:
@@ -131,7 +154,6 @@ class Slasher(Enemy):
             speed = 1 * level, #à remodifier probablement
             damage = 5 * level,
             attack_cooldown = 60,
-            detection_range = 300,
             attack_range = 25,
             AI_state = "IDLE",
             level = level
