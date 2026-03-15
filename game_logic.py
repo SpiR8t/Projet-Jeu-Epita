@@ -95,12 +95,12 @@ def update_game(playerL, playerD,):
         # ======================================================
 
 
-    # Mise à jour des ennemis
-    if playerL.host:
-        for ennemy in context.ennemies:
-            action = ennemy.update(playerL)
-            if action:
-                context.add_action(action)
+        # Mise à jour des ennemis
+        if playerL.host:
+            for ennemy in context.ennemies:
+                action = ennemy.update(playerL)
+                if action:
+                    context.add_action(action)
 
     if keys[pygame.K_ESCAPE]: # Activation du menu pause
         if now() - last_key_pressed >= KEY_COOLDOWN:
