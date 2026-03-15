@@ -53,7 +53,7 @@ class Node:
 
 
 
-def astar(start,target): #prend directement les coordonnées cartésiennes des tuiles
+def astar(start,target,iteration_limit=800): #prend directement les coordonnées cartésiennes des tuiles
     open_set = [] # liste des tuiles voisines
     closed_set = set() # liste des tuiles sur lesquelles on est déjà passé
 
@@ -62,7 +62,12 @@ def astar(start,target): #prend directement les coordonnées cartésiennes des t
 
     g = {start: 0} # coût total depuis le départ
 
+    iterations = 0
+
     while open_set:
+        iterations += 1
+        if iterations >= iteration_limit: # sécurité pour éviter des calculs inutiles (iteration_limit est modifiable)
+            return None
         if not iswalkable(target[0],target[1]): # sécurité pour éviter les longs calculs infinis
             return None
         current_node = heapq.heappop(open_set) # on récupère le meilleur Node (celui avec le plus petit f (= g + heuristic(Node, target)))
