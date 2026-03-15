@@ -215,11 +215,7 @@ class Map:
             pygame.image.load(
                 "assets/images/game/tileset/test_door_SE.png"
             ).convert_alpha()
-
         ]
-        
-        #avatar1 = pygame.image.load("assets/images/game/players/avatar.png").convert_alpha()
-        # avatar2 = pygame.image.load(avatar_j2).convert_alpha()
 
         j1_pos = iso_to_cart_tile(x_j1, y_j1)
         j2_pos = iso_to_cart_tile(x_j2, y_j2)

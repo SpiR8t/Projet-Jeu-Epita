@@ -30,9 +30,8 @@ class Entity():
     
 
 class Player(Entity):
-    def __init__(self, x, y, avatar_image, is_host):
+    def __init__(self, x, y, is_host):
         super().__init__(x, y, 100,2)
-        self.avatar = avatar_image
         self.host = is_host
         self.direction = (0,-1)
 
